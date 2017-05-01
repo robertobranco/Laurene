@@ -1,0 +1,72 @@
+directed-link-breed [active-links active-link] ;; define um breed de ligação direta, o conjunto de links é o de links ativos, e um membro desse conjunto é active-link
+directed-link-breed [inactive-links inactive-link] ;; define um breed de ligação direta, o conjunto de links é o de links inativos, e um membro desse conjunto é inactive-link
+
+
+;;;;;;;; MÉTODO SETUP ;;;;;;;;
+to setup
+clear-all
+set-default-shape turtles "person"
+set-default-shape links "default"
+create-turtles 30  [fd random 10]
+;;layout-circle turtles max-pxcor - 5
+
+
+ask turtles [
+let neighbor-nodes turtle-set [turtles-here] of neighbors
+create-active-links-to neighbor-nodes ;; criação de links ativos para os 4 nós vizinhos (ou seja, não é permitida a conexão em diagonal)
+    [
+      ;;set current-flow 0 ;; a variável "current-flow" recebe valor 0
+      if random-float 100 > grau-confianca ;; é chamado um número aleatório entre 0 e 100, se esse número for maior que a quantidade indicada no slider "link-chance"
+      [
+        set breed inactive-links ;; então esse link tem seu tipo modificado para "inactive-links"
+        hide-link ;; e é escondido
+      ]
+    ]
+]
+end
+
+
+
+TENTATIVA NUM 2
+
+directed-link-breed [active-links active-link] ;; define um breed de ligação direta, o conjunto de links é o de links ativos, e um membro desse conjunto é active-link
+directed-link-breed [inactive-links inactive-link] ;; define um breed de ligação direta, o conjunto de links é o de links inativos, e um membro desse conjunto é inactive-link
+
+
+;;;;;;;; MÉTODO SETUP ;;;;;;;;
+to setup
+clear-all
+set-default-shape turtles "person"
+set-default-shape links "default"
+create-turtles 30  [fd random 10]
+;;layout-circle turtles max-pxcor - 5
+
+end
+
+
+to go
+ask turtles [
+let neighbor-nodes turtle-set [turtles-here] of neighbors
+create-active-links-to neighbor-nodes ;; criação de links ativos para os 4 nós vizinhos (ou seja, não é permitida a conexão em diagonal)
+    [
+      ;;set current-flow 0 ;; a variável "current-flow" recebe valor 0
+      if random-float 100 > grau-confianca ;; é chamado um número aleatório entre 0 e 100, se esse número for maior que a quantidade indicada no slider "link-chance"
+      [
+        set breed inactive-links ;; então esse link tem seu tipo modificado para "inactive-links"
+        hide-link ;; e é escondido
+      ]
+    ]
+]
+layout
+end
+
+to layout
+  repeat 10 [
+    do-layout
+    display  
+  ]
+end
+
+to do-layout
+  layout-spring (turtles with [any? link-neighbors]) links 0.4 6 1
+end

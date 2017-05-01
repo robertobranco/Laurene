@@ -1,0 +1,182 @@
+turtles-own
+[
+  ;; variável usada para marcar os nós que já foram visitados (pode ter sido explorado ou não)
+  explored?
+]
+
+globals ;; variáveis globais de sistema
+[
+  component-size          ;; numero de nós explorados até agora no componente atual
+  giant-component-size    ;; numero de nós no componente gigante
+  giant-start-node        ;; nó em que o componente gigante foi iniciado
+]
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Setup Procedures ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;
+
+to setup ;; procedimento setup
+  clear-all ;; comando para limpar tudo
+  set-default-shape turtles "person" ;; modificador de shape para o tipo "person"
+
+  make-turtles ;; executa o método criador dos nós
+  ;; nesse primeiro momento, todos os componentes terão tamanho 1,
+  ;; então não se tem nós até agora.
+
+  ;; executa os métodos "find-all-components", "color-giant-component" e reseta a quantidade de passos dados.
+  find-all-components
+  color-giant-component
+  reset-ticks
+end
+
+MÉTODO PRA CRIAR OS NÓS
+to make-turtles
+
+  ;; cria o número de nós especificados no "SLIDER NUM-NODES", todas com tamanho = 3.
+  create-turtles num-nodes [ set size 3 ] 
+
+  ;; faz os nós criados se organizarem no layout de círculo 
+  layout-circle turtles max-pxcor - 1
+end
+
+;;;;;;;;;;;;;;;;;;;;;;
+;;; Main Procedure ;;;
+;;;;;;;;;;;;;;;;;;;;;;
+
+to go
+  ;; o método pára se a condição abaixo é verdadeira, pois indica que a rede está toda conectada.
+  ;; se (numero de links * 2) for maior/igual a (num de nós * (número de nós -1))
+  if ( (2 * count links ) >= ( (count turtles) * (count turtles - 1) ) ) [
+  ;; surge um display com a indicação de que toda a rede está conectada, e o sistema pára.
+    display
+    user-message "Network is fully connected. No more edges can be added."
+    stop
+  ]
+
+
+  add-edge ;; chama o método para testar os links entre dois nós.
+  find-all-components ;; chama o método para encontrar todos os nós conectados na rede, seus tamanhos e nós inicializados
+  color-giant-component ;; chama o método que faz o gerenciamento das cores
+
+  ;; comando específico para os links
+  ask links [ set color [color] of end1 ]  ;; recolore todos os links
+
+  ;; layout the turtles with a spring layout, but stop laying out when all nodes are in the giant component
+  if not all? turtles [ color = red ] [ layout ]
+  tick
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Network Exploration ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; MÉTODO USADO PARA ENCONTRAR TODOS OS NÓS EXISTENTES NA REDE, SEUS TAMANHOS E NÓS INICIALIZADOS
+to find-all-components
+
+  ;; comando que indica que nenhum nó foi visitado até o presente momento.
+  ask turtles [ set explored? false ]
+
+  ;; continua "explorando" até que todos os nós tenham sido "explorados"
+  loop
+  [
+    ;; pega um nó qualquer que ainda não tenha sido "explorado"
+    let start one-of turtles with [ not explored? ]
+
+    ;; se start = nenhum nó (supõe-se que todos tenham sido explorados ?) então o loop pára.
+    if start = nobody [ stop ]
+
+    ;; muda o "numero de nós encontrados" para 0, essa variável é atualizada sempre que se explora um nó inexplorado
+    set component-size 0
+
+    ;; nesse ponto, tudo é recolorido para "Light gray" 
+    ;; a "variável" start chama o método "explore" com a cor "light gray" como parâmetro
+    ask start [ explore (gray + 2) ]
+
+    ;; o método "explore" atualiza a variável que contem o número de nós encontrados.
+    ;; checagem para saber se temos um novo componente gigante
+    ;; se o número de nós encontrados for maior que o número de nós presentes no componente gigante, então
+    ;; a variável que representa o "número de nós no componente gigante" recebe a variável que representa "o número de nós encontrados" em start
+    ;; a variável que representa o "nó em que o componente gigante foi iniciado" chama a variável start
+    ;; será feita uma nova verificação e, nesse caso, como o componente gigante está nessa rede, o método pára.
+    if component-size > giant-component-size
+    [
+      set giant-component-size component-size
+      set giant-start-node start
+    ]
+  ]
+end
+
+  ;; Encontra todos os nós acessíveis a partir de um nó (e recolore eles)
+to explore [new-color]  ;; o método "explore" tem como parâmetro "new-color" 
+ 
+  ;; se o nó não tiver sido explorado, então ele pára o método.
+  if explored? [ stop ]
+
+  ;; indica que o nó foi visitado
+  set explored? true
+
+  ;; aumenta em 1 unidade a variável que representa o "número de nós encontrados"
+  set component-size component-size + 1
+
+  ;; muda a cor do nó para a cor especificada no parâmetro do método
+  set color new-color
+
+  ;; comando direcionado para os vizinhos do link modificado.
+  ask link-neighbors [ explore new-color ]
+end
+
+;; MÉTODO QUE MUDA A COR DO COMPONENTE GIGANTE PARA VERMELHO
+to color-giant-component
+  ;; comando que indica que todos os nós não participantes do componente gigante ainda não foram visitados
+  ask turtles [ set explored? false ]
+
+  ;; usa o método explore para modificar a cor do componente gigante para vermelho.
+  ask giant-start-node [ explore red ]
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;
+;;; Edge Operations ;;;
+;;;;;;;;;;;;;;;;;;;;;;;
+
+;; MÉTODO USADO PARA PEGAR DOIS NÓS RANDÔMICAMENTE E LINKAR OS DOIS, SE O LINK AINDA NÃO EXISTIR
+to add-edge
+  ;; utiliza como parâmetros dois nós quaisquer (indicado por one-of turtles) dentro da rede
+  ;; nomeia esses nós como "node1" e "node2"
+  let node1 one-of turtles
+  let node2 one-of turtles
+
+  ;; comando específico para o node1
+  ask node1 [
+
+    ;; se já existir um link entre node1 e node2
+    ;; então o método vai ser chamado novamente para dois nós quaisquer
+    ifelse link-neighbor? node2 or node1 = node2
+    [ add-edge ]
+
+    ;; senão, será criado um link entre node1 e node2
+    [ create-link-with node2 ]
+  ]
+end
+
+;;;;;;;;;;;;;;
+;;; Layout ;;;
+;;;;;;;;;;;;;;
+
+ ;; MÉTODO
+to layout
+  ;; se o switch layout estiver desligado, então o método encerra.
+  if not layout? [ stop ]
+  ;; repete o método de layout 10 vezes, um número arbitrário, pois um número maior de repetições deixa o modelo mais lento
+  repeat 10 [
+    do-layout
+    display  ;; so we get smooth animation
+  ]
+end
+
+to do-layout
+  layout-spring (turtles with [any? link-neighbors]) links 0.4 6 1
+end
+
+
+; Copyright 2005 Uri Wilensky.
+; See Info tab for full copyright and license.
