@@ -1,0 +1,53 @@
+breed [ent-geradoras geradora]
+breed [ent-difusoras difusora]
+breed [ent-consumidoras consumidora]
+breed [ent-integradoras integradora]
+
+to setup
+  clear-all;
+  ask patches [set pcolor white];
+  
+  set-default-shape ent-geradoras "circle";
+  create-ent-geradoras entidades-geradoras
+  [
+    set color blue
+    setxy random-xcor random-ycor
+    let conhec-cientifico-geradoras n-values (conhecimento / 2)  [random 2]
+    let conhec-tec-geradoras n-values (conhecimento / 2) [random 2]
+    ;;show conhec-cientifico-geradoras 
+    ;;show conhec-tec-geradoras
+  ]
+
+  set-default-shape ent-difusoras "square";
+  create-ent-difusoras entidades-difusoras
+  [
+    set color red
+    setxy random-xcor random-ycor
+    let conhec-cientifico-difusoras n-values (conhecimento / 2)  [random 2]
+    let conhec-tec-difusoras n-values (conhecimento / 2) [random 2]
+    ;;show conhec-cientifico-difusoras 
+    ;;show conhec-tec-difusoras
+  ]
+
+  set-default-shape ent-consumidoras "pentagon"
+  create-ent-consumidoras entidades-consumidoras
+  [
+    set color green
+    setxy random-xcor random-ycor
+    let conhec-cientifico-consumidoras n-values (conhecimento / 2)  [random 2]
+    let conhec-tec-consumidoras n-values (conhecimento / 2) [random 2]
+    ;;show conhec-cientifico-consumidoras 
+    ;;show conhec-tec-consumidoras
+  ]
+
+  set-default-shape ent-integradoras "triangle"
+  create-ent-integradoras entidades-integradoras
+  [
+    set color yellow
+    setxy random-xcor random-ycor
+    let conhec-cientifico-integradoras n-values (conhecimento / 2)  [random 2]
+    let conhec-tec-integradoras n-values (conhecimento / 2) [random 2]
+    ;;show conhec-cientifico-integradoras 
+    ;;show conhec-tec-integradoras
+  ]
+end
