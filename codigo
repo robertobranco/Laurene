@@ -14,8 +14,7 @@ to setup
     setxy random-xcor random-ycor
     let conhec-cientifico-geradoras n-values (conhecimento / 2)  [random 2]
     let conhec-tec-geradoras n-values (conhecimento / 2) [random 2]
-    ;;show conhec-cientifico-geradoras 
-    ;;show conhec-tec-geradoras
+    
   ]
 
   set-default-shape ent-difusoras "square";
@@ -25,8 +24,7 @@ to setup
     setxy random-xcor random-ycor
     let conhec-cientifico-difusoras n-values (conhecimento / 2)  [random 2]
     let conhec-tec-difusoras n-values (conhecimento / 2) [random 2]
-    ;;show conhec-cientifico-difusoras 
-    ;;show conhec-tec-difusoras
+   
   ]
 
   set-default-shape ent-consumidoras "pentagon"
@@ -36,8 +34,7 @@ to setup
     setxy random-xcor random-ycor
     let conhec-cientifico-consumidoras n-values (conhecimento / 2)  [random 2]
     let conhec-tec-consumidoras n-values (conhecimento / 2) [random 2]
-    ;;show conhec-cientifico-consumidoras 
-    ;;show conhec-tec-consumidoras
+   
   ]
 
   set-default-shape ent-integradoras "triangle"
@@ -47,7 +44,18 @@ to setup
     setxy random-xcor random-ycor
     let conhec-cientifico-integradoras n-values (conhecimento / 2)  [random 2]
     let conhec-tec-integradoras n-values (conhecimento / 2) [random 2]
-    ;;show conhec-cientifico-integradoras 
-    ;;show conhec-tec-integradoras
+    
   ]
+end
+
+to walk
+  ask turtles[
+  rt random 100
+  lt random 100
+  fd 1
+  ]
+end
+
+to go
+  walk
 end
