@@ -1,0 +1,52 @@
+breed [ent-consumidoras consumidora]
+
+globals[
+conhec-cient
+conhec-tecn
+]
+
+to setup
+  ;;limpar tudo
+  clear-all
+  ;;mudar a cor de fundo para branco (facilita a visualizaçao)
+  ask patches [set pcolor white];
+
+;;mudar a forma das entidades geradoras para circulo (diferenciaçao de outras entidades)
+  set-default-shape ent-consumidoras "circle";
+  ;;criar turtles do tipo entidades geradoras
+  create-ent-consumidoras entidades-consumidoras
+  [
+    set size (recurso-inicial / 500)
+    ;;mudar cor das entidades para azul
+    set color blue
+    ;;dispor as turtles em posiçoes aleatorias do ambiente
+    setxy random-xcor random-ycor
+    ;;define o conhecimento cientifico como uma lista contendo o numero de caracteres
+    ;;dado como "quantidade de conhecimento indicada no slider/2"
+    ;;o conhecimento informado no slider é a quantidade de conhecimento total
+    ;;pela existencia dos dois tipos de conhecimento, divide-se pela metade
+    ;;os numeros que preencherao essa lista sao 1 e 0, distribuidos aleatoriamente
+    set conhec-cient n-values (conhecimento / 2)  [random 2]
+    ;;o mesmo acontece com o conhecimento tecnologico
+    set conhec-tecn n-values (conhecimento / 2) [random 2]
+    ;let conhec-cons (sentence conhec-cient conhec-tecn)
+    
+  ]
+
+    let conhec-ambiente n-values conhecimento [random 2]
+
+end
+
+to compare
+  ask ent-consumidoras[
+    test (conhec-tecn conhec-ambiente)
+  ]
+end
+
+to test (conhec-tecn conhec-ambiente)
+foreach conhec-tecn[
+      if ?1 = ?2[
+        let aptidao (aptidao + 1)
+      ]
+    ]
+end
