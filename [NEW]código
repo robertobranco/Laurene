@@ -3,6 +3,9 @@ breed [ent-consumidoras consumidora]
 globals[
 conhec-cient
 conhec-tecn
+conhec-ambiente
+aptidao
+comparada?
 ]
 
 to setup
@@ -30,23 +33,38 @@ to setup
     ;;o mesmo acontece com o conhecimento tecnologico
     set conhec-tecn n-values (conhecimento / 2) [random 2]
     ;let conhec-cons (sentence conhec-cient conhec-tecn)
-    
+    show conhec-tecn
   ]
 
-    let conhec-ambiente n-values conhecimento [random 2]
-
+    set conhec-ambiente n-values conhecimento [random 2]
+    show conhec-ambiente
 end
 
 to compare
-  ask ent-consumidoras[
-    test (conhec-tecn conhec-ambiente)
-  ]
+  ; assume que nenhuma entidade foi comparada ao mercado
+  ask ent-consumidoras [set comparada? false]
+  ; loop para comparar todas as entidades ao mercado
+    ask ent-consumidoras with [not comparada?]
+    [test]
+
+
 end
 
-to test (conhec-tecn conhec-ambiente)
+to test
+  ask ent-consumidoras [show comparada?]
+  let cont 0
+  set aptidao 0
+  ;let aux-aptidao n-values (conhecimento / 2) [0]
 foreach conhec-tecn[
-      if ?1 = ?2[
-        let aptidao (aptidao + 1)
+      ifelse item (cont) conhec-tecn = item (cont) conhec-ambiente 
+      [print "yep"]
+      [print "nope"]
+      ;set aux-aptidao replace-item (cont) aux-aptidao 1
+      set cont cont + 1
       ]
-    ]
+set comparada? true
+      show comparada?
+
+    
+
 end
