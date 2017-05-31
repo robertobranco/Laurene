@@ -1,4 +1,4 @@
-breed [ent-consumidoras consumidora]
+﻿breed [ent-consumidoras consumidora]
 
 globals[
 conhec-cient
@@ -21,7 +21,7 @@ to setup
   [
     set size (recurso-inicial / 500)
     ;;mudar cor das entidades para azul
-    set color blue
+    set color blue ;;no futuro vamos fazer a cor de acordo com a aptidao ao ambiente
     ;;dispor as turtles em posiçoes aleatorias do ambiente
     setxy random-xcor random-ycor
     ;;define o conhecimento cientifico como uma lista contendo o numero de caracteres
@@ -36,7 +36,10 @@ to setup
     show conhec-tecn
   ]
 
-    set conhec-ambiente n-values conhecimento [random 2]
+    set conhec-ambiente n-values conhecimento [random 2] 
+;; penso que o ambiente demanda tecnologias, entao o numero de bits do ambiente seria a metade
+;; no entanto, o ambiente possui nichos, e portanto ele tem varios conjuntos de bits, mas bits tecnologicos. Cada um funciona como um mercado
+;; pra começar um está bom.
     show conhec-ambiente
 end
 
