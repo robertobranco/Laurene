@@ -16,6 +16,10 @@ entities-own [
   tech-knowledge
   ;; stores the Hamming distance of the entity (currently just from one niche)
   fitness
+  ;; stores the amount of resources kept by the entity
+  resources
+  ;; Stores the entity's reputation, given its resources and fitness in its niche
+  reputation
   ;; Does the entity assume a generator role in the ecosystem?
   generator?
   ;; Does the entity assume a generator role in the ecosystem?
@@ -30,11 +34,10 @@ entities-own [
 
 niches-own [
   ;; total-resources of a niche (put this on a slider in the future)
-  total-resources
+  niche-resources
   ;; stores the demand DNA of the niche
   niche-demand
-  ;; it is the sum of the fitness of every entity competing on the niche
-  total-fitness
+
   ;; it is the average fitness of the entities competing on the niche
   average-fitness
 ]
@@ -42,12 +45,13 @@ niches-own [
 
 ;;;;;;;;;;;;;;;;;;;;;;; globals ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-globals[
+globals [
  ;; holds counter value for which instruction is being displayed
  current-instruction
  ;; stores the niche-demand DNA for comparison
  niche-demand-now
-
+ ;; it is the sum of the fitness of every entity competing on the niche
+  total-fitness
 ]
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -55,6 +59,7 @@ globals[
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to setup
+
   clear-all
   ask patches [set pcolor black];
   set-default-shape entities "circle";
@@ -64,17 +69,29 @@ to setup
     set size (initial_resources / 500)
     set color blue
     setxy random-xcor random-ycor
+
+    ;; gives the entities its initial resources
+    set resources initial_resources
+
+    ;; sets all entities as consumers (temporary - for test purposes)
+    set consumer? true
+
+    ;; randomly creates the scientific knowledge string
     set science-knowledge n-values (knowledge / 2)  [random 2]
     show science-knowledge
+
+    ;; randomly creates the technological knowledge string
     set tech-knowledge n-values (knowledge / 2) [random 2]
     show tech-knowledge
   ]
 
-  ;; creates the niches where entities will compete and assigns them a demand DNA
+  ;; creates the niches where entities will compete and assigns them a demand DNA (temporarily just one)
   create-niches 1 [
     set niche-demand n-values (knowledge / 2) [random 2]
     show niche-demand
   ]
+  ;; resets the clock
+  reset-ticks
 end
 
 
@@ -83,19 +100,34 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to go
+  ;; asks entities to assess their Hamming distance for fitness test (check algoritm for Hamming)
   ask entities [compare]
+  set total-fitness sum [fitness] of entities
+
+  ;; gives the entities resources proportional to their fitness, and collects resources
+  ask entities [
+    set resources resources + (1000 * (fitness / total-fitness))
+    show resources
+    set resources resources - 500
+    show resources
+    set size resources / 500
+  ]
+
+  tick
 end
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;; entities procedures  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to compare
   ask entities [set checked? false]
-    loop[
-      let start one-of entities with [ not checked?]
+;;    loop[
+      let start entities with [ not checked?]
       ifelse start = nobody [stop]
       [test
-      set checked? true]
-    ]
+       set checked? true]
+;;    ]
 
 end
 
@@ -104,14 +136,28 @@ to test
   set fitness 0
   set niche-demand-now [niche-demand] of one-of niches
   foreach tech-knowledge [
-      ifelse item (counter) tech-knowledge = item (counter) niche-demand-now
+      if item (counter) tech-knowledge = item (counter) niche-demand-now
       [set fitness fitness + 1]
-      [print "nope"]
-      if counter < knowledge [set counter counter + 1]
+       if counter < knowledge [set counter counter + 1]
       ]
-show counter
-show niches
+show fitness
 end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;; niches procedures  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Distributes resources to entities according to their relative fitness
+to distribute-resources
+
+  ;; resets total-fitness
+  ;; set total-fitness sum fitness of entities
+  ;show total-fitness
+  ;set average-fitness (total-fitness / count entities)
+
+end
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -126,25 +172,24 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;; instructions for players ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
+;; presents the number of the instruction being read, and sugests the press setup if none is displayed
 to-report current-instruction-label
   report ifelse-value (current-instruction = 0)
     [ "press setup" ]
     [ (word current-instruction " of " length instructions) ]
 end
 
-
+;; goes to next instruction on the list
 to next-instruction
   show-instruction current-instruction + 1
 end
 
-
+;; goes to previos instruction on the list
 to previous-instruction
   show-instruction current-instruction - 1
 end
 
-
+;; prints the selected instruction
 to show-instruction [ i ]
   if i >= 1 and i <= length instructions [
     set current-instruction i
@@ -153,7 +198,7 @@ to show-instruction [ i ]
   ]
 end
 
-
+;; instrutcions
 to-report instructions
   report [
     [
@@ -314,7 +359,7 @@ Knowledge
 Knowledge
 0
 100
-10.0
+100.0
 2
 1
 NIL
