@@ -1,94 +1,256 @@
-;; ao invés de criar breeds podemos criar variáveis dentro do turtle que afirma que papéis ele assume. no futuro podemos até implementar mudanças de papel
-;; podemos discutir se vale a pena criar os breeds ou não... pode até ser que seja uma boa ideia, mas tens q justificar pra mim
-breed [ent-consumidoras consumidora]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;; Innovation Ecosystem ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-globals[
-;; se tu colocas uma variavel como global ela pode ser alterada por todos, certo? Como é que cada turtle terá sua própria?
-;; tanto é que se tu usa o inspect turtle a string de conhecimento não aparece
+;;;;;;;;;;;;;;;;;;;;;; breeds ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-conhec-cient
-conhec-tecn
-conhec-ambiente
-;; mesma coisa. Penso em criar uma grande lista mantida pelo observador das aptidoes, mas pode ser também que cada turtle tenha a sua
-aptidao
-comparada?
+breed [entities entity]
+breed [niches niche]
+
+;;;;;;;;;;;;;;;;;;;;;; turtle variables ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+entities-own [
+  ;; stores the scientific knowledge of the entity. It is a characteristic of Generators and Diffusers
+  science-knowledge
+  ;; stores the technological knowledge of the entity. It is a characteristic of Consumers and Diffusers
+  tech-knowledge
+  ;; stores the Hamming distance of the entity (currently just from one niche)
+  fitness
+  ;; Does the entity assume a generator role in the ecosystem?
+  generator?
+  ;; Does the entity assume a generator role in the ecosystem?
+  consumer?
+  ;; Does the entity assume a generator role in the ecosystem?
+  diffuser?
+  ;; Does the entity assume a generator role in the ecosystem?
+  integrator?
+  ;; Has the entity been checked for fitness?
+  checked?
 ]
 
-to setup
-  ;;limpar tudo
-  clear-all
-  ;;mudar a cor de fundo para branco (facilita a visualizaçao)
-  ask patches [set pcolor white];
+niches-own [
+  ;; total-resources of a niche (put this on a slider in the future)
+  total-resources
+  ;; stores the demand DNA of the niche
+  niche-demand
+  ;; it is the sum of the fitness of every entity competing on the niche
+  total-fitness
+  ;; it is the average fitness of the entities competing on the niche
+  average-fitness
+]
 
-;;mudar a forma das entidades geradoras para circulo (diferenciaçao de outras entidades)
-  set-default-shape ent-consumidoras "circle";
-  ;;criar turtles do tipo entidades geradoras
-  create-ent-consumidoras entidades-consumidoras
-  [
-    ;;tamanho das entidades de acordo com o recurso inicial de cada uma
-    set size (recurso-inicial / 500)
-    ;;mudar cor das entidades para azul
+
+;;;;;;;;;;;;;;;;;;;;;;; globals ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+globals[
+ ;; holds counter value for which instruction is being displayed
+ current-instruction
+ ;; stores the niche-demand DNA for comparison
+ niche-demand-now
+
+]
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;; setup procedures;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to setup
+  clear-all
+  ask patches [set pcolor black];
+  set-default-shape entities "circle";
+
+  ;; creates the entities and assigns them resources, a knowledge DNA and its role (s)
+  create-entities number_of_entities [
+    set size (initial_resources / 500)
     set color blue
-    ;;dispor as turtles em posiçoes aleatorias do ambiente
     setxy random-xcor random-ycor
-    ;;define o conhecimento cientifico como uma lista contendo o numero de caracteres
-    ;;dado como "quantidade de conhecimento indicada no slider/2"
-    ;;o conhecimento informado no slider é a quantidade de conhecimento total
-    ;;pela existencia dos dois tipos de conhecimento, divide-se pela metade
-    ;;os numeros que preencherao essa lista sao 1 e 0, distribuidos aleatoriamente
-    ;; seria bom que estes números fossem pares. O slider pode fazer de dois em dois?
-    set conhec-cient n-values (conhecimento / 2)  [random 2]
-    show conhec-cient
-    ;;o mesmo acontece com o conhecimento tecnologico
-    set conhec-tecn n-values (conhecimento / 2) [random 2]
-    ;let conhec-cons (sentence conhec-cient conhec-tecn)
-    show conhec-tecn
+    set science-knowledge n-values (knowledge / 2)  [random 2]
+    show science-knowledge
+    set tech-knowledge n-values (knowledge / 2) [random 2]
+    show tech-knowledge
   ]
 
-    set conhec-ambiente n-values conhecimento [random 2]
-    show conhec-ambiente
+  ;; creates the niches where entities will compete and assigns them a demand DNA
+  create-niches 1 [
+    set niche-demand n-values (knowledge / 2) [random 2]
+    show niche-demand
+  ]
 end
 
-to compare
-  ; assume que nenhuma entidade foi comparada ao mercado
-  ask ent-consumidoras [set comparada? false]
-  ; loop para comparar todas as entidades ao mercado
-    loop[
 
-      let start one-of ent-consumidoras with [ not comparada?]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;; go procedures   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to go
+  ask entities [compare]
+end
+
+
+
+to compare
+  ask entities [set checked? false]
+    loop[
+      let start one-of entities with [ not checked?]
       ifelse start = nobody [stop]
       [test
-      set comparada? true]
-
+      set checked? true]
     ]
 
 end
 
 to test
-  let cont 0
-  set aptidao 0
-  ;let aux-aptidao n-values (conhecimento / 2) [0]
-foreach conhec-tecn[
-      ifelse item (cont) conhec-tecn = item (cont) conhec-ambiente
-      [print "yep"]
+  let counter 0
+  set fitness 0
+  set niche-demand-now [niche-demand] of one-of niches
+  foreach tech-knowledge [
+      ifelse item (counter) tech-knowledge = item (counter) niche-demand-now
+      [set fitness fitness + 1]
       [print "nope"]
-      ;set aux-aptidao replace-item (cont) aux-aptidao 1
-      ;; me parece que ele está contando tudo, 0s e 1s, e isto não adianta. O nome deste tipo de fitness function é distância de hamming, e com isto podes procurar algoritmos na net
-      set cont cont + 1
+      if counter < knowledge [set counter counter + 1]
       ]
-show cont
-;set comparada? true
-
-
-
-
+show counter
+show niches
 end
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;; visibility procedures   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;; instructions for players ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+to-report current-instruction-label
+  report ifelse-value (current-instruction = 0)
+    [ "press setup" ]
+    [ (word current-instruction " of " length instructions) ]
+end
+
+
+to next-instruction
+  show-instruction current-instruction + 1
+end
+
+
+to previous-instruction
+  show-instruction current-instruction - 1
+end
+
+
+to show-instruction [ i ]
+  if i >= 1 and i <= length instructions [
+    set current-instruction i
+    clear-output
+    foreach item (current-instruction - 1) instructions output-print
+  ]
+end
+
+
+to-report instructions
+  report [
+    [
+     "You will be simulating the process"
+     "of protein synthesis from DNA that"
+     "occurs in every cell.  And you will"
+     "explore the effects of mutations"
+     "on the proteins that are produced."
+    ]
+    [
+     "When you press SETUP, a single"
+     "strand of an unwound DNA molecule"
+     "appears. This represents the state"
+      "of DNA in the cell nucleus during"
+     "transcription."
+    ]
+    [
+     "To produce proteins, each gene in"
+     "the original DNA strand must be"
+     "transcribed  into an mRNA molecule."
+     "Do this by pressing GO/STOP and"
+     "then the 1-TRANSCRIBE button."
+    ]
+    [
+     "For each mRNA molecule that was"
+     "transcribed, press the 2-RELEASE"
+     "button.  This releases the mRNA"
+     "from the nucleus  into the ribosome"
+     "of the cell."
+    ]
+    [
+     "For each mRNA molecule in the"
+     "ribosome, press the 3-TRANSLATE"
+     "button.  This pairs up molecules"
+     "of tRNA with each set of three"
+     "nucleotides in the mRNA molecule."
+    ]
+    [
+      "For each tRNA chain built, press"
+      "the 4-RELEASE button.  This"
+      "releases the amino acid chain"
+      "from the rest of the tRNA chain,"
+      "leaving behind the protein"
+      "molecule that is produced."
+    ]
+    [
+      "Each time the 1-TRANSCRIBE"
+      "button is pressed, the next gene"
+      "in the original strand of DNA "
+      "will be transcribed.  Press the 1-,"
+      "2-, 3-, 4- buttons and repeat to"
+      "translate each subsequent gene."
+    ]
+    [
+      "When you press the 5-REPLICATE"
+      "THE ORIGINAL DNA button a copy"
+      "of the original DNA will be "
+      "generated for a new cell"
+      "(as in mitosis or meiosis) and"
+      "it will appear in the green."
+    ]
+    [
+      "The replicated DNA will have a"
+      "# of random mutations, set by"
+      "#-NUCLEOTIDES-AFFECTED, each"
+      "mutation of the type set by"
+      "MUTATION-TYPE. Press button 5)"
+      "again to explore possible outcomes."
+    ]
+    [
+      "Now repeat the same transcription,"
+      "release, translation, and release"
+      "process for the DNA in this new"
+      "cell by pressing 6-, 7-, 8-, 9-."
+      "Repeat that sequence again to"
+      "cycle through to the next gene."
+    ]
+    [
+      "If you want to test the outcomes"
+      "for your own DNA code, type any"
+      "sequence of A, G, T, C in the"
+      "USER-CREATED-CODE box and set"
+      "the INITIAL-DNA-STRING to"
+      "“from-user-code”.  Then press"
+      "SETUP and start over again."
+    ]
+  ]
+end
+
+; Copyright 2017 José Roberto Branco Ramos Filho
+; See info tab for full copyright and license.
 @#$#@#$#@
 GRAPHICS-WINDOW
-210
-10
-647
-448
+359
+26
+796
+464
 -1
 -1
 13.0
@@ -112,10 +274,10 @@ ticks
 30.0
 
 BUTTON
-54
-80
-117
-113
+28
+10
+83
+57
 NIL
 setup
 NIL
@@ -129,12 +291,12 @@ NIL
 1
 
 SLIDER
-12
-133
-196
-166
-entidades-consumidoras
-entidades-consumidoras
+27
+92
+211
+125
+number_of_entities
+number_of_entities
 0
 100
 2.0
@@ -144,27 +306,27 @@ NIL
 HORIZONTAL
 
 SLIDER
-22
-26
-194
+27
 59
-Conhecimento
-Conhecimento
+211
+92
+Knowledge
+Knowledge
 0
 100
-20.0
-1
+10.0
+2
 1
 NIL
 HORIZONTAL
 
 SLIDER
-23
-268
-195
-301
-recurso-inicial
-recurso-inicial
+27
+159
+211
+192
+initial_resources
+initial_resources
 0
 1000
 1000.0
@@ -174,12 +336,12 @@ NIL
 HORIZONTAL
 
 BUTTON
-99
-206
-178
-239
+53
+216
+132
+249
 NIL
-compare
+go
 NIL
 1
 T
@@ -189,6 +351,73 @@ NIL
 NIL
 NIL
 1
+
+OUTPUT
+807
+59
+1127
+242
+12
+
+BUTTON
+807
+26
+975
+59
+Previous Instruction
+previous-instruction
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+973
+26
+1127
+59
+Next Instruction
+next-instruction
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+MONITOR
+807
+242
+893
+287
+Instruction #
+current-instruction-label
+17
+1
+11
+
+SLIDER
+27
+126
+211
+159
+number_of_niches
+number_of_niches
+0
+10
+2.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -209,11 +438,16 @@ The mentioned roles are:
 
 ## HOW IT WORKS
 
-(what rules the agents use to create the overall behavior of the model)
 
 ## HOW TO USE IT
 
-(how to use the model, including a description of each of the items in the Interface tab)
+Set the number of entities.
+Set the number of niches where they will compete.
+Set the amount of resources the niches have to distribute.
+Set the initial amount of resources each entity has to get by.
+Click on the Setup button.
+Click on the Go button.
+
 
 ## THINGS TO NOTICE
 
