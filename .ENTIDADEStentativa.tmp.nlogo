@@ -5,6 +5,7 @@ breed [ent-consumidoras consumidora]
 globals[
 ;; se tu colocas uma variavel como global ela pode ser alterada por todos, certo? Como é que cada turtle terá sua própria?
 ;; tanto é que se tu usa o inspect turtle a string de conhecimento não aparece
+
 conhec-cient
 conhec-tecn
 conhec-ambiente
