@@ -150,8 +150,7 @@ to compare
 
 end
 
-;; evaluates the hamming distance between the niche's demand and the consumers tech-knowledge
-;; also assigns a color to the entity given its absolute fitness (an option would be to code this to evaluate if it is earning enough to live or not)
+;; evaluates the hamming distance between the niche's demand and the consumers tech-k
 to test
   let counter 0
   set fitness 0
@@ -379,7 +378,7 @@ number_of_entities
 number_of_entities
 0
 100
-40.0
+3.0
 1
 1
 NIL
@@ -508,7 +507,7 @@ niche_resources
 niche_resources
 0
 10000
-10000.0
+4000.0
 1000
 1
 NIL
@@ -523,7 +522,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 0
 1000
-500.0
+1000.0
 100
 1
 NIL
