@@ -20,38 +20,46 @@ entities-own [
   resources
   ;; Stores the entity's reputation, given its resources and fitness in its niche
   reputation
-  ;; Does the entity assume a generator role in the ecosystem?
+  ;; does the entity assume a generator role in the ecosystem?
   generator?
-  ;; Does the entity assume a generator role in the ecosystem?
+  ;; does the entity assume a generator role in the ecosystem?
   consumer?
-  ;; Does the entity assume a generator role in the ecosystem?
+  ;; does the entity assume a generator role in the ecosystem?
   diffuser?
-  ;; Does the entity assume a generator role in the ecosystem?
+  ;; does the entity assume a generator role in the ecosystem?
   integrator?
-  ;; Has the entity been checked for fitness?
-  checked?
+  ;; entity's willingness to share knowledge with others
+  willingness-to-share
+  ;; entity's motivation to learn from others
+  motivation-to-learn
+  ;; entity's creation performance
+  creation-performance
+
 ]
 
 niches-own [
+
   ;; total-resources of a niche (put this on a slider in the future)
   niche-resources
   ;; stores the demand DNA of the niche
   niche-demand
-
   ;; it is the average fitness of the entities competing on the niche
   average-fitness
+
 ]
 
 
 ;;;;;;;;;;;;;;;;;;;;;;; globals ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 globals [
+
  ;; holds counter value for which instruction is being displayed
  current-instruction
  ;; stores the niche-demand DNA for comparison
  niche-demand-now
  ;; it is the sum of the fitness of every entity competing on the niche
   total-fitness
+
 ]
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -80,21 +88,14 @@ to setup
     ;; does the entity assume a generator role in the ecosystem?
     set integrator? random 2
 
-    ;; sets the shape of the entities according to their role
-    ;; star for generators
-    if generator? = 1 and consumer? = 0 and diffuser? = 0 and integrator? = 0 [set shape "star"]
-    ;; square for consumers
-    if generator? = 0 and consumer? = 1 and diffuser? = 0 and integrator? = 0 [set shape "square"]
-    ;; triangle for diffusers
-    if generator? = 0 and consumer? = 0 and diffuser? = 1 and integrator? = 0 [set shape "triangle"]
-    ;; pentagon for integrators
-    if generator? = 0 and consumer? = 0 and diffuser? = 0 and integrator? = 1 [set shape "pentagon"]
-    ;; circle remains for hybrids, as it is the default shape
+    ;; selects the shape of the entity given its role in the ecosystem
+    select-shape
+
 
     ;; gives the entities its initial resources
     set resources initial_resources
 
-    ;; gets all entities as consumers (temporary - for test purposes)
+    ;; *** gets all entities as consumers (temporary - for test purposes) *** has to change as soon as there is a way for the non market entities to find resources on their own
     set consumer? true
 
     ;; randomly creates the scientific knowledge string
@@ -106,7 +107,7 @@ to setup
     show tech-knowledge
   ]
 
-
+  ;; *** issue - how to deal with more than one niche - resources only go to the fittest, how to display the colors (may be fit in one and not in the other) ***
   ;; creates the niches where entities will compete and assigns them a demand DNA (temporarily just one)
   create-niches 1 [
     set niche-demand n-values (knowledge / 2) [random 2]
@@ -115,8 +116,9 @@ to setup
   ;; resets the clock
   reset-ticks
 
-  ;; just for testing
-  ask one-of entities [set tech-knowledge [niche-demand] of one-of niches]
+  ;; *** just for testing - sets one superfit entity ***
+  ;; ask one-of entities [set tech-knowledge [niche-demand] of one-of niches]
+
 end
 
 
@@ -126,33 +128,30 @@ end
 
 to go
   ;; asks entities to assess their Hamming distance for fitness test (check algoritm for Hamming)
-  ask entities [compare]
+  ask entities [test-fitness]
   set total-fitness sum [fitness] of entities
 
   ;; gives the entities resources proportional to their fitness, and collects resources
   ask entities [calculate-resource]
 
+  ;; ask entities to look for partners and exchange knowledge
+  ;; ask entities to create new knowledge
+  ;; ask entities to convert knowledge
+  ;; ask entities to update its own parameters (adapt)
+  ;; generate graphics and output updates
+
   tick
+
 end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; entities procedures  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-to compare
-  ask entities [set checked? false]
-;;    loop[
-      let start entities with [ not checked?]
-      ifelse start = nobody [stop]
-      [test
-       set checked? true]
-;;    ]
-
-end
 
 ;; evaluates the hamming distance between the niche's demand and the consumers tech-knowledge
-;; also assigns a color to the entity given its absolute fitness (an option would be to code this to evaluate if it is earning enough to live or not)
-to test
+to test-fitness
+
   let counter 0
   set fitness 0
   set niche-demand-now [niche-demand] of one-of niches
@@ -161,21 +160,29 @@ to test
       [set fitness fitness + 1]
        if counter < knowledge [set counter counter + 1]
       ]
-  ifelse (fitness / (knowledge / 2 )) > 0.67 [ set color green]
-    [ ifelse (fitness / (knowledge / 2 )) > 0.33 [ set color yellow] [ set color red] ]
-  show fitness
+
+  ;; sets the color of the entities based on its absolute fitness
+  select-fitness-color
 
 end
 
 ;; procedure to calculate how much must the entity receive from the market, and how much must it pay to live
+;; also adjusts the size of the entity given the amount of its resources
+
 to calculate-resource
-    let proportional-fitness (fitness / total-fitness)
-    set resources resources + (niche_resources * proportional-fitness)
-    show resources
-    set resources resources - minimum_resources_to_live
-    show resources
-    set size resources / minimum_resources_to_live
+
+    ;; gives an entity a share of the niche's resources proportional to its market share (relative fitness)
+    set resources resources + (niche_resources * (fitness / total-fitness))
+
+    ;; takes resources from the entity proportionally to its total amount of resources, respecting the minimum amount to stay alive
+    set resources resources - (minimum_resources_to_live + (resources * 0.05))
+
+    ;; sets the size of the entity given its accumulated amount of resources
+    set-size-entity
+
+    ;; kills the entity if it has no resources left
     if resources < 0 [ die ]
+
 end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -199,14 +206,42 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;; visibility procedures   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; sets the shape of the entities according to their role
+to select-shape
+
+    ;; star for generators
+    if generator? = 1 and consumer? = 0 and diffuser? = 0 and integrator? = 0 [set shape "star"]
+    ;; square for consumers
+    if generator? = 0 and consumer? = 1 and diffuser? = 0 and integrator? = 0 [set shape "square"]
+    ;; triangle for diffusers
+    if generator? = 0 and consumer? = 0 and diffuser? = 1 and integrator? = 0 [set shape "triangle"]
+    ;; pentagon for integrators
+    if generator? = 0 and consumer? = 0 and diffuser? = 0 and integrator? = 1 [set shape "pentagon"]
+    ;; circle remains for hybrids, as it is the default shape
+
+end
+
+;; also assigns a color to the entity given its absolute fitness (an option would be to code this to evaluate if it is earning enough to live or not)
+to select-fitness-color
+
+  ifelse (fitness / (knowledge / 2 )) > 0.67 [ set color green]
+    [ ifelse (fitness / (knowledge / 2 )) > 0.33 [ set color yellow] [ set color red] ]
+
+end
 
 
+;; sets the size of the entity proportional to its resources, related to the amount of periods it could live without receiving resources
+to set-size-entity
 
+     set size resources / (minimum_resources_to_live + (resources * 0.05))
+
+end
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;; instructions for players ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;; presents the number of the instruction being read, and sugests the press setup if none is displayed
 to-report current-instruction-label
   report ifelse-value (current-instruction = 0)
@@ -237,18 +272,18 @@ end
 to-report instructions
   report [
     [
-     "You will be simulating the process"
-     "of protein synthesis from DNA that"
-     "occurs in every cell.  And you will"
-     "explore the effects of mutations"
-     "on the proteins that are produced."
+     "You will be simulating an innovation"
+     "ecosystem based on knowledge flows."
+     "The shapes of the entities denote"
+     "their role in the ecosystem, and their"
+     "color denotes their absolute fitness."
     ]
     [
-     "When you press SETUP, a single"
-     "strand of an unwound DNA molecule"
-     "appears. This represents the state"
-      "of DNA in the cell nucleus during"
-     "transcription."
+     "When you press SETUP, a population of"
+     "entities is randomly created."
+     "They will them start competing for "
+     "the evinronments resources."
+
     ]
     [
      "To produce proteins, each gene in"
@@ -435,14 +470,14 @@ NIL
 OUTPUT
 807
 59
-1127
+1148
 242
 12
 
 BUTTON
 807
 26
-975
+985
 59
 Previous Instruction
 previous-instruction
@@ -457,9 +492,9 @@ NIL
 1
 
 BUTTON
-973
+983
 26
-1127
+1147
 59
 Next Instruction
 next-instruction
@@ -507,7 +542,7 @@ SLIDER
 niche_resources
 niche_resources
 0
-10000
+20000
 10000.0
 1000
 1
