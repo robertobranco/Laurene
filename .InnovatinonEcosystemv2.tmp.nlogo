@@ -12,8 +12,12 @@ breed [niches niche]
 entities-own [
   ;; stores the scientific knowledge of the entity. It is a characteristic of Generators and Diffusers
   science-knowledge
+  ;; lets the model know which entities have active scientific knowledge
+  science?
   ;; stores the technological knowledge of the entity. It is a characteristic of Consumers and Diffusers
   tech-knowledge
+  ;; lets the  model know which entities have active technological knowledge
+  technology?
   ;; stores the Hamming distance of the entity (currently just from one niche)
   fitness
   ;; stores the amount of resources kept by the entity
@@ -58,7 +62,9 @@ globals [
  ;; stores the niche-demand DNA for comparison
  niche-demand-now
  ;; it is the sum of the fitness of every entity competing on the niche
-  total-fitness
+ total-fitness
+ ;; agentset of possible partners for crossover
+ possible-partners
 
 ]
 
@@ -77,16 +83,25 @@ to setup
     set size (initial_resources / 500)
     set color blue
     setxy random-xcor random-ycor
+    set science? false
+    set technology? false
 
-    ;; randomly sets the role (s) an entity assumes in the ecosystem. Later it has to be more controllable
+    ;; randomly sets the role (s) an entity assumes in the ecosystem.
+    ;; sets the type of knowledge the entity has according to its role
+    ;; later it has to be more controllable, assigning a known proportion of each
     ;; does the entity assume a generator role in the ecosystem?
-    set generator? random 2
-    ;; does the entity assume a generator role in the ecosystem?
-    set consumer? random 2
-    ;; does the entity assume a generator role in the ecosystem?
-    set diffuser? random 2
-    ;; does the entity assume a generator role in the ecosystem?
-    set integrator? random 2
+    set generator? one-of [true false]
+    if generator? [set science? true]
+    ;; does the entity assume a consumer role in the ecosystem?
+    set consumer? one-of [true false]
+    if consumer? [set technology? true]
+    ;; does the entity assume a diffuser role in the ecosystem?
+    ;; if the entity accumulates other role, it will retain the knowledge the other role confers, and maybe add other
+    set diffuser? one-of [true false]
+    if not science? [set science? one-of [true false]]
+    if not technology? [set technology? one-of[true false]]
+    ;; does the entity assume an integrator role in the ecosystem?
+    set integrator? one-of [true false]
 
     ;; selects the shape of the entity given its role in the ecosystem
     select-shape
@@ -156,7 +171,7 @@ to go
 end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;; entities procedures  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;; entities' procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -196,22 +211,87 @@ to calculate-resource
 
 end
 
-;; procedure to perform a lottery based on fitness and resources
-;; turtles to figure out which turtle holds that ticket. (modelo Lottery Example)
+
+;; creates agentsets of possible partners who possess the same kind of knowledge possessed by the choosing entity
+;; *** issue - something has to be done with the agentsets before it is closed. The lottery for an instance
+to-report chose-partner
+
+  ;; creates an agentset with entities possessing knowledge similar to the knowledge of the choosing entity
+  ifelse science? and technology? [
+    set possible-partners entities with [science? or technology?]
+    ]
+    [ifelse science? [
+      set possible-partners entities with [science?]
+      ]
+      [if technology? [
+        set possible-partners entities with [technology?]
+        ]
+      ]
+    ]
+
+  ;; creates roulette that will select the partner from the agentset of suitable partners (Lottery Example model from Netlogo)
+  ;; the method favours those with higher reputation and more resouces, but it doesnt rule anyone out.
+  let pick random-float (sum [fitness] of possible-partners  + sum [resources] of possible-partners)
+  let partner nobody
+  ask possible-partners
+    [ ;; if there's no winner yet...
+      if partner = nobody
+        [ ifelse (resources + fitness) > pick
+            [ set partner self ]
+            [ set pick pick - (resources + fitness) ] ] ]
+  report partner
+
+end
+
+
+
+;; procedure to perform a lottery based on fitness and resources. The lottery will be run only by those with the same kind of knowledge
+;; turtles to figure out which turtle holds that ticket. (Lottery Example model from Netlogo)
+;; *** issue - if the entity has both knowledges, it will only run the lottery with scientific partners
 to-report lottery-winner
-  let pick random-float (sum [fitness] of entities  + sum [resources] of entities)
+  ifelse science? [
+    let pick random-float (sum [fitness] of entities with [science?]  + sum [resources] of entities with [science?])
   let winner nobody
-  ask entities
+  ask entities with [science?]
     [ ;; if there's no winner yet...
       if winner = nobody
         [ ifelse (resources + fitness) > pick
             [ set winner self ]
             [ set pick pick - (resources + fitness) ] ] ]
   report winner
+  ]
+  [
+    let pick random-float (sum [fitness] of entities with [technology?]  + sum [resources] of entities with [technology?])
+  let winner nobody
+  ask entities with [technology?]
+    [ ;; if there's no winner yet...
+      if winner = nobody
+        [ ifelse (resources + fitness) > pick
+            [ set winner self ]
+            [ set pick pick - (resources + fitness) ] ] ]
+  report winner
+  ]
+
+  ;; shorter code option - see netlogo online manual
+  ;;ask rnd:weighted-one-of entities with science? [ resources + fitness ] [set color black]
+  ;;  set label label + 1
+  ;;]
+
 end
 
+;; the candidates provided are the suitable partners for crossover - those with the same kind of knowledge.
+;; the wheight use is the reputation perceived by the entity, which is the fitness, the amount of resources and past history of relations
+
+;;rnd:wheighed-one-of entities with science? rnd:weighted-one-of rnd:weighted-n-of rnd:weighted-n-of-with-repeats
+
+
+;; cria uma lista ordenada de todas as entidades (serve neste caso porque as entidades são criadas primeiro). O que acontece após mortes?
+;; ele mostra o da turtle morta como nobody, e adiciona o que vier na sequencia, incluindo os niches
+;;show n-values count entities turtle
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;; niches procedures  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;; niche's procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Distributes resources to entities according to their relative fitness
