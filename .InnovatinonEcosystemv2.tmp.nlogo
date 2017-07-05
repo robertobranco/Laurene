@@ -241,7 +241,7 @@ to-report chose-partner
 
   ;; creates an agentset with entities possessing knowledge similar to the knowledge of the choosing entity
   ifelse science? and technology? [
-    set possible-partners entities with [science? or technology?]
+    set possible-partners  entities with [science? or technology?]
     ]
     [ifelse science? [
       set possible-partners entities with [science?]
@@ -275,7 +275,6 @@ to-report chose-partner
 
 ;;rnd:wheighed-one-of entities with science? rnd:weighted-one-of rnd:weighted-n-of rnd:weighted-n-of-with-repeats
 
-
 end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -293,10 +292,8 @@ to distribute-resources
 end
 
 
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;; visibility procedures   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;; GUI procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; sets the shape of the entities according to their role
@@ -379,75 +376,9 @@ to-report instructions
 
     ]
     [
-     "To produce proteins, each gene in"
-     "the original DNA strand must be"
-     "transcribed  into an mRNA molecule."
      "Do this by pressing GO/STOP and"
-     "then the 1-TRANSCRIBE button."
     ]
-    [
-     "For each mRNA molecule that was"
-     "transcribed, press the 2-RELEASE"
-     "button.  This releases the mRNA"
-     "from the nucleus  into the ribosome"
-     "of the cell."
-    ]
-    [
-     "For each mRNA molecule in the"
-     "ribosome, press the 3-TRANSLATE"
-     "button.  This pairs up molecules"
-     "of tRNA with each set of three"
-     "nucleotides in the mRNA molecule."
-    ]
-    [
-      "For each tRNA chain built, press"
-      "the 4-RELEASE button.  This"
-      "releases the amino acid chain"
-      "from the rest of the tRNA chain,"
-      "leaving behind the protein"
-      "molecule that is produced."
-    ]
-    [
-      "Each time the 1-TRANSCRIBE"
-      "button is pressed, the next gene"
-      "in the original strand of DNA "
-      "will be transcribed.  Press the 1-,"
-      "2-, 3-, 4- buttons and repeat to"
-      "translate each subsequent gene."
-    ]
-    [
-      "When you press the 5-REPLICATE"
-      "THE ORIGINAL DNA button a copy"
-      "of the original DNA will be "
-      "generated for a new cell"
-      "(as in mitosis or meiosis) and"
-      "it will appear in the green."
-    ]
-    [
-      "The replicated DNA will have a"
-      "# of random mutations, set by"
-      "#-NUCLEOTIDES-AFFECTED, each"
-      "mutation of the type set by"
-      "MUTATION-TYPE. Press button 5)"
-      "again to explore possible outcomes."
-    ]
-    [
-      "Now repeat the same transcription,"
-      "release, translation, and release"
-      "process for the DNA in this new"
-      "cell by pressing 6-, 7-, 8-, 9-."
-      "Repeat that sequence again to"
-      "cycle through to the next gene."
-    ]
-    [
-      "If you want to test the outcomes"
-      "for your own DNA code, type any"
-      "sequence of A, G, T, C in the"
-      "USER-CREATED-CODE box and set"
-      "the INITIAL-DNA-STRING to"
-      "“from-user-code”.  Then press"
-      "SETUP and start over again."
-    ]
+
   ]
 end
 
