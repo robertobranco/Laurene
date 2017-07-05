@@ -299,11 +299,11 @@ to select-shape
     ;; star for generators
     if generator? and not consumer? and not diffuser? and not integrator? [set shape "star"]
     ;; square for consumers
-    if not generator? and consumer? and not diffuser? and not integrator?= 0 [set shape "square"]
+    if not generator? and consumer? and not diffuser? and not integrator? [set shape "square"]
     ;; triangle for diffusers
-    if not generator? = 0 and consumer? = 0 and diffuser? = 1 and integrator? = 0 [set shape "triangle"]
+    if not generator? and not consumer? and diffuser? and not integrator? [set shape "triangle"]
     ;; pentagon for integrators
-    if not generator? = 0 and consumer? = 0 and diffuser? = 0 and integrator? = 1 [set shape "pentagon"]
+    if not generator? and not consumer? and not diffuser? and integrator? [set shape "pentagon"]
     ;; circle remains for hybrids, as it is the default shape
 
 end
@@ -710,10 +710,10 @@ PENS
 "Average resources" 1.0 0 -14070903 true "" "plot (sum [resources] of entities) / (count entities)"
 
 MONITOR
-814
-312
-918
-357
+812
+356
+1012
+401
 Maximum fitness
 max [fitness] of entities
 17
@@ -721,10 +721,10 @@ max [fitness] of entities
 11
 
 MONITOR
-1013
-311
-1207
+1014
 356
+1213
+401
 Maximum resources accumulated
 max [resources] of entities
 2
@@ -739,6 +739,45 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability"
+1
+
+MONITOR
+812
+311
+1012
+356
+Std deviation of fitness
+standard-deviation [fitness] of entities
+2
+1
+11
+
+MONITOR
+1013
+310
+1213
+355
+Std deviation of resources
+standard-deviation [resources] of entities
+2
+1
+11
+
+BUTTON
+145
+10
+208
+58
+NIL
+go
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
 1
 
 @#$#@#$#@
