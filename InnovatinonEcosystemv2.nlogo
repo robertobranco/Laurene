@@ -139,7 +139,7 @@ to go
 
   ;; the impact of integrators on relations
 
-  ask entities [show chose-partner]
+  ask entities [show choose-partner]
 
   tick
 
@@ -151,7 +151,7 @@ end
 
 to select-role
 
-  ;; initializes the kind of knowledge posessed by the entities. The default is no knowledge
+  ;; initializes the kind of knowledge possessed by the entities. The default is no knowledge
   set science? false
   set technology? false
 
@@ -176,7 +176,7 @@ to select-role
   select-shape
 
   ;; randomly creates the scientific knowledge string
-  ;; if the entity does not posess this kind of knowledge, the string is all 0's
+  ;; if the entity does not possess this kind of knowledge, the string is all 0's
   ifelse science? [
   set science-knowledge n-values (knowledge / 2)  [random 2]
   show science-knowledge
@@ -185,7 +185,7 @@ to select-role
   ]
 
   ;; randomly creates the technological knowledge string
-  ;; if the entity does not posess this kind of knowledge, the string is all 0's
+  ;; if the entity does not possess this kind of knowledge, the string is all 0's
   ifelse technology? [
   set tech-knowledge n-values (knowledge / 2) [random 2]
   show tech-knowledge
@@ -238,7 +238,7 @@ end
 
 ;; creates agentsets of possible partners who possess the same kind of knowledge possessed by the choosing entity
 ;; *** issue - something has to be done with the agentsets before it is closed. The lottery for an instance
-to-report chose-partner
+to-report choose-partner
 
   ;; creates an agentset with entities possessing knowledge similar to the knowledge of the choosing entity
   ifelse science? and technology? [
@@ -297,13 +297,13 @@ end
 to select-shape
 
     ;; star for generators
-    if generator? = 1 and consumer? = 0 and diffuser? = 0 and integrator? = 0 [set shape "star"]
+    if generator? and not consumer? and not diffuser? and not integrator? [set shape "star"]
     ;; square for consumers
-    if generator? = 0 and consumer? = 1 and diffuser? = 0 and integrator? = 0 [set shape "square"]
+    if not generator? and consumer? and not diffuser? and not integrator? [set shape "square"]
     ;; triangle for diffusers
-    if generator? = 0 and consumer? = 0 and diffuser? = 1 and integrator? = 0 [set shape "triangle"]
+    if not generator? and not consumer? and diffuser? and not integrator? [set shape "triangle"]
     ;; pentagon for integrators
-    if generator? = 0 and consumer? = 0 and diffuser? = 0 and integrator? = 1 [set shape "pentagon"]
+    if not generator? and not consumer? and not diffuser? and integrator? [set shape "pentagon"]
     ;; circle remains for hybrids, as it is the default shape
 
 end
@@ -371,17 +371,46 @@ to-report instructions
      "ecosystem based on knowledge flows."
      "The shapes of the entities denote"
      "their role in the ecosystem, and their"
-     "color denotes their absolute fitness."
+     "color denotes their absolute fitness or"
+     "their ability to stay alive for several"
+     "periods"
     ]
     [
      "When you press SETUP, a population of"
      "entities is randomly created."
-     "They will them start competing for "
-     "the evinronments resources."
+     "Their roles and knowledge DNA's are"
+     "randomly created."
+     "Scientific knowledge and technological"
+     "knowledge is assigned according to the"
+     "entities roles in the ecosystem."
 
     ]
     [
-     "Do this by pressing GO/STOP and"
+     "Choose the amount of entities you want"
+     "in the ecosystem by sliding the"
+     "number_of_entities slider"
+     "Choose the number of market niches "
+     "where the entities will compete by"
+     "sliding the number_of_niches slider"
+    ]
+    [
+      "Choose the initial amount of resources"
+      "the entities possesses by sliding the"
+      "initial_resources slider"
+      "Choose the size of the markets by sliding"
+      "niche_resources slider"
+    ]
+    [
+      "Choose the amount of resources that are"
+      "available at a market by sliding the"
+      "niche_resources"
+      "Choose minimum amount of resources to live"
+      "by sliding the minimum_resources_to_live"
+      "slider"
+      "Choose how much do the resources necessary"
+      " to remain in the market grow as the entity"
+      " grows by sliding the"
+      "expense_to_live_growth slider "
     ]
 
   ]
@@ -538,10 +567,10 @@ NIL
 1
 
 MONITOR
-15
-607
-101
-652
+27
+515
+113
+560
 Instruction #
 current-instruction-label
 17
