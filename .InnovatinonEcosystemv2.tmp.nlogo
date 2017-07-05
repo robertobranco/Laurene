@@ -241,13 +241,13 @@ to-report chose-partner
 
   ;; creates an agentset with entities possessing knowledge similar to the knowledge of the choosing entity
   ifelse science? and technology? [
-    set possible-partners  entities with [science? or technology?]
+    set possible-partners other entities with [science? or technology?]
     ]
     [ifelse science? [
-      set possible-partners entities with [science?]
+      set possible-partners other entities with [science?]
       ]
       [if technology? [
-        set possible-partners entities with [technology?]
+        set possible-partners other entities with [technology?]
         ]
       ]
     ]
@@ -281,15 +281,11 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;; niche's procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Distributes resources to entities according to their relative fitness
-to distribute-resources
+;; mutation
 
-  ;; resets total-fitness
-  ;; set total-fitness sum fitness of entities
-  ;show total-fitness
-  ;set average-fitness (total-fitness / count entities)
+;; niche swap
 
-end
+;; niche learning from introduced products (crossover with consumers)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -481,7 +477,7 @@ BUTTON
 346
 NIL
 go
-NIL
+T
 1
 T
 OBSERVER
@@ -550,7 +546,7 @@ SLIDER
 159
 number_of_niches
 number_of_niches
-0
+1
 10
 1.0
 1
@@ -580,9 +576,9 @@ SLIDER
 258
 minimum_resources_to_live
 minimum_resources_to_live
-0
+1
 1000
-500.0
+501.0
 100
 1
 NIL
@@ -597,11 +593,105 @@ expense_to_live_growth
 expense_to_live_growth
 0
 1
-0.45
+0.05
 0.05
 1
 NIL
 HORIZONTAL
+
+PLOT
+808
+292
+1008
+442
+Fitness of entities histogram
+Entity's fitness
+Entities
+0.0
+100.0
+0.0
+10.0
+false
+false
+"" ""
+PENS
+"default" 10.0 1 -16777216 true "" "histogram [fitness] of entities"
+
+PLOT
+1009
+292
+1209
+442
+Entities' resources histogram
+Resources posessed
+Entities
+0.0
+50000.0
+0.0
+10.0
+false
+false
+"" ""
+PENS
+"default" 1000.0 1 -13840069 true "" "histogram [resources] of entities"
+
+PLOT
+808
+441
+1008
+591
+Fitness average
+Ticks
+Average Fitness
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"Average fitness" 1.0 0 -2674135 true "" "plot (sum [fitness] of entities) / (count entities)"
+
+PLOT
+1008
+442
+1208
+592
+Average resources
+Ticks
+Average resources
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"Average resources" 1.0 0 -14070903 true "" "plot (sum [resources] of entities) / (count entities)"
+
+MONITOR
+809
+593
+913
+638
+Maximum fitness
+max [fitness] of entities
+17
+1
+11
+
+MONITOR
+1045
+614
+1239
+659
+Maximum resources accumulated
+max [resources] of entities
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
