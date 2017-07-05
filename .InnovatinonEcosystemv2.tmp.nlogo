@@ -10,6 +10,7 @@ breed [niches niche]
 ;;;;;;;;;;;;;;;;;;;;;; turtle variables ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 entities-own [
+
   ;; stores the scientific knowledge of the entity. It is a characteristic of Generators and Diffusers
   science-knowledge
   ;; lets the model know which entities have active scientific knowledge
@@ -83,29 +84,9 @@ to setup
     set size (initial_resources / 500)
     set color blue
     setxy random-xcor random-ycor
-    set science? false
-    set technology? false
 
-    ;; randomly sets the role (s) an entity assumes in the ecosystem.
-    ;; sets the type of knowledge the entity has according to its role
-    ;; later it has to be more controllable, assigning a known proportion of each
-    ;; does the entity assume a generator role in the ecosystem?
-    set generator? one-of [true false]
-    if generator? [set science? true]
-    ;; does the entity assume a consumer role in the ecosystem?
-    set consumer? one-of [true false]
-    if consumer? [set technology? true]
-    ;; does the entity assume a diffuser role in the ecosystem?
-    ;; if the entity accumulates other role, it will retain the knowledge the other role confers, and maybe add other
-    set diffuser? one-of [true false]
-    if not science? [set science? one-of [true false]]
-    if not technology? [set technology? one-of[true false]]
-    ;; does the entity assume an integrator role in the ecosystem?
-    set integrator? one-of [true false]
-
-    ;; selects the shape of the entity given its role in the ecosystem
-    select-shape
-
+    ;; asks turtles to select their roles
+    select-role
 
     ;; gives the entities its initial resources
     set resources initial_resources
@@ -113,13 +94,6 @@ to setup
     ;; *** gets all entities as consumers (temporary - for test purposes) *** has to change as soon as there is a way for the non market entities to find resources on their own
     set consumer? true
 
-    ;; randomly creates the scientific knowledge string
-    set science-knowledge n-values (knowledge / 2)  [random 2]
-    show science-knowledge
-
-    ;; randomly creates the technological knowledge string
-    set tech-knowledge n-values (knowledge / 2) [random 2]
-    show tech-knowledge
   ]
 
   ;; *** issue - how to deal with more than one niche - resources only go to the fittest, how to display the colors (may be fit in one and not in the other) ***
@@ -165,7 +139,7 @@ to go
 
   ;; the impact of integrators on relations
 
-
+ask entities [show chose-partner]
   tick
 
 end
@@ -173,6 +147,53 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; entities' procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to select-role
+
+  ;; initializes the kind of knowledge posessed by the entities. The default is no knowledge
+  set science? false
+  set technology? false
+
+  ;; randomly sets the role (s) an entity assumes in the ecosystem.
+  ;; sets the type of knowledge the entity has according to its role
+  ;; later it has to be more controllable, assigning a known proportion of each
+  ;; does the entity assume a generator role in the ecosystem?
+  set generator? one-of [true false]
+  if generator? [set science? true]
+  ;; does the entity assume a consumer role in the ecosystem?
+  set consumer? one-of [true false]
+  if consumer? [set technology? true]
+  ;; does the entity assume a diffuser role in the ecosystem?
+  ;; if the entity accumulates other role, it will retain the knowledge the other role confers, and maybe add another
+  set diffuser? one-of [true false]
+  if not science? [set science? one-of [true false]]
+  if not technology? [set technology? one-of[true false]]
+  ;; does the entity assume an integrator role in the ecosystem? Integrators don't need to have scientific or technological knowledge
+  set integrator? one-of [true false]
+
+  ;; selects the shape of the entity given its role in the ecosystem
+  select-shape
+
+  ;; randomly creates the scientific knowledge string
+  ;; if the entity does not posess this kind of knowledge, the string is all 0's
+  ifelse science? [
+  set science-knowledge n-values (knowledge / 2)  [random 2]
+  show science-knowledge
+  ]
+  [ set science-knowledge n-values (knowledge / 2) [0]
+  ]
+
+  ;; randomly creates the technological knowledge string
+  ;; if the entity does not posess this kind of knowledge, the string is all 0's
+  ifelse technology? [
+  set tech-knowledge n-values (knowledge / 2) [random 2]
+  show tech-knowledge
+  ]
+  [ set tech-knowledge n-values (knowledge / 2) [0]
+  ]
+
+end
+
 
 
 ;; evaluates the hamming distance between the niche's demand and the consumers tech-knowledge
@@ -201,7 +222,9 @@ to calculate-resource
     set resources resources + (niche_resources * (fitness / total-fitness))
 
     ;; takes resources from the entity proportionally to its total amount of resources, respecting the minimum amount to stay alive
-    set resources resources - (minimum_resources_to_live + (resources * 0.05))
+    ;; the amount necessary grows with the amount of resources the entity amasses (which is the growth of the entity)
+    ;; the rate of the expense growth is given by the expense to live growth slider
+    set resources resources - (minimum_resources_to_live + (resources * expense_to_live_growth))
 
     ;; sets the size of the entity given its accumulated amount of resources
     set-size-entity
@@ -241,54 +264,19 @@ to-report chose-partner
             [ set pick pick - (resources + fitness) ] ] ]
   report partner
 
-end
-
-
-
-;; procedure to perform a lottery based on fitness and resources. The lottery will be run only by those with the same kind of knowledge
-;; turtles to figure out which turtle holds that ticket. (Lottery Example model from Netlogo)
-;; *** issue - if the entity has both knowledges, it will only run the lottery with scientific partners
-to-report lottery-winner
-  ifelse science? [
-    let pick random-float (sum [fitness] of entities with [science?]  + sum [resources] of entities with [science?])
-  let winner nobody
-  ask entities with [science?]
-    [ ;; if there's no winner yet...
-      if winner = nobody
-        [ ifelse (resources + fitness) > pick
-            [ set winner self ]
-            [ set pick pick - (resources + fitness) ] ] ]
-  report winner
-  ]
-  [
-    let pick random-float (sum [fitness] of entities with [technology?]  + sum [resources] of entities with [technology?])
-  let winner nobody
-  ask entities with [technology?]
-    [ ;; if there's no winner yet...
-      if winner = nobody
-        [ ifelse (resources + fitness) > pick
-            [ set winner self ]
-            [ set pick pick - (resources + fitness) ] ] ]
-  report winner
-  ]
-
+  ;; *** alternate code for simplicity
   ;; shorter code option - see netlogo online manual
   ;;ask rnd:weighted-one-of entities with science? [ resources + fitness ] [set color black]
   ;;  set label label + 1
   ;;]
 
-end
-
-;; the candidates provided are the suitable partners for crossover - those with the same kind of knowledge.
+  ;; the candidates provided are the suitable partners for crossover - those with the same kind of knowledge.
 ;; the wheight use is the reputation perceived by the entity, which is the fitness, the amount of resources and past history of relations
 
 ;;rnd:wheighed-one-of entities with science? rnd:weighted-one-of rnd:weighted-n-of rnd:weighted-n-of-with-repeats
 
 
-;; cria uma lista ordenada de todas as entidades (serve neste caso porque as entidades são criadas primeiro). O que acontece após mortes?
-;; ele mostra o da turtle morta como nobody, e adiciona o que vier na sequencia, incluindo os niches
-;;show n-values count entities turtle
-
+end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; niche's procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -556,10 +544,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-29
-283
-108
-316
+28
+313
+107
+346
 NIL
 go
 NIL
@@ -665,6 +653,21 @@ minimum_resources_to_live
 1000
 500.0
 100
+1
+NIL
+HORIZONTAL
+
+SLIDER
+27
+258
+211
+291
+expense_to_live_growth
+expense_to_live_growth
+0
+1
+0.45
+0.05
 1
 NIL
 HORIZONTAL
