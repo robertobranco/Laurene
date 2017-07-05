@@ -139,7 +139,8 @@ to go
 
   ;; the impact of integrators on relations
 
-ask entities [show chose-partner]
+  ask entities [show chose-partner]
+
   tick
 
 end
@@ -310,8 +311,16 @@ end
 ;; also assigns a color to the entity given its absolute fitness (an option would be to code this to evaluate if it is earning enough to live or not)
 to select-fitness-color
 
-  ifelse (fitness / (knowledge / 2 )) > 0.67 [ set color green]
-    [ ifelse (fitness / (knowledge / 2 )) > 0.33 [ set color yellow] [ set color red] ]
+  ifelse color_update_rule = "fitness" [
+    ifelse (fitness / (knowledge / 2 )) > 0.67 [ set color green]
+      [ ifelse (fitness / (knowledge / 2 )) > 0.33 [ set color yellow]
+      [ set color red] ]
+    ]
+  [ ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 2) [ set color green ]
+    [ ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 10) [ set color yellow ]
+      [set color red]
+    ]
+  ]
 
 end
 
@@ -319,7 +328,7 @@ end
 ;; sets the size of the entity proportional to its resources, related to the amount of periods it could live without receiving resources
 to set-size-entity
 
-     set size resources / (minimum_resources_to_live + (resources * 0.05))
+     set size resources / (minimum_resources_to_live + (resources * expense_to_live_growth))
 
 end
 
@@ -382,10 +391,10 @@ end
 ; See info tab for full copyright and license.
 @#$#@#$#@
 GRAPHICS-WINDOW
-359
-26
-796
-464
+372
+10
+809
+448
 -1
 -1
 13.0
@@ -409,9 +418,9 @@ ticks
 30.0
 
 BUTTON
-28
+27
 10
-83
+82
 57
 NIL
 setup
@@ -471,10 +480,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-28
-313
-107
-346
+85
+10
+143
+57
 NIL
 go
 T
@@ -488,17 +497,17 @@ NIL
 1
 
 OUTPUT
-807
-59
-1148
-242
+27
+331
+368
+514
 12
 
 BUTTON
-807
-26
-985
-59
+27
+297
+205
+330
 Previous Instruction
 previous-instruction
 NIL
@@ -512,10 +521,10 @@ NIL
 1
 
 BUTTON
-983
-26
-1147
-59
+203
+297
+367
+330
 Next Instruction
 next-instruction
 NIL
@@ -529,10 +538,10 @@ NIL
 1
 
 MONITOR
-807
-242
-893
-287
+15
+607
+101
+652
 Instruction #
 current-instruction-label
 17
@@ -578,7 +587,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1000
-501.0
+401.0
 100
 1
 NIL
@@ -600,10 +609,10 @@ NIL
 HORIZONTAL
 
 PLOT
-808
-292
-1008
-442
+813
+11
+1013
+161
 Fitness of entities histogram
 Entity's fitness
 Entities
@@ -618,10 +627,10 @@ PENS
 "default" 10.0 1 -16777216 true "" "histogram [fitness] of entities"
 
 PLOT
-1009
-292
-1209
-442
+1014
+11
+1214
+161
 Entities' resources histogram
 Resources posessed
 Entities
@@ -636,10 +645,10 @@ PENS
 "default" 1000.0 1 -13840069 true "" "histogram [resources] of entities"
 
 PLOT
-808
-441
-1008
-591
+813
+160
+1013
+310
 Fitness average
 Ticks
 Average Fitness
@@ -654,10 +663,10 @@ PENS
 "Average fitness" 1.0 0 -2674135 true "" "plot (sum [fitness] of entities) / (count entities)"
 
 PLOT
-1008
-442
-1208
-592
+1013
+161
+1213
+311
 Average resources
 Ticks
 Average resources
@@ -672,10 +681,10 @@ PENS
 "Average resources" 1.0 0 -14070903 true "" "plot (sum [resources] of entities) / (count entities)"
 
 MONITOR
-809
-593
-913
-638
+814
+312
+918
+357
 Maximum fitness
 max [fitness] of entities
 17
@@ -683,15 +692,25 @@ max [fitness] of entities
 11
 
 MONITOR
-1045
-614
-1239
-659
+1013
+311
+1207
+356
 Maximum resources accumulated
 max [resources] of entities
-17
+2
 1
 11
+
+CHOOSER
+216
+60
+354
+105
+color_update_rule
+color_update_rule
+"fitness" "survivability"
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
