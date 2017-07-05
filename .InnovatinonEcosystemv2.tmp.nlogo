@@ -91,7 +91,8 @@ to setup
     ;; gives the entities its initial resources
     set resources initial_resources
 
-    ;; *** gets all entities as consumers (temporary - for test purposes) *** has to change as soon as there is a way for the non market entities to find resources on their own
+    ;; *** gets all entities as consumers (temporary - for test purposes)
+    ;;*** has to change as soon as there is a way for the non market entities to find resources on their own
     set consumer? true
 
   ]
@@ -130,13 +131,6 @@ to go
   ;; ask entities to update its own parameters (adapt)
   ;; generate graphics and output updates
   ;; create new entities to replace the dead from crossover of other fit entities and mutations
-
-  ;; lottery example e comando 	rnd:weighted-one-of	rnd:weighted-one-of-list
-;; The idea behind this procedure is a bit tricky to understand.
-;; Basically we take the sum of the sizes of the turtles, and
-;; that's how many "tickets" we have in our lottery.  Then we pick
-;; a random "ticket" (a random number).  Then we step through the
-
   ;; the impact of integrators on relations
 
   ask entities [show choose-partner]
@@ -158,17 +152,21 @@ to select-role
   ;; randomly sets the role (s) an entity assumes in the ecosystem.
   ;; sets the type of knowledge the entity has according to its role
   ;; later it has to be more controllable, assigning a known proportion of each
+
   ;; does the entity assume a generator role in the ecosystem?
   set generator? one-of [true false]
   if generator? [set science? true]
+
   ;; does the entity assume a consumer role in the ecosystem?
   set consumer? one-of [true false]
   if consumer? [set technology? true]
+
   ;; does the entity assume a diffuser role in the ecosystem?
   ;; if the entity accumulates other role, it will retain the knowledge the other role confers, and maybe add another
   set diffuser? one-of [true false]
   if not science? [set science? one-of [true false]]
   if not technology? [set technology? one-of[true false]]
+
   ;; does the entity assume an integrator role in the ecosystem? Integrators don't need to have scientific or technological knowledge
   set integrator? one-of [true false]
 
@@ -195,8 +193,6 @@ to select-role
 
 end
 
-
-
 ;; evaluates the hamming distance between the niche's demand and the consumers tech-knowledge
 to test-fitness
 
@@ -216,7 +212,6 @@ end
 
 ;; procedure to calculate how much must the entity receive from the market, and how much must it pay to live
 ;; also adjusts the size of the entity given the amount of its resources
-
 to calculate-resource
 
     ;; gives an entity a share of the niche's resources proportional to its market share (relative fitness)
@@ -266,15 +261,13 @@ to-report choose-partner
   report partner
 
   ;; *** alternate code for simplicity
+  ;; lottery example e comando 	rnd:weighted-one-of	rnd:weighted-one-of-list
+  ;; The idea behind this procedure is a bit tricky to understand.
+  ;; Basically we take the sum of the sizes of the turtles, and
+  ;; that's how many "tickets" we have in our lottery.  Then we pick
+  ;; a random "ticket" (a random number).  Then we step through the
   ;; shorter code option - see netlogo online manual
   ;;ask rnd:weighted-one-of entities with science? [ resources + fitness ] [set color black]
-  ;;  set label label + 1
-  ;;]
-
-  ;; the candidates provided are the suitable partners for crossover - those with the same kind of knowledge.
-;; the wheight use is the reputation perceived by the entity, which is the fitness, the amount of resources and past history of relations
-
-;;rnd:wheighed-one-of entities with science? rnd:weighted-one-of rnd:weighted-n-of rnd:weighted-n-of-with-repeats
 
 end
 
@@ -324,14 +317,12 @@ to select-fitness-color
 
 end
 
-
 ;; sets the size of the entity proportional to its resources, related to the amount of periods it could live without receiving resources
 to set-size-entity
 
      set size resources / (minimum_resources_to_live + (resources * expense_to_live_growth))
 
 end
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; (modelo DNA Protein Synthesis)
 ;;;;;;;;;;;;;;;;;;;;;; instructions for players ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -509,9 +500,9 @@ NIL
 HORIZONTAL
 
 BUTTON
-85
+87
 10
-143
+145
 57
 NIL
 go
@@ -764,9 +755,9 @@ standard-deviation [resources] of entities
 11
 
 BUTTON
-145
+150
 10
-208
+210
 58
 NIL
 go
@@ -779,6 +770,28 @@ NIL
 NIL
 NIL
 1
+
+MONITOR
+814
+402
+1013
+447
+Minimum fitness
+min [fitness] of entities
+2
+1
+11
+
+MONITOR
+1047
+440
+1204
+485
+NIL
+min [resources] of entities
+2
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
