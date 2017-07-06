@@ -13,10 +13,12 @@ entities-own [
 
   ;; stores the scientific knowledge of the entity. It is a characteristic of Generators and Diffusers
   science-knowledge
+  new_science_knowledge
   ;; lets the model know which entities have active scientific knowledge
   science?
   ;; stores the technological knowledge of the entity. It is a characteristic of Consumers and Diffusers
   tech-knowledge
+  new_tech_knowledge
   ;; lets the  model know which entities have active technological knowledge
   technology?
   ;; stores the Hamming distance of the entity (currently just from one niche)
@@ -196,14 +198,18 @@ end
 ;; evaluates the hamming distance between the niche's demand and the consumers tech-knowledge
 to test-fitness
 
-  let counter 0
   set fitness 0
   set niche-demand-now [niche-demand] of one-of niches
-  foreach tech-knowledge [
-      if item (counter) tech-knowledge = item (counter) niche-demand-now
-      [set fitness fitness + 1]
-       if counter < knowledge [set counter counter + 1]
-      ]
+  set fitness length remove false ( map [ [ a b ] -> a = b ]  tech-knowledge niche-demand-now )
+
+;; alternate code for the hamm
+;;  let counter 0
+;;  foreach tech-knowledge [
+;;      if item (counter) tech-knowledge = item (counter) niche-demand-now
+;;      [set fitness fitness + 1]
+;;       if counter < knowledge [set counter counter + 1]
+;;      ]
+
 
   ;; sets the color of the entities based on its absolute fitness
   select-fitness-color
@@ -270,6 +276,43 @@ to-report choose-partner
   ;;ask rnd:weighted-one-of entities with science? [ resources + fitness ] [set color black]
 
 end
+
+;; crossover procedure from simple genetic algorithm model
+;; This reporter performs one-point crossover on two lists of bits.
+;; That is, it chooses a random location for a splitting point.
+;; Then it reports two new lists, using that splitting point,
+;; by combining the first part of bits1 with the second part of bits2
+;; and the first part of bits2 with the second part of bits1;
+;; it puts together the first part of one list with the second part of
+;; the other.
+;;to-report crossover [bits1 bits2]
+;;  let split-point 1 + random (length bits1 - 1)
+;;  report list (sentence (sublist bits1 0 split-point)
+;;                        (sublist bits2 split-point length bits2))
+;;              (sentence (sublist bits2 0 split-point)
+;;                        (sublist bits1 split-point length bits1))
+;;end
+
+;; mutation procedure from simple genetic algorithm model
+;; This procedure causes random mutations to occur in a solution's bits.
+;; The probability that each bit will be flipped is controlled by the
+;; MUTATION-RATE slider.
+;; to mutate   ;; turtle procedure
+;;   set bits map [ [b] ->
+;;     ifelse-value (random-float 100.0 < mutation-rate)
+;;       [ 1 - b ]
+;;       [ b ]
+;;   ] bits
+;; end
+
+;; The Hamming distance between two bit sequences is the fraction
+;; of positions at which the two sequences have different values.
+;; We use MAP to run down the lists comparing for equality, then
+;; we use LENGTH and REMOVE to count the number of inequalities.
+;; to-report hamming-distance [bits1 bits2]
+;;   report (length remove true (map [ [b1 b2] -> b1 = b2 ] bits1 bits2)) / world-width
+;; end
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; niche's procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -607,7 +650,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1000
-501.0
+301.0
 100
 1
 NIL
@@ -783,10 +826,10 @@ min [fitness] of entities
 11
 
 MONITOR
-1047
-440
-1204
-485
+1014
+401
+1212
+446
 NIL
 min [resources] of entities
 2
