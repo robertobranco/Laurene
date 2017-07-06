@@ -133,7 +133,8 @@ to go
   ask entities [calculate-resource]
 
   ;; stops the simulation if all the entities have died after calculating the resources
-    if not any? entities [stop]
+    if not any? entities [ print "There are no entities left"]
+    if count entities = 1 [stop print "There is only one entity left"]
 
   ;; ask entities to look for partners and exchange knowledge
   ;; ask entities to create new knowledge
@@ -147,7 +148,8 @@ to go
   ;;ask entities [show crossover]
   ask entities [ interact ]
   ask entities [set science-knowledge new-science-knowledge
-                s
+                set tech-knowledge new-tech-knowledge
+  ]
 
 
 
