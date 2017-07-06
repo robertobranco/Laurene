@@ -13,12 +13,12 @@ entities-own [
 
   ;; stores the scientific knowledge of the entity. It is a characteristic of Generators and Diffusers
   science-knowledge
-  new_science_knowledge
+  new-science-knowledge
   ;; lets the model know which entities have active scientific knowledge
   science?
   ;; stores the technological knowledge of the entity. It is a characteristic of Consumers and Diffusers
   tech-knowledge
-  new_tech_knowledge
+  new-tech-knowledge
   ;; lets the  model know which entities have active technological knowledge
   technology?
   ;; stores the Hamming distance of the entity (currently just from one niche)
@@ -124,6 +124,7 @@ to go
   ;; implements the stop trigger
     if ticks >= stop_trigger [ stop ]
 
+
   ;; asks entities to assess their Hamming distance for fitness test (check algoritm for Hamming)
   ask entities [test-fitness]
   set total-fitness sum [fitness] of entities
@@ -140,7 +141,13 @@ to go
   ;; the impact of integrators on relations
 
   ;;ask entities [show choose-partner]
-  ask entities [show crossover]
+  ;;ask entities [show crossover]
+  ask entities [
+    set new-tech-knowledge crossover
+    show new-tech-knowledge
+  ]
+
+  ask entities [set tech-knowledge new-tech-knowledge]
 
   tick
 
@@ -304,7 +311,7 @@ to-report crossover
   let bits2 [tech-knowledge] of partner
 
   let split-point 1 + random (length bits1 - 1)
-  report remove- item one-of [2]
+  report item one-of [0 1]
     list (sentence (sublist bits1 0 split-point)
                    (sublist bits2 split-point length bits2))
          (sentence (sublist bits2 0 split-point)
@@ -555,7 +562,7 @@ SLIDER
 125
 number_of_entities
 number_of_entities
-0
+1
 100
 40.0
 1
@@ -570,7 +577,7 @@ SLIDER
 92
 Knowledge
 Knowledge
-0
+2
 100
 100.0
 2
@@ -585,7 +592,7 @@ SLIDER
 192
 initial_resources
 initial_resources
-0
+1
 1000
 1000.0
 1
