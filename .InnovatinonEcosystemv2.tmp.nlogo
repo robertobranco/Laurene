@@ -132,6 +132,9 @@ to go
   ;; gives the entities resources proportional to their fitness, and collects resources
   ask entities [calculate-resource]
 
+  ;; stops the simulation if all the entities have died after calculating the resources
+    if not any? entities [stop]
+
   ;; ask entities to look for partners and exchange knowledge
   ;; ask entities to create new knowledge
   ;; ask entities to convert knowledge
@@ -142,12 +145,11 @@ to go
 
   ;;ask entities [show choose-partner]
   ;;ask entities [show crossover]
-  ask entities [
-    set new-tech-knowledge crossover
-    show new-tech-knowledge
-  ]
+  ask entities [ interact ]
+  ask entities [set science-knowledge new-science-knowledge
+                s
 
-  ask entities [set tech-knowledge new-tech-knowledge]
+
 
   tick
 
@@ -189,20 +191,26 @@ to select-role
 
   ;; randomly creates the scientific knowledge string
   ;; if the entity does not possess this kind of knowledge, the string is all 0's
+  ;; it also initializes the new-science-knowledge
   ifelse science? [
   set science-knowledge n-values (knowledge / 2)  [random 2]
+  set new-science-knowledge science-knowledge
   show science-knowledge
   ]
   [ set science-knowledge n-values (knowledge / 2) [0]
+    set new-science-knowledge science-knowledge
   ]
 
   ;; randomly creates the technological knowledge string
   ;; if the entity does not possess this kind of knowledge, the string is all 0's
+  ;; it also initializes the new-tech-knowledge
   ifelse technology? [
   set tech-knowledge n-values (knowledge / 2) [random 2]
+  set new-tech-knowledge tech-knowledge
   show tech-knowledge
   ]
   [ set tech-knowledge n-values (knowledge / 2) [0]
+    set new-tech-knowledge tech-knowledge
   ]
 
 end
@@ -288,7 +296,7 @@ to-report choose-partner
 
 end
 
-;; crossover procedure from simple genetic algorithm model
+;; Crossover procedure from simple genetic algorithm model
 ;; This reporter performs one-point crossover on two lists of bits.
 ;; That is, it chooses a random location for a splitting point.
 ;; Then it reports two new lists, using that splitting point,
@@ -300,15 +308,61 @@ end
 ;; one of the answers has to be chosen to represent the new knowledge DNA of
 ;; the receiver entity
 
-
-to-report crossover
-
-  ;; chooses a suitable partner to be the emitter
+to interact
+ ;; chooses a suitable partner to be the emitter
   let partner choose-partner
-  ;; bits1 is the tech-knowledge of the receiver
-  let bits1 [tech-knowledge] of  self
-  ;; bits2 is the tech-knowledge of the emitter
-  let bits2 [tech-knowledge] of partner
+
+  ;; if both the entity (receiver) and the partner (emitter) possess scientific and technological knowledge
+  ifelse science? and technology? and [science?] of partner and [technology?] of partner [
+
+      ;; bits1 is the tech-knowledge of the receiver
+      let bits1 [science-knowledge] of  self
+      ;; bits2 is the tech-knowledge of the emitter
+      let bits2 [science-knowledge] of partner
+      set new-science-knowledge crossover bits1 bits2
+
+      ;; bits1 is the tech-knowledge of the receiver
+      set bits1 [tech-knowledge] of  self
+      ;; bits2 is the tech-knowledge of the emitter
+      set bits2 [tech-knowledge] of partner
+      set new-tech-knowledge crossover bits1 bits2
+
+  ]
+
+  ;; if both the entity (receiver) and the partner (emitter) possess only scientific knowledge
+  [ ifelse science? and [science?] of partner [
+
+      ;; bits1 is the tech-knowledge of the receiver
+      let bits1 [science-knowledge] of  self
+      ;; bits2 is the tech-knowledge of the emitter
+      let bits2 [science-knowledge] of partner
+      set new-science-knowledge crossover bits1 bits2
+    ]
+
+    ;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
+    ;; the code ignores those who don't have any knowledge, but these have been ignored already by the choose-partner procedure
+    [
+      if technology? and [technology?] of partner [
+      ;; bits1 is the tech-knowledge of the receiver
+      let bits1 [tech-knowledge] of  self
+      ;; bits2 is the tech-knowledge of the emitter
+      let bits2 [tech-knowledge] of partner
+      set new-tech-knowledge crossover bits1 bits2
+      ]
+    ]
+  ]
+
+
+
+
+end
+
+;; reports one of two strings of bits resulting from single point crossover
+to-report crossover [bits1 bits2]
+
+  show bits1
+  show bits2
+
 
   let split-point 1 + random (length bits1 - 1)
   report item one-of [0 1]
@@ -900,7 +954,7 @@ INPUTBOX
 353
 70
 stop_trigger
-2000.0
+150.0
 1
 0
 Number
