@@ -120,9 +120,9 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to go
-  ;; implements the stop trigger
-  let trigger ticks
 
+  ;; implements the stop trigger
+    if ticks >= stop_trigger [ stop ]
 
   ;; asks entities to assess their Hamming distance for fitness test (check algoritm for Hamming)
   ask entities [test-fitness]
@@ -473,6 +473,15 @@ to-report instructions
      "but would be in trouble if competition "
      "increased or if its fitness dropped."
     ]
+    [
+     "The stop_trigger tells the model after how"
+     "many iterations it should stop, so it will"
+     "be easier to compare the results of multiple"
+     "runs"
+     "There is a button go for infinite loop until"
+     "the stop_trigger (if defined) is reached"
+     "and a button go for manual single iterations"
+
 
 
   ]
@@ -867,13 +876,13 @@ min [resources] of entities
 INPUTBOX
 213
 10
-370
+353
 70
 stop_trigger
-2000
+2000.0
 1
 0
-String
+Number
 
 @#$#@#$#@
 ## WHAT IS IT?
