@@ -201,7 +201,6 @@ to select-role
   ifelse science? [
   set science-knowledge n-values (knowledge / 2)  [random 2]
   set new-science-knowledge science-knowledge
-  show science-knowledge
   ]
   [ set science-knowledge n-values (knowledge / 2) [0]
     set new-science-knowledge science-knowledge
@@ -213,7 +212,6 @@ to select-role
   ifelse technology? [
   set tech-knowledge n-values (knowledge / 2) [random 2]
   set new-tech-knowledge tech-knowledge
-  show tech-knowledge
   ]
   [ set tech-knowledge n-values (knowledge / 2) [0]
     set new-tech-knowledge tech-knowledge
@@ -302,22 +300,19 @@ to-report choose-partner
 
 end
 
-;; Crossover procedure from simple genetic algorithm model
-;; This reporter performs one-point crossover on two lists of bits.
-;; That is, it chooses a random location for a splitting point.
-;; Then it reports two new lists, using that splitting point,
-;; by combining the first part of bits1 with the second part of bits2
-;; and the first part of bits2 with the second part of bits1;
-;; it puts together the first part of one list with the second part of
-;; the other.
-;; In this model, if we consider unidirectional exchanges of knowledge, only
-;; one of the answers has to be chosen to represent the new knowledge DNA of
-;; the receiver entity
-
+;; This procedure implements the attempt to interact with other entities
+;; it will call procedures so select suitable partners, and from this pool, to select one
+;; will analyze what kind of knowledge can be used for crossover and call the operation
+;; it will then store the result in the new-knowledge variable, which will be used to update the
+;; entity's knowledge at the end of the iteration.
+;; it cannot update it because it would tamper with the fitness evaluation performed by other entities
+;; before the run is done.
 to interact
  ;; chooses a suitable partner to be the emitter
   let partner choose-partner
 
+  ;; *** decide whether an interaction between entities with both kinds of knowledge results in changes in both
+  ;; kinds of knowledge
   ;; if both the entity (receiver) and the partner (emitter) possess scientific and technological knowledge
   ifelse science? and technology? and [science?] of partner and [technology?] of partner [
 
@@ -326,6 +321,10 @@ to interact
       ;; bits2 is the tech-knowledge of the emitter
       let bits2 [science-knowledge] of partner
       set new-science-knowledge crossover bits1 bits2
+      ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
+      let new-science-knowledge1 new-science-knowledge
+      set new-science-knowledge mutate new-science-knowledge
+      if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]
 
       ;; bits1 is the tech-knowledge of the receiver
       set bits1 [tech-knowledge] of  self
@@ -343,6 +342,10 @@ to interact
       ;; bits2 is the tech-knowledge of the emitter
       let bits2 [science-knowledge] of partner
       set new-science-knowledge crossover bits1 bits2
+      ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
+      let new-science-knowledge1 new-science-knowledge
+      set new-science-knowledge mutate new-science-knowledge
+      if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]
     ]
 
     ;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
@@ -358,17 +361,21 @@ to interact
     ]
   ]
 
-
-
-
 end
 
+;; Crossover procedure from simple genetic algorithm model
+;; This reporter performs one-point crossover on two lists of bits.
+;; That is, it chooses a random location for a splitting point.
+;; Then it reports two new lists, using that splitting point,
+;; by combining the first part of bits1 with the second part of bits2
+;; and the first part of bits2 with the second part of bits1;
+;; it puts together the first part of one list with the second part of
+;; the other.
+;; In this model, if we consider unidirectional exchanges of knowledge, only
+;; one of the answers has to be chosen to represent the new knowledge DNA of
+;; the receiver entity
 ;; reports one of two strings of bits resulting from single point crossover
 to-report crossover [bits1 bits2]
-
-  show bits1
-  show bits2
-
 
   let split-point 1 + random (length bits1 - 1)
   report item one-of [0 1]
@@ -383,22 +390,15 @@ end
 ;; This procedure causes random mutations to occur in a solution's bits.
 ;; The probability that each bit will be flipped is controlled by the
 ;; MUTATION-RATE slider.
-;; to mutate   ;; turtle procedure
-;;   set bits map [ [b] ->
-;;     ifelse-value (random-float 100.0 < mutation-rate)
-;;       [ 1 - b ]
-;;       [ b ]
-;;   ] bits
-;; end
+to-report mutate [bits]
 
-;; The Hamming distance between two bit sequences is the fraction
-;; of positions at which the two sequences have different values.
-;; We use MAP to run down the lists comparing for equality, then
-;; we use LENGTH and REMOVE to count the number of inequalities.
-;; to-report hamming-distance [bits1 bits2]
-;;   report (length remove true (map [ [b1 b2] -> b1 = b2 ] bits1 bits2)) / world-width
-;; end
+   report map [ [b] ->
+     ifelse-value (random-float 100.0 < mutation_rate)
+       [ 1 - b ]
+       [ b ]
+   ] bits
 
+end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; niche's procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -960,10 +960,55 @@ INPUTBOX
 353
 70
 stop_trigger
-150.0
+2000.0
 1
 0
 Number
+
+SLIDER
+216
+120
+355
+153
+motivation_to_learn
+motivation_to_learn
+0.00
+1
+0.5
+0.05
+1
+NIL
+HORIZONTAL
+
+SLIDER
+216
+155
+355
+188
+willingness_to_share
+willingness_to_share
+0
+1
+0.5
+0.05
+1
+NIL
+HORIZONTAL
+
+SLIDER
+216
+190
+355
+223
+mutation_rate
+mutation_rate
+0
+0.1
+0.1
+0.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
