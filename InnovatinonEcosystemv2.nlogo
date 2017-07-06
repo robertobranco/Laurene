@@ -106,7 +106,7 @@ to setup
     hide-turtle
     show niche-demand
   ]
-  ;; resets the clock
+  ;; resets the tick clock
   reset-ticks
 
   ;; *** just for testing - sets one superfit entity ***
@@ -120,6 +120,9 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to go
+  ;; implements the stop trigger
+  if ticks = stop_trigger [ stop ]
+
   ;; asks entities to assess their Hamming distance for fitness test (check algoritm for Hamming)
   ask entities [test-fitness]
   set total-fitness sum [fitness] of entities
@@ -272,7 +275,7 @@ to-report choose-partner
   ;; that's how many "tickets" we have in our lottery.  Then we pick
   ;; a random "ticket" (a random number).  Then we step through the
   ;; shorter code option - see netlogo online manual
-  ;;ask rnd:weighted-one-of entities with science? [ resources + fitness ] [set color black]
+  ;;ask rnd:weighted-one-of entities with science? [ resources + fitness ] [set partner self]
 
 end
 
@@ -285,11 +288,13 @@ end
 ;; it puts together the first part of one list with the second part of
 ;; the other.
 ;;to-report crossover [bits1 bits2]
-;;  let split-point 1 + random (length bits1 - 1)
+;;let bits1 tech-knowledge self
+;;let split-point 1 + random (length bits1 - 1)
 ;;  report list (sentence (sublist bits1 0 split-point)
 ;;                        (sublist bits2 split-point length bits2))
 ;;              (sentence (sublist bits2 0 split-point)
 ;;                        (sublist bits1 split-point length bits1))
+
 ;;end
 
 ;; mutation procedure from simple genetic algorithm model
@@ -347,10 +352,14 @@ end
 to select-fitness-color
 
   ifelse color_update_rule = "fitness" [
+    ;; implements the color updating by absolute fitness
     ifelse (fitness / (knowledge / 2 )) > 0.67 [ set color green]
       [ ifelse (fitness / (knowledge / 2 )) > 0.33 [ set color yellow]
       [ set color red] ]
     ]
+    ;; implements the color updating by survivability, the amount of iterations the entity would
+    ;; be able to survive without receiving any resources
+    ;; of course, it can live longer if it keeps gathering resources from the environment
   [ ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 10) [ set color green ]
     [ ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 5) [ set color yellow ]
       [set color red]
@@ -445,6 +454,25 @@ to-report instructions
       " grows by sliding the"
       "expense_to_live_growth slider "
     ]
+    [
+     "The chooser  color_update_rule chooses how"
+     "the colors of the entities will be updated"
+     "Choosing fitness the model will color the "
+     "entities according to their absolute fitness,"
+     " being red up to 33% fitness, yellow up to "
+     "67% fitness and green up to 100% fitness"
+     "Choosing survivability will update the colors"
+     " given the number of iterations the entity "
+     "would be able to live without receiving "
+     "any resources, being red for less than 5"
+     "yellow for less than 10, and green for more"
+     "than 10 iterations."
+     "of course it can live longer if it keeps"
+     "gathering resources from the environment"
+     "but would be in trouble if competition "
+     "increased or if its fitness dropped."
+    ]
+
 
   ]
 end
@@ -649,7 +677,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1000
-301.0
+501.0
 100
 1
 NIL
@@ -765,10 +793,10 @@ max [resources] of entities
 11
 
 CHOOSER
-216
-60
-354
-105
+215
+73
+353
+118
 color_update_rule
 color_update_rule
 "fitness" "survivability"
@@ -834,6 +862,17 @@ min [resources] of entities
 2
 1
 11
+
+INPUTBOX
+213
+10
+370
+70
+stop_trigger
+2000
+1
+0
+String
 
 @#$#@#$#@
 ## WHAT IS IT?
