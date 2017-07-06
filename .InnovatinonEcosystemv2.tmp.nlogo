@@ -139,7 +139,8 @@ to go
   ;; create new entities to replace the dead from crossover of other fit entities and mutations
   ;; the impact of integrators on relations
 
-  ask entities [show choose-partner]
+  ;;ask entities [show choose-partner]
+  ask entities [show crossover]
 
   tick
 
@@ -288,15 +289,28 @@ end
 ;; and the first part of bits2 with the second part of bits1;
 ;; it puts together the first part of one list with the second part of
 ;; the other.
-;;to-report crossover [bits1 bits2]
-;;let bits1 tech-knowledge self
-;;let split-point 1 + random (length bits1 - 1)
-;;  report list (sentence (sublist bits1 0 split-point)
-;;                        (sublist bits2 split-point length bits2))
-;;              (sentence (sublist bits2 0 split-point)
-;;                        (sublist bits1 split-point length bits1))
+;; In this model, if we consider unidirectional exchanges of knowledge, only
+;; one of the answers has to be chosen to represent the new knowledge DNA of
+;; the receiver entity
 
-;;end
+
+to-report crossover
+
+  ;; chooses a suitable partner to be the emitter
+  let partner choose-partner
+  ;; bits1 is the tech-knowledge of the receiver
+  let bits1 [tech-knowledge] of  self
+  ;; bits2 is the tech-knowledge of the emitter
+  let bits2 [tech-knowledge] of partner
+
+  let split-point 1 + random (length bits1 - 1)
+  report remove- item one-of [2]
+    list (sentence (sublist bits1 0 split-point)
+                   (sublist bits2 split-point length bits2))
+         (sentence (sublist bits2 0 split-point)
+                   (sublist bits1 split-point length bits1))
+
+end
 
 ;; mutation procedure from simple genetic algorithm model
 ;; This procedure causes random mutations to occur in a solution's bits.
@@ -481,7 +495,7 @@ to-report instructions
      "There is a button go for infinite loop until"
      "the stop_trigger (if defined) is reached"
      "and a button go for manual single iterations"
-
+    ]
 
 
   ]
