@@ -124,6 +124,8 @@ to go
   ;; implements the stop trigger
     if ticks >= stop_trigger [ stop ]
 
+  ;; clears the links from previous iteration to keep a clean interface
+ ask links [die]
 
   ;; asks entities to assess their Hamming distance for fitness test (check algoritm for Hamming)
   ask entities [test-fitness]
@@ -311,6 +313,10 @@ to interact
  ;; chooses a suitable partner to be the emitter
   let partner choose-partner
 
+  ;;  asks the partner to create a link to the receiver
+  let receiver self
+  ask partner [create-link-to receiver]
+
   ;; *** decide whether an interaction between entities with both kinds of knowledge results in changes in both
   ;; kinds of knowledge
   ;; if both the entity (receiver) and the partner (emitter) possess scientific and technological knowledge
@@ -322,9 +328,9 @@ to interact
       let bits2 [science-knowledge] of partner
       set new-science-knowledge crossover bits1 bits2
       ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
-      show new-science-knowledge
+      let new-science-knowledge1 new-science-knowledge
       set new-science-knowledge mutate new-science-knowledge
-      show new-science-knowledge
+      if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]
 
       ;; bits1 is the tech-knowledge of the receiver
       set bits1 [tech-knowledge] of  self
@@ -345,7 +351,7 @@ to interact
       ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
       let new-science-knowledge1 new-science-knowledge
       set new-science-knowledge mutate new-science-knowledge
-      if length ( remove true (map [ [a b] -> a = b ] new-science-knowledge1  ) > 0 [print "mutou"]
+      if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]
     ]
 
     ;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
@@ -357,6 +363,7 @@ to interact
       ;; bits2 is the tech-knowledge of the emitter
       let bits2 [tech-knowledge] of partner
       set new-tech-knowledge crossover bits1 bits2
+
       ]
     ]
   ]
@@ -719,10 +726,10 @@ NIL
 1
 
 MONITOR
-27
-515
-113
-560
+280
+250
+366
+295
 Instruction #
 current-instruction-label
 17
@@ -753,7 +760,7 @@ niche_resources
 niche_resources
 0
 20000
-10000.0
+13000.0
 1000
 1
 NIL
@@ -960,7 +967,7 @@ INPUTBOX
 353
 70
 stop_trigger
-150.0
+2000.0
 1
 0
 Number
