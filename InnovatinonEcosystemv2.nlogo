@@ -93,8 +93,8 @@ to setup
     ;; gives the entities its initial resources
     set resources initial_resources
 
-    set willingness-to-share willingness_to_share
-    set motivation-to-learn motivation_to_learn
+    set willingness-to-share random-normal willingness_to_share std_dev_willingness
+    set motivation-to-learn random-normal motivation_to_learn std_dev_motivation
 
     ;; *** gets all entities as consumers (temporary - for test purposes)
     ;;*** has to change as soon as there is a way for the non market entities to find resources on their own
@@ -654,8 +654,8 @@ SLIDER
 Knowledge
 Knowledge
 2
-100
-100.0
+200
+200.0
 2
 1
 NIL
@@ -694,17 +694,17 @@ NIL
 1
 
 OUTPUT
-27
-331
-368
-514
+21
+396
+362
+579
 12
 
 BUTTON
-27
-297
-205
-330
+21
+362
+199
+395
 Previous Instruction
 previous-instruction
 NIL
@@ -718,10 +718,10 @@ NIL
 1
 
 BUTTON
-203
-297
-367
-330
+197
+362
+361
+395
 Next Instruction
 next-instruction
 NIL
@@ -735,10 +735,10 @@ NIL
 1
 
 MONITOR
-280
-250
-366
-295
+272
+316
+358
+361
 Instruction #
 current-instruction-label
 17
@@ -821,7 +821,7 @@ false
 false
 "" ""
 PENS
-"default" 10.0 1 -16777216 true "" "histogram (([fitness] of entities) / (Knowledge / 2 )) * 100"
+"default" 10.0 1 -16777216 true "" "histogram [fitness] of entities"
 
 PLOT
 1014
@@ -976,7 +976,7 @@ INPUTBOX
 353
 70
 stop_trigger
-2000.0
+100.0
 1
 0
 Number
@@ -990,7 +990,7 @@ motivation_to_learn
 motivation_to_learn
 0.00
 1
-0.7
+0.5
 0.05
 1
 NIL
@@ -998,14 +998,14 @@ HORIZONTAL
 
 SLIDER
 216
-155
+186
 355
-188
+219
 willingness_to_share
 willingness_to_share
 0
 1
-0.7
+0.5
 0.05
 1
 NIL
@@ -1013,15 +1013,45 @@ HORIZONTAL
 
 SLIDER
 216
-190
+253
 355
-223
+286
 mutation_rate
 mutation_rate
 0
 0.1
 0.1
 0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+216
+153
+355
+186
+std_dev_motivation
+std_dev_motivation
+0
+0.5
+0.2
+0.05
+1
+NIL
+HORIZONTAL
+
+SLIDER
+216
+219
+355
+252
+std_dev_willingness
+std_dev_willingness
+0
+0.5
+0.2
+0.05
 1
 NIL
 HORIZONTAL
