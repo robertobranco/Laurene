@@ -93,6 +93,9 @@ to setup
     ;; gives the entities its initial resources
     set resources initial_resources
 
+    set willingness-to-share willingness_to_share
+    set motivation-to-learn motivation_to_learn
+
     ;; *** gets all entities as consumers (temporary - for test purposes)
     ;;*** has to change as soon as there is a way for the non market entities to find resources on their own
     set consumer? true
@@ -125,7 +128,7 @@ to go
     if ticks >= stop_trigger [ stop ]
 
   ;; clears the links from previous iteration to keep a clean interface
- ask links [die]
+  ask links [die]
 
   ;; asks entities to assess their Hamming distance for fitness test (check algoritm for Hamming)
   ask entities [test-fitness]
@@ -302,68 +305,74 @@ to-report choose-partner
 
 end
 
-;; This procedure implements the attempt to interact with other entities
-;; it will call procedures so select suitable partners, and from this pool, to select one
-;; will analyze what kind of knowledge can be used for crossover and call the operation
-;; it will then store the result in the new-knowledge variable, which will be used to update the
-;; entity's knowledge at the end of the iteration.
-;; it cannot update it because it would tamper with the fitness evaluation performed by other entities
-;; before the run is done.
+ ;; This procedure implements the attempt to interact with other entities
+ ;; it will call procedures so select suitable partners, and from this pool, to select one
+ ;; will analyze what kind of knowledge can be used for crossover and call the operation
+ ;; it will then store the result in the new-knowledge variable, which will be used to update the
+ ;; entity's knowledge at the end of the iteration.
+ ;; it cannot update it because it would tamper with the fitness evaluation performed by other entities
+ ;; before the run is done.
 to interact
- ;; chooses a suitable partner to be the emitter
-  let partner choose-partner
+  ;; given the receiver's motivation to learn
+  ;; chooses a suitable partner to be the emitter
+  if  random-float 1 < motivation-to-learn [
 
-  ;;  asks the partner to create a link to the receiver
-  let receiver self
-  ask partner [create-link-to receiver]
+    let partner choose-partner
 
-  ;; *** decide whether an interaction between entities with both kinds of knowledge results in changes in both
-  ;; kinds of knowledge
-  ;; if both the entity (receiver) and the partner (emitter) possess scientific and technological knowledge
-  ifelse science? and technology? and [science?] of partner and [technology?] of partner [
+    if random-float 1 < [willingness-to-share] of partner [
+      ;;  asks the partner to create a link to the receiver
+      let receiver self
+      ask partner [create-link-to receiver]
 
-      ;; bits1 is the tech-knowledge of the receiver
-      let bits1 [science-knowledge] of  self
-      ;; bits2 is the tech-knowledge of the emitter
-      let bits2 [science-knowledge] of partner
-      set new-science-knowledge crossover bits1 bits2
-      ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
-      let new-science-knowledge1 new-science-knowledge
-      set new-science-knowledge mutate new-science-knowledge
-      if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]
+      ;; *** decide whether an interaction between entities with both kinds of knowledge results in changes in both
+      ;; kinds of knowledge
+      ;; if both the entity (receiver) and the partner (emitter) possess scientific and technological knowledge
+      ifelse science? and technology? and [science?] of partner and [technology?] of partner [
 
-      ;; bits1 is the tech-knowledge of the receiver
-      set bits1 [tech-knowledge] of  self
-      ;; bits2 is the tech-knowledge of the emitter
-      set bits2 [tech-knowledge] of partner
-      set new-tech-knowledge crossover bits1 bits2
+        ;; bits1 is the tech-knowledge of the receiver
+        let bits1 [science-knowledge] of  self
+        ;; bits2 is the tech-knowledge of the emitter
+        let bits2 [science-knowledge] of partner
+        set new-science-knowledge crossover bits1 bits2
+        ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
+        let new-science-knowledge1 new-science-knowledge
+        set new-science-knowledge mutate new-science-knowledge
+        if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]
 
-  ]
+        ;; bits1 is the tech-knowledge of the receiver
+        set bits1 [tech-knowledge] of  self
+        ;; bits2 is the tech-knowledge of the emitter
+        set bits2 [tech-knowledge] of partner
+        set new-tech-knowledge crossover bits1 bits2
 
-  ;; if both the entity (receiver) and the partner (emitter) possess only scientific knowledge
-  [ ifelse science? and [science?] of partner [
+      ]
 
-      ;; bits1 is the tech-knowledge of the receiver
-      let bits1 [science-knowledge] of  self
-      ;; bits2 is the tech-knowledge of the emitter
-      let bits2 [science-knowledge] of partner
-      set new-science-knowledge crossover bits1 bits2
-      ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
-      let new-science-knowledge1 new-science-knowledge
-      set new-science-knowledge mutate new-science-knowledge
-      if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]
-    ]
 
-    ;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
-    ;; the code ignores those who don't have any knowledge, but these have been ignored already by the choose-partner procedure
-    [
-      if technology? and [technology?] of partner [
-      ;; bits1 is the tech-knowledge of the receiver
-      let bits1 [tech-knowledge] of  self
-      ;; bits2 is the tech-knowledge of the emitter
-      let bits2 [tech-knowledge] of partner
-      set new-tech-knowledge crossover bits1 bits2
+      ;; if both the entity (receiver) and the partner (emitter) possess only scientific knowledge
+      [ ifelse science? and [science?] of partner [
 
+        ;; bits1 is the tech-knowledge of the receiver
+        let bits1 [science-knowledge] of  self
+        ;; bits2 is the tech-knowledge of the emitter
+        let bits2 [science-knowledge] of partner
+        set new-science-knowledge crossover bits1 bits2
+        ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
+        let new-science-knowledge1 new-science-knowledge
+        set new-science-knowledge mutate new-science-knowledge
+        if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]
+      ]
+
+      ;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
+      ;; the code ignores those who don't have any knowledge, but these have been ignored already by the choose-partner procedure
+      [
+        if technology? and [technology?] of partner [
+        ;; bits1 is the tech-knowledge of the receiver
+        let bits1 [tech-knowledge] of  self
+        ;; bits2 is the tech-knowledge of the emitter
+        let bits2 [tech-knowledge] of partner
+        set new-tech-knowledge crossover bits1 bits2
+        ]
+      ]
       ]
     ]
   ]
@@ -645,7 +654,7 @@ SLIDER
 Knowledge
 Knowledge
 2
-100
+200
 100.0
 2
 1
@@ -801,7 +810,7 @@ PLOT
 11
 1013
 161
-Fitness of entities histogram
+Fitness of entities histogram (%)
 Entity's fitness
 Entities
 0.0
@@ -837,7 +846,7 @@ PLOT
 160
 1013
 310
-Fitness average
+Fitness average (%)
 Ticks
 Average Fitness
 0.0
@@ -848,7 +857,7 @@ true
 false
 "" ""
 PENS
-"Average fitness" 1.0 0 -2674135 true "" "plot (sum [fitness] of entities) / (count entities)"
+"Average fitness" 1.0 0 -2674135 true "" "plot (((sum [fitness] of entities) / (count entities))/(Knowledge / 2)) * 100 "
 
 PLOT
 1013
@@ -898,7 +907,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability"
-1
+0
 
 MONITOR
 812
@@ -981,7 +990,7 @@ motivation_to_learn
 motivation_to_learn
 0.00
 1
-0.5
+0.7
 0.05
 1
 NIL
@@ -996,7 +1005,7 @@ willingness_to_share
 willingness_to_share
 0
 1
-0.5
+0.7
 0.05
 1
 NIL
