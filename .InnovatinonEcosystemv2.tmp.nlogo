@@ -579,6 +579,23 @@ to-report instructions
      "the stop_trigger (if defined) is reached"
      "and a button go for manual single iterations"
     ]
+    [
+      "The motivation to learn slider will determine"
+      "how likelly it is for the entity to contact"
+      "other entities."
+      "It's standard deviation will create a diverse"
+      "population regarding this motivation"
+      "The willingness to share will determine how"
+      "likelly it is for the entity to reply an"
+      "interaction request by another entity"
+    ]
+    [
+      "The mutation rate alters the rate at which"
+      "entities with scientific knowledge will"
+      "mutate after interacting with other entities"
+      "with scientific knowledge for crossover"
+      "effectively creating new knowledge"
+    ]
 
 
   ]
@@ -694,17 +711,17 @@ NIL
 1
 
 OUTPUT
-21
-396
-362
-579
+469
+546
+810
+729
 12
 
 BUTTON
-21
-362
-199
-395
+469
+512
+647
+545
 Previous Instruction
 previous-instruction
 NIL
@@ -718,10 +735,10 @@ NIL
 1
 
 BUTTON
-197
-362
-361
-395
+645
+512
+809
+545
 Next Instruction
 next-instruction
 NIL
@@ -735,10 +752,10 @@ NIL
 1
 
 MONITOR
-272
-316
-358
-361
+720
+466
+806
+511
 Instruction #
 current-instruction-label
 17
@@ -1005,7 +1022,7 @@ willingness_to_share
 willingness_to_share
 0
 1
-0.5
+0.7
 0.05
 1
 NIL
@@ -1035,7 +1052,7 @@ std_dev_motivation
 std_dev_motivation
 0
 0.5
-0.2
+0.25
 0.05
 1
 NIL
@@ -1085,7 +1102,7 @@ NIL
 0.0
 10.0
 0.0
-10.0
+1.0
 true
 false
 "" ""

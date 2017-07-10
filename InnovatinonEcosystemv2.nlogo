@@ -579,6 +579,23 @@ to-report instructions
      "the stop_trigger (if defined) is reached"
      "and a button go for manual single iterations"
     ]
+    [
+      "The motivation to learn slider will determine"
+      "how likelly it is for the entity to contact"
+      "other entities."
+      "It's standard deviation will create a diverse"
+      "population regarding this motivation"
+      "The willingness to share will determine how"
+      "likelly it is for the entity to reply an"
+      "interaction request by another entity"
+    ]
+    [
+      "The mutation rate alters the rate at which"
+      "entities with scientific knowledge will"
+      "mutate after interacting with other entities"
+      "with scientific knowledge for crossover"
+      "effectively creating new knowledge"
+    ]
 
 
   ]
@@ -694,17 +711,17 @@ NIL
 1
 
 OUTPUT
-21
-396
-362
-579
+30
+516
+371
+699
 12
 
 BUTTON
-21
-362
-199
-395
+30
+482
+208
+515
 Previous Instruction
 previous-instruction
 NIL
@@ -718,10 +735,10 @@ NIL
 1
 
 BUTTON
-197
-362
-361
-395
+206
+482
+370
+515
 Next Instruction
 next-instruction
 NIL
@@ -735,10 +752,10 @@ NIL
 1
 
 MONITOR
-272
-316
-358
-361
+281
+436
+367
+481
 Instruction #
 current-instruction-label
 17
@@ -1005,7 +1022,7 @@ willingness_to_share
 willingness_to_share
 0
 1
-0.5
+0.7
 0.05
 1
 NIL
@@ -1035,7 +1052,7 @@ std_dev_motivation
 std_dev_motivation
 0
 0.5
-0.2
+0.25
 0.05
 1
 NIL
@@ -1055,6 +1072,108 @@ std_dev_willingness
 1
 NIL
 HORIZONTAL
+
+PLOT
+813
+446
+1013
+596
+Average motivation to learn
+NIL
+NIL
+0.0
+10.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot (sum [motivation-to-learn] of entities) / (count entities)"
+
+PLOT
+1013
+447
+1213
+597
+Average willingness to share
+NIL
+NIL
+0.0
+10.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot (sum [willingness-to-share] of entities) / (count entities)"
+
+MONITOR
+813
+596
+1012
+641
+Maximum motivation to learn
+max [motivation-to-learn] of entities
+2
+1
+11
+
+MONITOR
+1012
+597
+1212
+642
+Maximum willingness to share
+max [willingness-to-share] of entities
+2
+1
+11
+
+MONITOR
+813
+640
+1012
+685
+Minimum motivation to learn
+min [motivation-to-learn] of entities
+2
+1
+11
+
+MONITOR
+1012
+640
+1212
+685
+Minimum willingness to share
+min [willingness-to-share] of entities
+2
+1
+11
+
+MONITOR
+814
+686
+1012
+731
+Std deviation motivation to learn
+standard-deviation [motivation-to-learn] of entities
+2
+1
+11
+
+MONITOR
+1014
+686
+1210
+731
+Std deviation willingness to share
+standard-deviation [willingness-to-share] of entities
+2
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
