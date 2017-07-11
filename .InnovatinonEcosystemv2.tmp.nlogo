@@ -168,17 +168,19 @@ to go
   ;; this has to be called before the crossover is called by GO, as it falsifies the crossover? flag
   ;; the development is implemented as an internal crossover, done among the people and structures within the organization
   ;; therefore, it has to falsify the regular crossover? cost, as it may also be performed by the entity during an iteration
+  ;; asks entities with scientific and technological knowledge to develop science into technology
   ask entities with [science? and technology?] [
     if resources > cost_of_development [
      set new-tech-knowledge crossover tech-knowledge science-knowledge
      ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
      set crossover? false
      set development? true
+
     ]
   ]
 
-  ;; ask entities to look for partners and possibly, to crossover
-  ask entities [
+  ;; ask entities with some kind of knowledge  to look for partners and possibly, to crossover
+  ask entities with [science? or technology?] [
     if resources > cost_of_crossover [interact]
   ]
 
@@ -388,7 +390,6 @@ to interact
         ;;let new-science-knowledge1 new-science-knowledge ;;*** used to assess whether the mutation is working
         set new-science-knowledge mutate new-science-knowledge
         ;;if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]  ;;*** used to assess whether mutation is working
-        pdate-link-appearance new-science-knowledge science-knowledge green
 
         ;; here the code fixes the mutation flag, which in this case is not an investment, but an byproduct of crossover of scientific knowledge
         set mutation? false
@@ -413,10 +414,10 @@ to interact
         set new-science-knowledge crossover bits1 bits2
 
         ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
-        ;; let new-science-knowledge1 new-science-knowledge
+        ;; let new-science-knowledge1 new-science-knowledge *** used to assess whether the mutation is working
         set new-science-knowledge mutate new-science-knowledge
         update-link-appearance new-science-knowledge science-knowledge green
-        ;; if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]
+        ;; if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"] *** used to assess whether the mutation is working
 
         ;; here the code fixes the mutation flag, which in this case is not an investment, but an byproduct of crossover of scientific knowledge
         set mutation? false
@@ -454,8 +455,11 @@ end
 ;; one of the answers has to be chosen to represent the new knowledge DNA of
 ;; the receiver entity
 ;; reports one of two strings of bits resulting from single point crossover
+
 to-report crossover [bits1 bits2]
 
+  ;; flags the model that the entity attempted to crossover (learn from others)
+  set crossover? true
   let split-point 1 + random (length bits1 - 1)
   report item one-of [0 1]
     list (sentence (sublist bits1 0 split-point)
@@ -463,30 +467,26 @@ to-report crossover [bits1 bits2]
          (sentence (sublist bits2 0 split-point)
                    (sublist bits1 split-point length bits1))
 
-  ;; flags the model that the entity attempted to crossover (learn from others)
-  set crossover? true
-
 end
 
 ;; mutation procedure from simple genetic algorithm model
 ;; This procedure causes random mutations to occur in a solution's bits.
 ;; The probability that each bit will be flipped is controlled by the
-;; MUTATION-RATE slider.
+;; MUTATION_RATE slider.
 ;; The cost to mutate is not charged here because mutation may be a by product of learning through crossover
 ;; or the result of efforts in research. The costs of the first are included in the crossover costs
 ;; the costs of the second are charged when the mutate procedure is called in the go function
 
 to-report mutate [bits]
 
+   ;; flags the model that the entity attempted to mutate (create new knowledge)
+   set mutation? true
+   print "funcao mutate acionada"
    report map [ [b] ->
      ifelse-value (random-float 100.0 < mutation_rate)
        [ 1 - b ]
        [ b ]
    ] bits
-
-   ;; flags the model that the entity attempted to mutate (create new knowledge)
-   set mutation? true
-   print "mutou"
 
 end
 
@@ -745,7 +745,7 @@ number_of_entities
 number_of_entities
 1
 100
-39.0
+40.0
 1
 1
 NIL
@@ -1125,7 +1125,7 @@ mutation_rate
 mutation_rate
 0
 0.1
-0.1
+0.0
 0.01
 1
 NIL
@@ -1272,7 +1272,7 @@ cost_of_crossover
 cost_of_crossover
 0
 1000
-100.0
+0.0
 100
 1
 NIL
@@ -1287,7 +1287,7 @@ cost_of_mutation
 cost_of_mutation
 0
 1000
-50.0
+0.0
 100
 1
 NIL
@@ -1302,7 +1302,7 @@ cost_of_development
 cost_of_development
 0
 1000
-50.0
+0.0
 100
 1
 NIL
