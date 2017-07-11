@@ -110,7 +110,7 @@ to setup
     set development? false
 
     ;; *** temporário durante o desenvolvimento do modelo até todos os roles terem suas fontes de recurso
-    set consumer? true
+    ;;set consumer? true
 
   ]
 
@@ -171,11 +171,10 @@ to go
   ;; asks entities with scientific and technological knowledge to develop science into technology
   ask entities with [science? and technology?] [
     if resources > cost_of_development [
-     set new-tech-knowledge crossover tech-knowledge science-knowledge
-     ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
-     set crossover? false
-     set development? true
-
+      set new-tech-knowledge crossover tech-knowledge science-knowledge
+      ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
+      set crossover? false
+      set development? true
     ]
   ]
 
@@ -214,26 +213,34 @@ to select-role
   ;; sets the type of knowledge the entity has according to its role
   ;; later it has to be more controllable, assigning a known proportion of each
 
-  ;; does the entity assume a generator role in the ecosystem?
+  ;; does the entity assume a GENERATOR role in the ecosystem?
   set generator? one-of [true false]
   if generator? [set science? true]
 
-  ;; does the entity assume a consumer role in the ecosystem?
+  ;; does the entity assume a CONSUMER role in the ecosystem?
   set consumer? one-of [true false]
   if consumer? [set technology? true]
 
-  ;; does the entity assume a diffuser role in the ecosystem?
+  ;; does the entity assume a di role in the ecosystem?
   ;; if the entity accumulates other role, it will retain the knowledge the other role confers, and maybe add another
   set diffuser? one-of [true false]
-  if not science? [set science? one-of [true false]]
-  if not technology? [set technology? one-of[true false]]
-
+  if diffuser? [
+    if not science? [set science? one-of [true false]]
+    if not technology? [set technology? one-of[true false]]
+  ]
   ;; does the entity assume an integrator role in the ecosystem? Integrators don't need to have scientific or technological knowledge
   set integrator? one-of [true false]
 
   ;; selects the shape of the entity given its role in the ecosystem
   select-shape
   create-knowledge-DNA
+
+  ;; The code above randomly assigns roles, and they may be cumulative.
+  ;; If any entity remains without a role in the ecosystem, it will be turned into a CONSUMER
+  if not generator? and not consumer? and not diffuser?  and not integrator? [
+    set consumer? true
+    set technology? true]
+
 
 end
 
@@ -1012,7 +1019,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability"
-0
+1
 
 MONITOR
 812
@@ -1125,7 +1132,7 @@ mutation_rate
 mutation_rate
 0
 0.1
-0.0
+0.1
 0.01
 1
 NIL

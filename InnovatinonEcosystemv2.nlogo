@@ -110,7 +110,7 @@ to setup
     set development? false
 
     ;; *** temporário durante o desenvolvimento do modelo até todos os roles terem suas fontes de recurso
-    set consumer? true
+    ;;set consumer? true
 
   ]
 
