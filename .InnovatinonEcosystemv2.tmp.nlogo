@@ -41,6 +41,13 @@ entities-own [
   motivation-to-learn
   ;; entity's creation performance
   creation-performance
+  ;; entity's development performance
+  ;; lets the model know if the agent performed crossover
+  crossover?
+  ;; lets the model know if the agent performed mutation
+  mutation?
+  ;; lets the model know if the agent performed development of science knowledge into technological knowledge
+  development?
 
 ]
 
@@ -98,6 +105,11 @@ to setup
 
     ;; *** gets all entities as consumers (temporary - for test purposes)
     ;;*** has to change as soon as there is a way for the non market entities to find resources on their own
+    set crossover? false
+    set mutation? false
+    set development? false
+
+    ;; *** temporário durante o desenvolvimento do modelo até todos os roles terem suas fontes de recurso
     set consumer? true
 
   ]
@@ -145,22 +157,42 @@ to go
     stop
     ]
 
-  ;; ask entities to look for partners and exchange knowledge
-  ;; ask entities to create new knowledge
   ;; ask entities to convert knowledge
   ;; ask entities to update its own parameters (adapt)
-  ;; generate graphics and output updates
   ;; create new entities to replace the dead from crossover of other fit entities and mutations
   ;; the impact of integrators on relations
 
   ;;ask entities [show choose-partner]
   ;;ask entities [show crossover]
-  ask entities [ interact ]
-  ask entities [set science-knowledge new-science-knowledge
-                set tech-knowledge new-tech-knowledge
+
+  ;; this has to be called before the crossover is called by GO, as it falsifies the crossover? flag
+  ;; the development is implemented as an internal crossover, done among the people and structures within the organization
+  ;; therefore, it has to falsify the regular crossover? cost, as it may also be performed by the entity during an iteration
+  ask entities with [science? and technology?] [
+    if resources > cost_of_development [
+     set new-tech-knowledge crossover tech-knowledge science-knowledge
+     ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
+     set crossover? false
+     set development? true
+    ]
   ]
 
+  ;; ask entities to look for partners and possibly, to crossover
+  ask entities [
+    if resources > cost_of_crossover [interact]
+  ]
 
+  ;; the crossover has to be called in the go function before the mutation, because it falsifies the mutation? flag
+  ;; *** inserir aqui a probabilidade de mutar
+  ask entities with [science?] [
+    if resources > cost_of_mutation [ set new-science-knowledge mutate new-science-knowledge ]
+  ]
+
+  ;; ask entities to update their knowledge given the actions performed on the iteration
+  ask entities [
+    set science-knowledge new-science-knowledge
+    set tech-knowledge new-tech-knowledge
+  ]
 
   tick
 
@@ -199,7 +231,11 @@ to select-role
 
   ;; selects the shape of the entity given its role in the ecosystem
   select-shape
+  create-knowledge-DNA
 
+end
+
+to create-knowledge-DNA
   ;; randomly creates the scientific knowledge string
   ;; if the entity does not possess this kind of knowledge, the string is all 0's
   ;; it also initializes the new-science-knowledge
@@ -221,7 +257,6 @@ to select-role
   [ set tech-knowledge n-values (knowledge / 2) [0]
     set new-tech-knowledge tech-knowledge
   ]
-
 end
 
 ;; evaluates the hamming distance between the niche's demand and the consumers tech-knowledge
@@ -255,6 +290,18 @@ to calculate-resource
     ;; the amount necessary grows with the amount of resources the entity amasses (which is the growth of the entity)
     ;; the rate of the expense growth is given by the expense to live growth slider
     set resources resources - (minimum_resources_to_live + (resources * expense_to_live_growth))
+    if crossover? [
+      set resources resources - cost_of_crossover
+      set crossover? false
+    ]
+    if mutation? [
+      set resources resources - cost_of_mutation
+      set mutation? false
+    ]
+    if development? [
+      set resources resources - cost_of_development
+      set development? false
+    ]
 
     ;; sets the size of the entity given its accumulated amount of resources
     set-size-entity
@@ -313,14 +360,16 @@ end
  ;; it cannot update it because it would tamper with the fitness evaluation performed by other entities
  ;; before the run is done.
 to interact
+
   ;; given the receiver's motivation to learn
   ;; chooses a suitable partner to be the emitter
   if  random-float 1 < motivation-to-learn [
+     let partner choose-partner
 
-    let partner choose-partner
+     ;; given the partners willingness to share, begin crossover
+     if random-float 1 < [willingness-to-share] of partner [
 
-    if random-float 1 < [willingness-to-share] of partner [
-      ;;  asks the partner to create a link to the receiver
+      ;;  asks the partner to create a directional link to the receiver
       let receiver self
       ask partner [create-link-to receiver]
 
@@ -329,21 +378,27 @@ to interact
       ;; if both the entity (receiver) and the partner (emitter) possess scientific and technological knowledge
       ifelse science? and technology? and [science?] of partner and [technology?] of partner [
 
-        ;; bits1 is the tech-knowledge of the receiver
+        ;; bits1 is the science-knowledge of the receiver
         let bits1 [science-knowledge] of  self
-        ;; bits2 is the tech-knowledge of the emitter
+        ;; bits2 is the science-knowledge of the emitter
         let bits2 [science-knowledge] of partner
         set new-science-knowledge crossover bits1 bits2
+
         ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
-        let new-science-knowledge1 new-science-knowledge
+        ;;let new-science-knowledge1 new-science-knowledge ;;*** used to assess whether the mutation is working
         set new-science-knowledge mutate new-science-knowledge
-        if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]
+        ;;if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]  ;;*** used to assess whether mutation is working
+        update-link-appearance new-science-knowledge science-knowledge green
+
+        ;; here the code fixes the mutation flag, which in this case is not an investment, but an byproduct of crossover of scientific knowledge
+        set mutation? false
 
         ;; bits1 is the tech-knowledge of the receiver
         set bits1 [tech-knowledge] of  self
         ;; bits2 is the tech-knowledge of the emitter
         set bits2 [tech-knowledge] of partner
         set new-tech-knowledge crossover bits1 bits2
+        update-link-appearance new-tech-knowledge tech-knowledge yellow
 
       ]
 
@@ -351,15 +406,22 @@ to interact
       ;; if both the entity (receiver) and the partner (emitter) possess only scientific knowledge
       [ ifelse science? and [science?] of partner [
 
-        ;; bits1 is the tech-knowledge of the receiver
+        ;; bits1 is the science-knowledge of the receiver
         let bits1 [science-knowledge] of  self
-        ;; bits2 is the tech-knowledge of the emitter
+        ;; bits2 is the science-knowledge of the emitter
         let bits2 [science-knowledge] of partner
         set new-science-knowledge crossover bits1 bits2
+
         ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
-        let new-science-knowledge1 new-science-knowledge
+        ;; let new-science-knowledge1 new-science-knowledge
         set new-science-knowledge mutate new-science-knowledge
-        if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]
+        update-link-appearance new-science-knowledge science-knowledge green
+        ;; if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]
+
+        ;; here the code fixes the mutation flag, which in this case is not an investment, but an byproduct of crossover of scientific knowledge
+        set mutation? false
+
+
       ]
 
       ;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
@@ -371,12 +433,13 @@ to interact
         ;; bits2 is the tech-knowledge of the emitter
         let bits2 [tech-knowledge] of partner
         set new-tech-knowledge crossover bits1 bits2
+        update-link-appearance new-tech-knowledge tech-knowledge blue
+
         ]
       ]
       ]
     ]
   ]
-
 end
 
 ;; Crossover procedure from simple genetic algorithm model
@@ -399,6 +462,10 @@ to-report crossover [bits1 bits2]
                    (sublist bits2 split-point length bits2))
          (sentence (sublist bits2 0 split-point)
                    (sublist bits1 split-point length bits1))
+  set resources resources - cost_of_crossove
+
+  ;; flags the model that the entity attempted to crossover (learn from others)
+  set crossover? true
 
 end
 
@@ -406,6 +473,10 @@ end
 ;; This procedure causes random mutations to occur in a solution's bits.
 ;; The probability that each bit will be flipped is controlled by the
 ;; MUTATION-RATE slider.
+;; The cost to mutate is not charged here because mutation may be a by product of learning through crossover
+;; or the result of efforts in research. The costs of the first are included in the crossover costs
+;; the costs of the second are charged when the mutate procedure is called in the go function
+
 to-report mutate [bits]
 
    report map [ [b] ->
@@ -413,6 +484,10 @@ to-report mutate [bits]
        [ 1 - b ]
        [ b ]
    ] bits
+
+   ;; flags the model that the entity attempted to mutate (create new knowledge)
+   set mutation? true
+   print "mutou"
 
 end
 
@@ -472,6 +547,20 @@ to set-size-entity
      set size resources / (minimum_resources_to_live + (resources * expense_to_live_growth))
 
 end
+
+to update-link-appearance [bits1 bits2 color-link]
+  ;; Evaluates whether the crossover and the mutation actually changed bits
+  ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the bits changed. If not, it
+  ;; colors the link red
+
+  ;let counter-change 0
+  ;foreach ( map [ [a b] -> a = b ] new-tech-knowledge tech-knowledge ) [[a] -> if not a [ set counter-change counter-change + 1]]
+
+  let counter-change length remove true ( map [ [ a b ] -> a = b ]  bits1 bits2 )
+  ifelse counter-change > 0 [ ask my-links [set color color-link set thickness counter-change / 100]] [ask my-links [set color red]]
+
+end
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; (modelo DNA Protein Synthesis)
 ;;;;;;;;;;;;;;;;;;;;;; instructions for players ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -632,9 +721,9 @@ ticks
 30.0
 
 BUTTON
-27
+14
 10
-82
+69
 57
 NIL
 setup
@@ -649,40 +738,40 @@ NIL
 1
 
 SLIDER
-27
+14
 92
-211
+189
 125
 number_of_entities
 number_of_entities
 1
 100
-40.0
+39.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-27
+14
 59
-211
+189
 92
 Knowledge
 Knowledge
 2
 200
-200.0
+194.0
 2
 1
 NIL
 HORIZONTAL
 
 SLIDER
-27
-159
-211
-192
+14
+158
+189
+191
 initial_resources
 initial_resources
 1
@@ -694,9 +783,9 @@ NIL
 HORIZONTAL
 
 BUTTON
-87
+72
 10
-145
+130
 57
 NIL
 go
@@ -711,17 +800,17 @@ NIL
 1
 
 OUTPUT
-469
-546
-810
-729
+25
+511
+368
+694
 12
 
 BUTTON
-469
-512
-647
-545
+24
+477
+202
+510
 Previous Instruction
 previous-instruction
 NIL
@@ -735,10 +824,10 @@ NIL
 1
 
 BUTTON
-645
-512
-809
-545
+203
+477
+367
+510
 Next Instruction
 next-instruction
 NIL
@@ -752,10 +841,10 @@ NIL
 1
 
 MONITOR
-720
-466
-806
-511
+281
+431
+367
+476
 Instruction #
 current-instruction-label
 17
@@ -763,10 +852,10 @@ current-instruction-label
 11
 
 SLIDER
-27
-126
-211
-159
+14
+125
+189
+158
 number_of_niches
 number_of_niches
 1
@@ -778,25 +867,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-27
-192
-211
-225
+14
+191
+189
+224
 niche_resources
 niche_resources
 0
 20000
-13000.0
+10000.0
 1000
 1
 NIL
 HORIZONTAL
 
 SLIDER
-27
-225
-211
-258
+14
+224
+189
+257
 minimum_resources_to_live
 minimum_resources_to_live
 1
@@ -808,15 +897,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-27
-258
-211
-291
+13
+257
+189
+290
 expense_to_live_growth
 expense_to_live_growth
 0
 1
-0.05
+0.1
 0.05
 1
 NIL
@@ -917,10 +1006,10 @@ max [resources] of entities
 11
 
 CHOOSER
-215
-73
-353
-118
+189
+80
+365
+125
 color_update_rule
 color_update_rule
 "fitness" "survivability"
@@ -949,9 +1038,9 @@ standard-deviation [resources] of entities
 11
 
 BUTTON
-150
+134
 10
-210
+189
 58
 NIL
 go
@@ -988,21 +1077,21 @@ min [resources] of entities
 11
 
 INPUTBOX
-213
+189
 10
-353
-70
+281
+80
 stop_trigger
-100.0
+2000.0
 1
 0
 Number
 
 SLIDER
-216
-120
-355
-153
+189
+125
+365
+158
 motivation_to_learn
 motivation_to_learn
 0.00
@@ -1014,25 +1103,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-216
-186
-355
-219
+189
+191
+365
+224
 willingness_to_share
 willingness_to_share
 0
 1
-0.7
+0.45
 0.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-216
-253
-355
-286
+189
+257
+365
+290
 mutation_rate
 mutation_rate
 0
@@ -1044,10 +1133,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-216
-153
-355
-186
+189
+158
+365
+191
 std_dev_motivation
 std_dev_motivation
 0
@@ -1059,10 +1148,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-216
-219
-355
-252
+189
+224
+365
+257
 std_dev_willingness
 std_dev_willingness
 0
@@ -1174,6 +1263,66 @@ standard-deviation [willingness-to-share] of entities
 2
 1
 11
+
+SLIDER
+13
+290
+185
+323
+cost_of_crossover
+cost_of_crossover
+0
+1000
+100.0
+100
+1
+NIL
+HORIZONTAL
+
+SLIDER
+13
+323
+185
+356
+cost_of_mutation
+cost_of_mutation
+0
+1000
+50.0
+100
+1
+NIL
+HORIZONTAL
+
+SLIDER
+189
+289
+366
+322
+cost_of_development
+cost_of_development
+0
+1000
+50.0
+100
+1
+NIL
+HORIZONTAL
+
+SLIDER
+189
+322
+366
+355
+development_performance
+development_performance
+0
+1
+1.0
+0.05
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
