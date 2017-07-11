@@ -388,7 +388,6 @@ to interact
         ;;let new-science-knowledge1 new-science-knowledge ;;*** used to assess whether the mutation is working
         set new-science-knowledge mutate new-science-knowledge
         ;;if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]  ;;*** used to assess whether mutation is working
-        update-link-appearance new-science-knowledge science-knowledge green
 
         ;; here the code fixes the mutation flag, which in this case is not an investment, but an byproduct of crossover of scientific knowledge
         set mutation? false
