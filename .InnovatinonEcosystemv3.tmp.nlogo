@@ -452,7 +452,7 @@ to interact
      let partner choose-partner
 
      ;; given the partners willingness to share, begin crossover
-     if random-float 1 < [willingness-to-share] of partner [
+     if partner != nobody and (random-float 1 < [willingness-to-share] of partner)and  [
 
       ;;  asks the partner to create a directional link to the receiver
       let receiver self
@@ -568,8 +568,8 @@ end
 
 to mutate-market
   ask niches [
-    set niche-demand n-values (Knowledge / 2) [random 2
-]
+    set niche-demand n-values (Knowledge / 2) [random 2]
+    show niche-demand
   ]
 end
 
