@@ -164,12 +164,12 @@ to go
     if resources > cost_of_development [
       set new-tech-knowledge crossover tech-knowledge science-knowledge
       ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
-      set crossover? false
       set development? true
     ]
   ]
 
   ;; ask entities with some kind of knowledge  to look for partners and possibly, to crossover
+  ;; the crossover? flag is set by the interact procedure after both entities have agreed to interact
   ask entities with [science? or technology?] [
     if resources > cost_of_crossover [interact]
   ]
@@ -177,7 +177,10 @@ to go
   ;; the crossover has to be called in the go function before the mutation, because it falsifies the mutation? flag
   ;; *** inserir aqui a probabilidade de mutar
   ask entities with [science?] [
-    if resources > cost_of_mutation [ set new-science-knowledge mutate new-science-knowledge ]
+    if resources > cost_of_mutation [
+      set mutation? true
+      set new-science-knowledge mutate new-science-knowledge
+    ]
   ]
 
   ;; ask entities to update their knowledge given the actions performed on the iteration
@@ -220,7 +223,7 @@ to create-super-competitor
     set consumer? true
     set diffuser? false
     set integrator? false
-    set generator?
+    set generator? false
 
     ;; sets the kind of knowledge the superCONSUMER possesses
     set science? false
@@ -337,8 +340,10 @@ end
 to calculate-resource
 
     ;; gives CONSUMER entities a share of the niche's resources proportional to its market share (relative fitness)
+    ;; the relative fitness is calculated of the fitness of entities who compete for market share (CONSUMERS of kn
     if consumer? [
-      set resources resources + (niche_resources * (fitness / total-fitness))
+      let market-fitness
+      set resources resources + (niche_resources * (fitness / (sum [fitness] of entities with [consumer?])))
     ]
 
     ;; gives GENERATOR a fixed budget every iteration
@@ -441,7 +446,7 @@ to interact
 
   ;; given the receiver's motivation to learn
   ;; chooses a suitable partner to be the emitter
-  if  random-float 1 < motivation-to-learn [
+  if random-float 1 < motivation-to-learn [
      let partner choose-partner
 
      ;; given the partners willingness to share, begin crossover
@@ -450,6 +455,7 @@ to interact
       ;;  asks the partner to create a directional link to the receiver
       let receiver self
       ask partner [create-link-to receiver]
+      set crossover? true
 
       ;; *** decide whether an interaction between entities with both kinds of knowledge results in changes in both
       ;; kinds of knowledge
@@ -467,9 +473,6 @@ to interact
         set new-science-knowledge mutate new-science-knowledge
         ;;if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]  ;;*** used to assess whether mutation is working
 
-        ;; here the code fixes the mutation flag, which in this case is not an investment, but an byproduct of crossover of scientific knowledge
-        set mutation? false
-
         ;; bits1 is the tech-knowledge of the receiver
         set bits1 [tech-knowledge] of  self
         ;; bits2 is the tech-knowledge of the emitter
@@ -483,37 +486,31 @@ to interact
       ;; if both the entity (receiver) and the partner (emitter) possess only scientific knowledge
       [ ifelse science? and [science?] of partner [
 
-        ;; bits1 is the science-knowledge of the receiver
-        let bits1 [science-knowledge] of  self
-        ;; bits2 is the science-knowledge of the emitter
-        let bits2 [science-knowledge] of partner
-        set new-science-knowledge crossover bits1 bits2
+          ;; bits1 is the science-knowledge of the receiver
+          let bits1 [science-knowledge] of  self
+          ;; bits2 is the science-knowledge of the emitter
+          let bits2 [science-knowledge] of partner
+          set new-science-knowledge crossover bits1 bits2
 
-        ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
-        ;; let new-science-knowledge1 new-science-knowledge *** used to assess whether the mutation is working
-        set new-science-knowledge mutate new-science-knowledge
-        update-link-appearance new-science-knowledge science-knowledge green
-        ;; if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"] *** used to assess whether the mutation is working
-
-        ;; here the code fixes the mutation flag, which in this case is not an investment, but an byproduct of crossover of scientific knowledge
-        set mutation? false
-
-
-      ]
-
-      ;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
-      ;; the code ignores those who don't have any knowledge, but these have been ignored already by the choose-partner procedure
-      [
-        if technology? and [technology?] of partner [
-        ;; bits1 is the tech-knowledge of the receiver
-        let bits1 [tech-knowledge] of  self
-        ;; bits2 is the tech-knowledge of the emitter
-        let bits2 [tech-knowledge] of partner
-        set new-tech-knowledge crossover bits1 bits2
-        update-link-appearance new-tech-knowledge tech-knowledge blue
-
+          ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
+          ;; let new-science-knowledge1 new-science-knowledge *** used to assess whether the mutation is working
+          set new-science-knowledge mutate new-science-knowledge
+          update-link-appearance new-science-knowledge science-knowledge green
+          ;; if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"] *** used to assess whether the mutation is working
         ]
-      ]
+
+        ;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
+        ;; the code ignores those who don't have any knowledge, but these have been ignored already by the choose-partner procedure
+        [
+          if technology? and [technology?] of partner [
+            ;; bits1 is the tech-knowledge of the receiver
+            let bits1 [tech-knowledge] of  self
+            ;; bits2 is the tech-knowledge of the emitter
+            let bits2 [tech-knowledge] of partner
+            set new-tech-knowledge crossover bits1 bits2
+            update-link-appearance new-tech-knowledge tech-knowledge blue
+          ]
+        ]
       ]
     ]
   ]
@@ -534,8 +531,6 @@ end
 
 to-report crossover [bits1 bits2]
 
-  ;; flags the model that the entity attempted to crossover (learn from others)
-  set crossover? true
   let split-point 1 + random (length bits1 - 1)
   report item one-of [0 1]
     list (sentence (sublist bits1 0 split-point)
@@ -555,13 +550,13 @@ end
 
 to-report mutate [bits]
 
-   ;; flags the model that the entity attempted to mutate (create new knowledge)
-   set mutation? true
-   print "funcao mutate acionada"
    report map [ [b] ->
-     ifelse-value (random-float 100.0 < mutation_rate)
-       [ 1 - b ]
-       [ b ]
+     ifelse-value (random-float 100.0 < mutation_rate) [
+       1 - b
+     ]
+     [
+       b
+     ]
    ] bits
 
 end
@@ -618,7 +613,7 @@ to select-fitness-color
   ]
 
   if color_update_rule = "market survivability" [
-    ife consumer? [
+    ifelse consumer? [
       ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 10) [
         set color green
       ]
@@ -630,6 +625,9 @@ to select-fitness-color
           set color red
         ]
       ]
+    ]
+    [
+      set color gray
     ]
   ]
 
@@ -1092,7 +1090,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-1
+2
 
 MONITOR
 812
