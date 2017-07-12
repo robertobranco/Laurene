@@ -566,6 +566,13 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;; niche's procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+to mutate-market
+  ask niches [
+    set niche-demand n-values (Knowledge / 2) [random 2
+]
+  ]
+end
+
 ;; mutation
 
 ;; niche swap
@@ -877,7 +884,7 @@ initial_resources
 initial_resources
 1
 1000
-1000.0
+501.0
 1
 1
 NIL
@@ -1212,7 +1219,7 @@ mutation_rate
 mutation_rate
 0
 0.1
-0.01
+0.1
 0.01
 1
 NIL
@@ -1441,10 +1448,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-14
-58
-189
-91
+192
+323
+367
+356
 NIL
 create-super-competitor
 NIL
@@ -1473,15 +1480,32 @@ NIL
 HORIZONTAL
 
 SWITCH
-190
-59
-280
-92
+193
+356
+367
+389
 super_share?
 super_share?
-0
+1
 1
 -1000
+
+BUTTON
+195
+398
+366
+431
+NIL
+mutate-market
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
