@@ -222,21 +222,21 @@ to create-super-competitor
     set integrator? false
     set generator? false
 
-    ;; sets the kind of knowledge the supercompetitor possesses
-    ;; it has a perfect match to the market
+    ;; sets the kind of knowledge the superCONSUMER possesses
     set science? false
     set technology? true
-    set tech-knowledge [niche-demand] of one-of niches
-    set science-knowledge tech-knowledge
-    set new-science-knowledge science-knowledge
-    set new-tech-knowledge tech-knowledge
 
+    select-shape
+    create-knowledge-DNA
+
+    ;; it has a perfect match to the market
+    set tech-knowledge [niche-demand] of one-of niches
+    set new-tech-knowledge tech-knowledge
 
 
     ;; assigns the supercompetitor the best fitness score possible from the start
     set fitness Knowledge / 2
 
-    select-shape
 
   ]
 
@@ -307,6 +307,7 @@ to create-knowledge-DNA
   [ set tech-knowledge n-values (knowledge / 2) [0]
     set new-tech-knowledge tech-knowledge
   ]
+
 end
 
 ;; evaluates the hamming distance between the niche's demand and the consumers tech-knowledge
@@ -331,6 +332,8 @@ end
 
 ;; procedure to calculate how much must the entity receive from the market, and how much must it pay to live
 ;; also adjusts the size of the entity given the amount of its resources
+;; *** create options to award resources to each role
+
 to calculate-resource
 
     ;; gives CONSUMER entities a share of the niche's resources proportional to its market share (relative fitness)
@@ -355,19 +358,24 @@ to calculate-resource
      set resources resources + initial_resources
     ]
 
-
     ;; takes resources from the entity proportionally to its total amount of resources, respecting the minimum amount to stay alive
     ;; the amount necessary grows with the amount of resources the entity amasses (which is the growth of the entity)
     ;; the rate of the expense growth is given by the expense to live growth slider
+
     set resources resources - (minimum_resources_to_live + (resources * expense_to_live_growth))
+    ;; if the entity attempted to crossover, collect its cost
     if crossover? [
       set resources resources - cost_of_crossover
       set crossover? false
     ]
+
+    ;; if the entity attempted to mutate, collect its cost
     if mutation? [
       set resources resources - cost_of_mutation
       set mutation? false
     ]
+
+    ;; if the entity attempted to convert scientific knowledge into technological knowledge, collect its cost
     if development? [
       set resources resources - cost_of_development
       set development? false
@@ -591,7 +599,7 @@ end
 ;; also assigns a color to the entity given its absolute fitness (an option would be to code this to evaluate if it is earning enough to live or not)
 to select-fitness-color
 
-  ifelse color_update_rule = "fitness" [
+  if color_update_rule = "fitness" [
     ;; implements the color updating by absolute fitness
     ifelse (fitness / (knowledge / 2 )) > 0.67 [ set color green]
       [ ifelse (fitness / (knowledge / 2 )) > 0.33 [ set color yellow]
@@ -600,9 +608,31 @@ to select-fitness-color
     ;; implements the color updating by survivability, the amount of iterations the entity would
     ;; be able to survive without receiving any resources
     ;; of course, it can live longer if it keeps gathering resources from the environment
-  [ ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 10) [ set color green ]
-    [ ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 5) [ set color yellow ]
-      [set color red]
+  if color_update_rule = "survivability"[
+    ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 10) [
+      set color green
+    ]
+  [ ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 5) [ set color yellow ]
+    [set color red]
+  ]
+  ]
+
+  if color_update_rule = "market survivability" [
+    ifelse consumer? [
+      ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 10) [
+        set color green
+      ]
+      [
+        ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 5) [
+          set color yellow
+        ]
+        [
+          set color red
+        ]
+      ]
+    ]
+    [
+      set color gray
     ]
   ]
 
@@ -1065,7 +1095,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-1
+0
 
 MONITOR
 812
