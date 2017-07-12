@@ -57,8 +57,6 @@ niches-own [
   niche-resources
   ;; stores the demand DNA of the niche
   niche-demand
-  ;; it is the average fitness of the entities competing on the niche
-  average-fitness
 
 ]
 
@@ -879,21 +877,6 @@ current-instruction-label
 
 SLIDER
 14
-125
-189
-158
-number_of_niches
-number_of_niches
-1
-10
-1.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-14
 191
 189
 224
@@ -1306,10 +1289,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-13
-323
-185
-356
+22
+442
+194
+475
 cost_of_mutation
 cost_of_mutation
 0
@@ -1346,6 +1329,36 @@ development_performance
 1
 1.0
 0.05
+1
+NIL
+HORIZONTAL
+
+SLIDER
+22
+377
+195
+410
+creation_performance
+creation_performance
+0
+1
+0.5
+0.05
+1
+NIL
+HORIZONTAL
+
+SLIDER
+22
+409
+195
+442
+std_dev_creation_performance
+std_dev_creation_performance
+0
+.5
+0.05
+.05
 1
 NIL
 HORIZONTAL
