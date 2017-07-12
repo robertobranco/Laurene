@@ -69,8 +69,6 @@ globals [
  current-instruction
  ;; stores the niche-demand DNA for comparison
  niche-demand-now
- ;; it is the sum of the fitness of every entity competing on the niche
- total-fitness
  ;; agentset of possible partners for crossover
  possible-partners
 
@@ -110,10 +108,12 @@ to setup
 
   ]
 
-  ;; *** issue - how to deal with more than one niche - resources only go to the fittest, how to display the colors (may be fit in one and not in the other) ***
-  ;; creates the niches where entities will compete and assigns them a demand DNA (temporarily just one)
+  ;; creates the niches where entities will compete and assigns them a demand DNA
   create-niches 1 [
-    set niche-demand n-values (knowledge / 2) [random 2]
+    ;; set the niche demand randomly
+    ;; set niche-demand n-values (knowledge / 2) [random 2]
+    ;; sets the niche demand as a full specification of what would be desirable, or all ones
+    set niche-demand n-values (knowledge / 2) [1]
     hide-turtle
     show niche-demand
   ]
@@ -137,7 +137,6 @@ to go
 
   ;; asks entities to assess their Hamming distance for fitness test (check algoritm for Hamming)
   ask entities [test-fitness]
-  set total-fitness sum [fitness] of entities
 
   ;; gives the entities resources proportional to their fitness, and collects resources
   ask entities [calculate-resource]
@@ -209,8 +208,12 @@ to create-super-competitor
     set resources initial_resources
 
     ;; sets its willingness to share its knowledge according to a normal distribution
-    set willingness-to-share random-normal willingness_to_share std_dev_willingness
-
+    ifelse super_share? [
+      set willingness-to-share random-normal willingness_to_share std_dev_willingness
+    ]
+    [
+      set willingness-to-share 0
+    ]
     ;; protects the great advantage of the supercompetitor
     set motivation-to-learn 0
 
@@ -481,7 +484,6 @@ to interact
 
       ]
 
-
       ;; if both the entity (receiver) and the partner (emitter) possess only scientific knowledge
       [ ifelse science? and [science?] of partner [
 
@@ -595,10 +597,18 @@ to select-fitness-color
 
   if color_update_rule = "fitness" [
     ;; implements the color updating by absolute fitness
-    ifelse (fitness / (knowledge / 2 )) > 0.67 [ set color green]
-      [ ifelse (fitness / (knowledge / 2 )) > 0.33 [ set color yellow]
-      [ set color red] ]
+    ifelse (fitness / (knowledge / 2 )) > 0.67 [
+      set color green
     ]
+    [
+      ifelse (fitness / (knowledge / 2 )) > 0.33 [
+        set color yellow
+      ]
+      [
+        set color red
+      ]
+    ]
+  ]
     ;; implements the color updating by survivability, the amount of iterations the entity would
     ;; be able to survive without receiving any resources
     ;; of course, it can live longer if it keeps gathering resources from the environment
@@ -1153,9 +1163,9 @@ min [resources] of entities
 11
 
 INPUTBOX
-189
+277
 10
-281
+369
 80
 stop_trigger
 2000.0
@@ -1217,7 +1227,7 @@ std_dev_motivation
 std_dev_motivation
 0
 0.5
-0.25
+0.0
 0.05
 1
 NIL
@@ -1232,7 +1242,7 @@ std_dev_willingness
 std_dev_willingness
 0
 0.5
-0.2
+0.0
 0.05
 1
 NIL
@@ -1349,7 +1359,7 @@ cost_of_crossover
 cost_of_crossover
 0
 1000
-0.0
+500.0
 100
 1
 NIL
@@ -1364,7 +1374,7 @@ cost_of_mutation
 cost_of_mutation
 0
 1000
-400.0
+500.0
 100
 1
 NIL
@@ -1379,7 +1389,7 @@ cost_of_development
 cost_of_development
 0
 1000
-0.0
+500.0
 100
 1
 NIL
@@ -1461,6 +1471,17 @@ std_dev_development_performance
 1
 NIL
 HORIZONTAL
+
+SWITCH
+190
+59
+280
+92
+super_share?
+super_share?
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
