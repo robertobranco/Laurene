@@ -231,6 +231,8 @@ to create-super-competitor
     set crossover? false
     set mutation? false
     set development? false
+    set emitted? false
+    set mutated? false
 
     ;; sets the supercompetitor as a pure knowledge CONSUMER
     set consumer? true
@@ -328,7 +330,11 @@ to test-fitness
 
   set fitness 0
   set niche-demand-now [niche-demand] of one-of niches
-  set fitness length remove false ( map [ [ a b ] -> a = b ]  tech-knowledge niche-demand-now )
+  let fitness1 0
+  let fitness2 0
+  set fitness1 length remove false ( map [ [ a b ] -> a = b ]  tech-knowledge niche-demand-now )
+  set fitness2 length remove false ( map [ [ a b ] -> a = b ]  science-knowledge niche-demand-now )
+  set fitness max (list fitness1 fitness2)
 
 ;; alternate code for the hamming distance
 ;;  let counter 0
@@ -925,7 +931,7 @@ initial_resources
 initial_resources
 1
 1000
-501.0
+401.0
 1
 1
 NIL
@@ -1216,7 +1222,7 @@ INPUTBOX
 369
 80
 stop_trigger
-2100.0
+2300.0
 1
 0
 Number
@@ -1422,7 +1428,7 @@ cost_of_mutation
 cost_of_mutation
 0
 1000
-500.0
+0.0
 100
 1
 NIL
