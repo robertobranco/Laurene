@@ -48,6 +48,10 @@ entities-own [
   mutation?
   ;; lets the model know if the agent performed development of science knowledge into technological knowledge
   development?
+  ;; lets the model know if the agent shared knowledge as the emitter
+  emitted?
+  ;; lets the model know if the mutation attempt by a generator was successful
+  mutated?
 
 ]
 
@@ -105,6 +109,8 @@ to setup
     set crossover? false
     set mutation? false
     set development? false
+    set emitted? false
+    set mutated? false
 
   ]
 
@@ -173,12 +179,16 @@ to go
     if resources > cost_of_crossover [interact]
   ]
 
-  ;; the crossover has to be called in the go function before the mutation, because it falsifies the mutation? flag
+
   ;; *** inserir aqui a probabilidade de mutar
   ask entities with [science?] [
     if resources > cost_of_mutation [
       set mutation? true
+      let new-science-knowledge1 new-science-knowledge
       set new-science-knowledge mutate new-science-knowledge
+      if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [
+        set mutated? true
+      ]
     ]
   ]
 
@@ -242,8 +252,6 @@ to create-super-competitor
 
     ;; assigns the supercompetitor the best fitness score possible from the start
     set fitness Knowledge / 2
-
-
   ]
 
 end
@@ -287,7 +295,6 @@ to select-role
   if not generator? and not consumer? and not diffuser?  and not integrator? [
     set consumer? true
     set technology? true]
-
 
 end
 
@@ -342,34 +349,56 @@ end
 
 to calculate-resource
 
+    ;; *** ATTENTION:  the code awards resources to CONSUMERs given their market-share, and all the others it keeps alive by awarding the initial_resources amount.
+    ;; However, if the entity has more than a role that excludes CONSUMER (e.g. GENERATOR and DIFFUSER, as many universities are), they will receive one budget per role.
     ;; gives CONSUMER entities a share of the niche's resources proportional to its market share (relative fitness)
     ;; the relative fitness is calculated of the fitness of entities who compete for market share (CONSUMERS of knowledge)
     if consumer? [
       set resources resources + (niche_resources * (fitness / (sum [fitness] of entities with [consumer?])))
-    ]
-
-    ;; gives GENERATOR a fixed budget every iteration
-    if generator? and not consumer? [
-      set resources resources + initial_resources
-    ]
-
-    ;; *** gives diffusers a fixed budget every iteration if they shared information (it has to have shared, not received)
-    if diffuser? and not consumer? [
-      if crossover? [
-        set resources resources + initial_resources
+      if emitted? [
+        set resources resources + (cost_of_crossover / 2)
+        set emitted? false
       ]
     ]
 
-    ;; gives pure INTEGRATORS a fixed budget every iteration
-    if integrator? and not consumer? [
-     set resources resources + initial_resources
+    ;; gives GENERATORs a fixed budget every iteration, as well if they shared information
+    if generator? and not consumer? [
+      set resources resources + initial_resources
+
+      if emitted? [
+        set resources resources + (cost_of_crossover / 2)
+        set emitted? false
+      ]
+
+      ;; if the mutation is well suceeded, the generator has the budget renewed.
+      if mutated? [
+        set resources resources + (cost_of_mutation)
+        set mutated? false
+      ]
     ]
+
+    ;; gives DIFFUSERs a fixed budget every iteration, as well if they shared information
+    ;; this assumes publicly funded diffusers
+    if diffuser? and not consumer? [
+      set resources resources + initial_resources
+      if emitted? [
+        set resources resources + (cost_of_crossover / 2)
+        set emitted? false
+      ]
+    ]
+
+    ;; gives pure INTEGRATORs a fixed budget every iteration
+    ;; if integrator? and not consumer? [
+    ;; set resources resources + initial_resources
+    ;; ]
 
     ;; takes resources from the entity proportionally to its total amount of resources, respecting the minimum amount to stay alive
     ;; the amount necessary grows with the amount of resources the entity amasses (which is the growth of the entity)
     ;; the rate of the expense growth is given by the expense to live growth slider
+    if consumer? or diffuser? or generator? [
+      set resources resources - (minimum_resources_to_live + (resources * expense_to_live_growth))
+    ]
 
-    set resources resources - (minimum_resources_to_live + (resources * expense_to_live_growth))
     ;; if the entity attempted to crossover, collect its cost
     if crossover? [
       set resources resources - cost_of_crossover
@@ -392,7 +421,9 @@ to calculate-resource
     set-size-entity
 
     ;; kills the entity if it has no resources left
-    if resources < 0 [ die ]
+    if resources < 0 [
+      die
+    ]
 
 end
 
@@ -418,12 +449,18 @@ to-report choose-partner
   ;; the method favours those with higher reputation and more resouces, but it doesnt rule anyone out.
   let pick random-float (sum [fitness] of possible-partners  + sum [resources] of possible-partners)
   let partner nobody
-  ask possible-partners
-    [ ;; if there's no winner yet...
-      if partner = nobody
-        [ ifelse (resources + fitness) > pick
-            [ set partner self ]
-            [ set pick pick - (resources + fitness) ] ] ]
+  ask possible-partners [
+    ;; if there's no winner yet...
+    if partner = nobody [
+      ifelse (resources + fitness) > pick [
+        set partner self
+      ]
+      [
+       set pick pick - (resources + fitness)
+      ]
+    ]
+  ]
+
   report partner
 
   ;; *** alternate code for simplicity
@@ -444,6 +481,7 @@ end
  ;; entity's knowledge at the end of the iteration.
  ;; it cannot update it because it would tamper with the fitness evaluation performed by other entities
  ;; before the run is done.
+
 to interact
 
   ;; given the receiver's motivation to learn
@@ -451,12 +489,16 @@ to interact
   if random-float 1 < motivation-to-learn [
      let partner choose-partner
 
-     ;; given the partners willingness to share, begin crossover
-     if partner != nobody and (random-float 1 < [willingness-to-share] of partner) [
+    ;; given the partners willingness to share, begin crossover
+    if partner != nobody and (random-float 1 < [willingness-to-share] of partner) [
 
       ;;  asks the partner to create a directional link to the receiver
       let receiver self
-      ask partner [create-link-to receiver]
+      ask partner [
+        create-link-to receiver
+        set emitted? true
+      ]
+
       set crossover? true
 
       ;; *** decide whether an interaction between entities with both kinds of knowledge results in changes in both
@@ -485,8 +527,8 @@ to interact
       ]
 
       ;; if both the entity (receiver) and the partner (emitter) possess only scientific knowledge
-      [ ifelse science? and [science?] of partner [
-
+      [
+        ifelse science? and [science?] of partner [
           ;; bits1 is the science-knowledge of the receiver
           let bits1 [science-knowledge] of  self
           ;; bits2 is the science-knowledge of the emitter
@@ -551,8 +593,7 @@ end
 
 to-report mutate [bits]
 
-   report map [ [b] ->
-     ifelse-value (random-float 100.0 < mutation_rate) [
+   report map [ [b] -> ifelse-value (random-float 100.0 < mutation_rate) [
        1 - b
      ]
      [
@@ -983,7 +1024,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1000
-501.0
+401.0
 100
 1
 NIL
@@ -1106,7 +1147,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-0
+2
 
 MONITOR
 812
@@ -1175,7 +1216,7 @@ INPUTBOX
 369
 80
 stop_trigger
-2000.0
+2100.0
 1
 0
 Number
@@ -1219,7 +1260,7 @@ mutation_rate
 mutation_rate
 0
 0.1
-0.1
+0.06
 0.01
 1
 NIL
@@ -1448,10 +1489,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-192
-323
-367
-356
+628
+482
+803
+515
 NIL
 create-super-competitor
 NIL
@@ -1480,10 +1521,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-193
-356
-367
-389
+629
+515
+803
+548
 super_share?
 super_share?
 1
@@ -1491,10 +1532,10 @@ super_share?
 -1000
 
 BUTTON
-195
-398
-366
-431
+631
+557
+802
+590
 NIL
 mutate-market
 NIL
@@ -1506,6 +1547,17 @@ NIL
 NIL
 NIL
 1
+
+SWITCH
+632
+600
+801
+633
+royalties?
+royalties?
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
