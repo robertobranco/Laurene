@@ -156,10 +156,12 @@ to go
   ask entities [calculate-resource]
 
   ;; stops the simulation if all the entities have died after calculating the resources
-  if not any? entities [ print "There are no entities left"
+  if not any? entities [
+    print "There are no entities left"
     stop
   ]
-  if count entities = 1 [print "There is only one entity left"
+  if count entities = 1 [
+    print "There is only one entity left"
     stop
   ]
 
@@ -200,6 +202,9 @@ to go
     ]
   ]
 
+  ask entities with [integrator?] [
+    integrate
+  ]
 
   ;; ask entities to update their knowledge given the actions performed on the iteration
   ask entities [
@@ -347,13 +352,13 @@ to test-fitness
   set fitness2 length remove false ( map [ [ a b ] -> a = b ]  science-knowledge niche-demand-now )
   set fitness max (list fitness1 fitness2)
 
-;; alternate code for the hamming distance
-;;  let counter 0
-;;  foreach tech-knowledge [
-;;      if item (counter) tech-knowledge = item (counter) niche-demand-now
-;;      [set fitness fitness + 1]
-;;       if counter < knowledge [set counter counter + 1]
-;;      ]
+  ;; alternate code for the hamming distance
+  ;;  let counter 0
+  ;;  foreach tech-knowledge [
+  ;;      if item (counter) tech-knowledge = item (counter) niche-demand-now
+  ;;      [set fitness fitness + 1]
+  ;;       if counter < knowledge [set counter counter + 1]
+  ;;      ]
 
   ;; sets the color of the entities based on its absolute fitness
   select-fitness-color
@@ -366,84 +371,109 @@ end
 
 to calculate-resource
 
-    ;; *** ATTENTION:  the code awards resources to CONSUMERs given their market-share, and all the others it keeps alive by awarding the initial_resources amount.
-    ;; However, if the entity has more than a role that excludes CONSUMER (e.g. GENERATOR and DIFFUSER, as many universities are), they will receive one budget per role.
-    ;; gives CONSUMER entities a share of the niche's resources proportional to its market share (relative fitness)
-    ;; the relative fitness is calculated of the fitness of entities who compete for market share (CONSUMERS of knowledge)
-    if consumer? [
-      set resources resources + (niche_resources * (fitness / (sum [fitness] of entities with [consumer?])))
-      if emitted? [
-        set resources resources + (cost_of_crossover / 2)
-        set emitted? false
-      ]
+  ;; Awards the entities resources based on their actions / fitness
+
+  ;; gives CONSUMER entities a share of the niche's resources proportional to its market share (relative fitness)
+  ;; the relative fitness is calculated of the fitness of entities who compete for market share (CONSUMERS of knowledge)
+  if consumer? [
+    set resources resources + (niche_resources * (fitness / (sum [fitness] of entities with [consumer?])))
+    if emitted? [
+      set resources resources + (cost_of_crossover / 2)
+      set emitted? false
+    ]
+  ]
+
+  ;;******************* new function for resources of non market entities
+
+  ;; Gives non market entities the minimum resources to live, to keep them always alive
+  ;; The entities will receive extra resources if they suceed in sharing resources, generating new knowledge
+  if not consumer? [
+
+    if emitted? [
+      set resources resources + (cost_of_crossover / 2)
+      set emitted? false
     ]
 
-    ;; gives GENERATORs a fixed budget every iteration, as well if they shared information
-    if generator? and not consumer? [
-      set resources resources + initial_resources
-
-      if emitted? [
-        set resources resources + (cost_of_crossover / 2)
-        set emitted? false
-      ]
-
-      ;; if the mutation is well suceeded, the generator has the budget renewed.
-      if mutated? [
-        set resources resources + (cost_of_mutation)
-        set mutated? false
-      ]
+   ;; if the mutation is well suceeded, the generator has the budget renewed.
+    if mutated? [
+      set resources resources + (2 * cost_of_mutation)
+      set mutated? false
     ]
+  ]
 
-    ;; gives DIFFUSERs a fixed budget every iteration, as well if they shared information
-    ;; this assumes publicly funded diffusers
-    if diffuser? and not consumer? [
-      set resources resources + initial_resources
-      if emitted? [
-        set resources resources + (cost_of_crossover / 2)
-        set emitted? false
-      ]
-    ]
+  ;;********************
 
-    ;; gives pure INTEGRATORs a fixed budget every iteration
-    ;; if integrator? and not consumer? [
-    ;; set resources resources + initial_resources
-    ;; ]
+  ;;*******************************old code for resources of non market entities
+
+
+  ;; gives GENERATORs a fixed budget every iteration, as well if they shared information
+  ;; if generator? and not consumer? [
+  ;;   set resources resources + (minimum_resources_to_live)
+  ;;   if emitted? [
+  ;;     set resources resources + (cost_of_crossover / 2)
+  ;;     set emitted? false
+  ;;   ]
+  ;;
+  ;;   if the mutation is well suceeded, the generator has the budget renewed.
+  ;;   if mutated? [
+  ;;     set resources resources + (2 * cost_of_mutation)
+  ;;     set mutated? false
+  ;;    ]
+  ;; ]
+
+  ;; gives DIFFUSERs a fixed budget every iteration, as well if they shared information
+  ;; this assumes publicly funded diffusers
+  ;; if diffuser? and not consumer? [
+  ;;   set resources resources + initial_resources
+  ;;   if emitted? [
+  ;;     set resources resources + (cost_of_crossover / 2)
+  ;;     set emitted? false
+  ;;   ]
+  ;; ]
+
+  ;; gives pure INTEGRATORs a fixed budget every iteration
+  ;; if integrator? and not consumer? [
+  ;; set resources resources + minimum_resources_to_live
+  ;; ]
+  ;;********************************************************************************************
 
     ;; takes resources from the entity proportionally to its total amount of resources, respecting the minimum amount to stay alive
     ;; the amount necessary grows with the amount of resources the entity amasses (which is the growth of the entity)
     ;; the rate of the expense growth is given by the expense to live growth slider
-    if consumer? or diffuser? or generator? [
-      set resources resources - (minimum_resources_to_live + (resources * expense_to_live_growth))
-    ]
 
-    ;; if the entity attempted to crossover, collect its cost
-    if crossover? [
-      set resources resources - cost_of_crossover
-      set crossover? false
-    ]
+  if consumer? [
+    set resources resources - (minimum_resources_to_live + (resources * expense_to_live_growth))
+  ]
 
-    ;; if the entity attempted to mutate, collect its cost
-    if mutation? [
-      set resources resources - cost_of_mutation
-      set mutation? false
-    ]
+  ;; Collects resources for the attempts of action
+  ;; if the entity attempted to crossover, collect its cost
+  if crossover? [
+    set resources resources - cost_of_crossover
+    set crossover? false
+  ]
 
-    ;; if the entity attempted to convert scientific knowledge into technological knowledge, collect its cost
-    if development? [
-      set resources resources - cost_of_development
-      set development? false
-    ]
+  ;; if the entity attempted to mutate, collect its cost
+  if mutation? [
+    set resources resources - cost_of_mutation
+    set mutation? false
+  ]
 
-    ;; Resets the integration attempt counter
-    set integrated? false
+  ;; if the entity attempted to convert scientific knowledge into technological knowledge, collect its cost
+  if development? [
+    set resources resources - cost_of_development
+    set development? false
+  ]
 
-    ;; sets the size of the entity given its accumulated amount of resources
-    set-size-entity
+  ;; Resets the integration attempt counter
+  set integrated? false
 
-    ;; kills the entity if it has no resources left
-    if resources < 0 [
-      die
-    ]
+  ;; sets the size of the entity given its accumulated amount of resources
+  set-size-entity
+
+  ;; kills the entity if it has no resources left
+  if resources < 0 [
+    die
+  ]
 
 end
 
@@ -519,7 +549,7 @@ ifelse integration? [
   set motivation-to-learn-actual motivation-to-learn
 ]
 
-ifelse random-float 1 < motivation-to-learn-actual [
+ifelse (random-float 1 < motivation-to-learn-actual) and (resources > cost_of_crossover) [
   let partner choose-partner
 
   ifelse integration? [
@@ -955,7 +985,7 @@ number_of_entities
 number_of_entities
 1
 100
-40.0
+100.0
 1
 1
 NIL
@@ -1069,7 +1099,7 @@ niche_resources
 niche_resources
 0
 20000
-7000.0
+10000.0
 1000
 1
 NIL
@@ -1084,7 +1114,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1000
-901.0
+501.0
 100
 1
 NIL
@@ -1207,7 +1237,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-0
+2
 
 MONITOR
 812
@@ -1283,9 +1313,9 @@ Number
 
 SLIDER
 14
-323
+298
 189
-356
+331
 motivation_to_learn
 motivation_to_learn
 0.00
@@ -1298,14 +1328,14 @@ HORIZONTAL
 
 SLIDER
 14
-389
+364
 189
-422
+397
 willingness_to_share
 willingness_to_share
 0
 1
-0.45
+0.5
 0.05
 1
 NIL
@@ -1313,14 +1343,14 @@ HORIZONTAL
 
 SLIDER
 14
-455
+430
 189
-488
+463
 mutation_rate
 mutation_rate
 0
 0.1
-0.06
+0.05
 0.01
 1
 NIL
@@ -1328,14 +1358,14 @@ HORIZONTAL
 
 SLIDER
 14
-356
+331
 189
-389
+364
 std_dev_motivation
 std_dev_motivation
 0
 0.5
-0.0
+0.05
 0.05
 1
 NIL
@@ -1343,14 +1373,14 @@ HORIZONTAL
 
 SLIDER
 14
-422
+397
 189
-455
+430
 std_dev_willingness
 std_dev_willingness
 0
 0.5
-0.0
+0.05
 0.05
 1
 NIL
@@ -1467,7 +1497,7 @@ cost_of_crossover
 cost_of_crossover
 0
 1000
-500.0
+1000.0
 100
 1
 NIL
@@ -1497,7 +1527,7 @@ cost_of_development
 cost_of_development
 0
 1000
-500.0
+0.0
 100
 1
 NIL
@@ -1512,17 +1542,17 @@ development_performance
 development_performance
 0
 1
-0.35
+0.7
 0.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-193
-200
-366
-233
+192
+164
+365
+197
 creation_performance
 creation_performance
 0
@@ -1534,25 +1564,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-193
-233
-366
-266
+192
+197
+365
+230
 std_dev_creation_performance
 std_dev_creation_performance
 0
 .5
-0.05
+0.15
 .05
 1
 NIL
 HORIZONTAL
 
 BUTTON
-628
-482
-803
-515
+634
+450
+809
+483
 NIL
 create-super-competitor
 NIL
@@ -1581,10 +1611,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-629
-515
-803
-548
+635
+483
+809
+516
 super_share?
 super_share?
 1
@@ -1592,10 +1622,10 @@ super_share?
 -1000
 
 BUTTON
-631
-557
-802
-590
+637
+525
+808
+558
 NIL
 mutate-market
 NIL
@@ -1631,14 +1661,14 @@ non_economical_entities?
 -1000
 
 SLIDER
-373
-503
-545
-536
+192
+236
+364
+269
 integration_boost
 integration_boost
 0
-0.5
+1
 0.5
 0.05
 1
