@@ -37,8 +37,10 @@ entities-own [
   integrator?
   ;; entity's willingness to share knowledge with others
   willingness-to-share
+
   ;; entity's motivation to learn from others
   motivation-to-learn
+
   ;; entity's creation performance
   creation-performance
   ;; entity's development performance
@@ -52,6 +54,10 @@ entities-own [
   emitted?
   ;; lets the model know if the mutation attempt by a generator was successful
   mutated?
+  ;; lets the model know if the integrator attempted to integrate
+  integrated?
+  ;; lets the model know if the interaction of an agent is ocurring through an integrator
+  integration?
 
 ]
 
@@ -111,6 +117,8 @@ to setup
     set development? false
     set emitted? false
     set mutated? false
+    set integrated? false
+    set integration? false
 
   ]
 
@@ -192,6 +200,10 @@ to go
     ]
   ]
 
+  ask entities with [integrator?] [
+    integrate
+  ]
+
   ;; ask entities to update their knowledge given the actions performed on the iteration
   ask entities [
     set science-knowledge new-science-knowledge
@@ -233,6 +245,8 @@ to create-super-competitor
     set development? false
     set emitted? false
     set mutated? false
+    set integrated? false
+    set integration? false
 
     ;; sets the supercompetitor as a pure knowledge CONSUMER
     set consumer? true
@@ -423,6 +437,9 @@ to calculate-resource
       set development? false
     ]
 
+    ;; Resets the integration attempt counter
+    set integrated? false
+
     ;; sets the size of the entity given its accumulated amount of resources
     set-size-entity
 
@@ -490,79 +507,118 @@ end
 
 to interact
 
-  ;; given the receiver's motivation to learn
-  ;; chooses a suitable partner to be the emitter
-  if random-float 1 < motivation-to-learn [
-     let partner choose-partner
+;; given the receiver's motivation to learn
+;; chooses a suitable partner to be the emitter
+;; If the interaction is intermediated by an integrator, there is an motivation-to-learn boost, increasing the chance of interaction
 
-    ;; given the partners willingness to share, begin crossover
-    if partner != nobody and (random-float 1 < [willingness-to-share] of partner) [
+let motivation-to-learn-actual 0
+let willingness-to-share-actual 0
 
-      ;;  asks the partner to create a directional link to the receiver
-      let receiver self
-      ask partner [
-        create-link-to receiver
-        set emitted? true
-      ]
+ifelse integration? [
+  ;; uses the integration_boost from the slider in the interface
+  set motivation-to-learn-actual (motivation-to-learn + integration_boost)
+]
+[
+  set motivation-to-learn-actual motivation-to-learn
+]
 
-      set crossover? true
+ifelse random-float 1 < motivation-to-learn-actual [
+  let partner choose-partner
 
-      ;; *** decide whether an interaction between entities with both kinds of knowledge results in changes in both
-      ;; kinds of knowledge
-      ;; if both the entity (receiver) and the partner (emitter) possess scientific and technological knowledge
-      ifelse science? and technology? and [science?] of partner and [technology?] of partner [
+  ifelse integration? [
+    set willingness-to-share-actual ([willingness-to-share] of partner + integration_boost)
+  ]
+  [
+    set willingness-to-share-actual [willingness-to-share] of partner
+  ]
 
+  ;; the integration flag has served its purpose and has to be reset
+  set integration? false
+
+  ;; given the partners willingness to share, begin crossover
+  if partner != nobody and (random-float 1 < willingness-to-share-actual) [
+    ;;  asks the partner to create a directional link to the receiver
+    let receiver self
+    ask partner [
+      create-link-to receiver
+      set emitted? true
+    ]
+
+    set crossover? true
+
+
+    ;; *** decide whether an interaction between entities with both kinds of knowledge results in changes in both
+    ;; kinds of knowledge
+    ;; if both the entity (receiver) and the partner (emitter) possess scientific and technological knowledge
+    ifelse science? and technology? and [science? and technology?] of partner [
+
+      ;; bits1 is the science-knowledge of the receiver
+      let bits1 science-knowledge
+      ;; bits2 is the science-knowledge of the emitter
+      let bits2 [science-knowledge] of partner
+      set new-science-knowledge crossover bits1 bits2
+
+      ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
+      ;;let new-science-knowledge1 new-science-knowledge ;;*** used to assess whether the mutation is working
+      set new-science-knowledge mutate new-science-knowledge
+      ;;if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]  ;;*** used to assess whether mutation is working
+
+      ;; bits1 is the tech-knowledge of the receiver
+      set bits1 tech-knowledge
+      ;; bits2 is the tech-knowledge of the emitter
+      set bits2 [tech-knowledge] of partner
+      set new-tech-knowledge crossover bits1 bits2
+      update-link-appearance new-tech-knowledge tech-knowledge yellow
+
+      ;;**** i can create a string with both knowledge for the update link, and it will sum the differences in both knowledges
+
+    ]
+
+    ;; if both the entity (receiver) and the partner (emitter) possess only scientific knowledge
+    [
+      ifelse science? and [science?] of partner [
         ;; bits1 is the science-knowledge of the receiver
-        let bits1 [science-knowledge] of  self
+        let bits1 science-knowledge
         ;; bits2 is the science-knowledge of the emitter
         let bits2 [science-knowledge] of partner
         set new-science-knowledge crossover bits1 bits2
 
         ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
-        ;;let new-science-knowledge1 new-science-knowledge ;;*** used to assess whether the mutation is working
+        ;; let new-science-knowledge1 new-science-knowledge *** used to assess whether the mutation is working
         set new-science-knowledge mutate new-science-knowledge
-        ;;if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]  ;;*** used to assess whether mutation is working
-
-        ;; bits1 is the tech-knowledge of the receiver
-        set bits1 [tech-knowledge] of  self
-        ;; bits2 is the tech-knowledge of the emitter
-        set bits2 [tech-knowledge] of partner
-        set new-tech-knowledge crossover bits1 bits2
-        update-link-appearance new-tech-knowledge tech-knowledge yellow
-
+        update-link-appearance new-science-knowledge science-knowledge green
+        ;; if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"] *** used to assess whether the mutation is working
       ]
 
-      ;; if both the entity (receiver) and the partner (emitter) possess only scientific knowledge
+      ;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
+      ;; the code ignores those who don't have any knowledge, but these have been ignored already by the choose-partner procedure
       [
-        ifelse science? and [science?] of partner [
-          ;; bits1 is the science-knowledge of the receiver
-          let bits1 [science-knowledge] of  self
-          ;; bits2 is the science-knowledge of the emitter
-          let bits2 [science-knowledge] of partner
-          set new-science-knowledge crossover bits1 bits2
-
-          ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
-          ;; let new-science-knowledge1 new-science-knowledge *** used to assess whether the mutation is working
-          set new-science-knowledge mutate new-science-knowledge
-          update-link-appearance new-science-knowledge science-knowledge green
-          ;; if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"] *** used to assess whether the mutation is working
-        ]
-
-        ;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
-        ;; the code ignores those who don't have any knowledge, but these have been ignored already by the choose-partner procedure
-        [
-          if technology? and [technology?] of partner [
-            ;; bits1 is the tech-knowledge of the receiver
-            let bits1 [tech-knowledge] of  self
-            ;; bits2 is the tech-knowledge of the emitter
-            let bits2 [tech-knowledge] of partner
-            set new-tech-knowledge crossover bits1 bits2
-            update-link-appearance new-tech-knowledge tech-knowledge blue
-          ]
+        if technology? and [technology?] of partner [
+          ;; bits1 is the tech-knowledge of the receiver
+          let bits1 tech-knowledge
+          ;; bits2 is the tech-knowledge of the emitter
+          let bits2 [tech-knowledge] of partner
+          set new-tech-knowledge crossover bits1 bits2
+          update-link-appearance new-tech-knowledge tech-knowledge blue
         ]
       ]
     ]
   ]
+]
+[ set integration? false ]
+
+end
+
+;; The integrator facilitates interaction
+to integrate
+
+set integrated? true
+let partner1 one-of other entities with [science? or technology?]
+ask partner1 [
+set integration? true
+  interact
+]
+
 end
 
 ;; Crossover procedure from simple genetic algorithm model
@@ -715,6 +771,7 @@ to update-link-appearance [bits1 bits2 color-link]
   ifelse counter-change > 0 [ ask my-links [set color color-link set thickness counter-change / 100]] [ask my-links [set color red]]
 
 end
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; (modelo DNA Protein Synthesis)
@@ -931,7 +988,7 @@ initial_resources
 initial_resources
 1
 1000
-501.0
+1000.0
 1
 1
 NIL
@@ -1015,7 +1072,7 @@ niche_resources
 niche_resources
 0
 20000
-10000.0
+7000.0
 1000
 1
 NIL
@@ -1030,7 +1087,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1000
-401.0
+901.0
 100
 1
 NIL
@@ -1222,7 +1279,7 @@ INPUTBOX
 369
 80
 stop_trigger
-2100.0
+2300.0
 1
 0
 Number
@@ -1405,10 +1462,10 @@ standard-deviation [willingness-to-share] of entities
 11
 
 SLIDER
-14
-290
-189
-323
+196
+342
+369
+375
 cost_of_crossover
 cost_of_crossover
 0
@@ -1420,25 +1477,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-193
-266
-366
-299
+196
+408
+369
+441
 cost_of_mutation
 cost_of_mutation
 0
 1000
-500.0
+0.0
 100
 1
 NIL
 HORIZONTAL
 
 SLIDER
-192
-158
-365
-191
+196
+375
+369
+408
 cost_of_development
 cost_of_development
 0
@@ -1473,7 +1530,7 @@ creation_performance
 creation_performance
 0
 1
-0.1
+0.5
 0.05
 1
 NIL
@@ -1488,7 +1545,7 @@ std_dev_creation_performance
 std_dev_creation_performance
 0
 .5
-0.05
+0.15
 .05
 1
 NIL
@@ -1561,9 +1618,35 @@ SWITCH
 633
 royalties?
 royalties?
+0
+1
+-1000
+
+SWITCH
+196
+309
+369
+342
+non_economical_entities?
+non_economical_entities?
 1
 1
 -1000
+
+SLIDER
+373
+503
+545
+536
+integration_boost
+integration_boost
+0
+0.5
+0.5
+0.05
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
