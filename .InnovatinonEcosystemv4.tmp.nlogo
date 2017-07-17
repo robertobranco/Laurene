@@ -301,7 +301,7 @@ to select-role
     if not science? [set science? one-of [true false]]
     if not technology? [set technology? one-of[true false]]
 
-    ;; If, by any chance, the diffuser has no knowledge assignment, repeat the random assig
+    ;; If, by any chance, the diffuser has no knowledge assignment, repeat the random assignment
     while [ not science? and not technology?] [
       if not science? [set science? one-of [true false]]
       if not technology? [set technology? one-of[true false]]
@@ -789,6 +789,7 @@ end
 to set-size-entity
 
      set size resources / (minimum_resources_to_live + (resources * expense_to_live_growth))
+
 
 end
 
