@@ -300,6 +300,12 @@ to select-role
   if diffuser? [
     if not science? [set science? one-of [true false]]
     if not technology? [set technology? one-of[true false]]
+
+    ;; If, by any chance, the diffuser has no knowledge assignment, repeat the random assig
+    while [ not science? and not technology?] [
+      if not science? [set science? one-of [true false]]
+      if not technology? [set technology? one-of[true false]]
+    ]
   ]
   ;; does the entity assume an INTEGRATOR role in the ecosystem? Integrators don't need to have scientific or technological knowledge
   set integrator? one-of [true false]
@@ -1237,7 +1243,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-2
+0
 
 MONITOR
 812
@@ -1306,7 +1312,7 @@ INPUTBOX
 369
 80
 stop_trigger
-2300.0
+5000.0
 1
 0
 Number
@@ -1497,7 +1503,7 @@ cost_of_crossover
 cost_of_crossover
 0
 1000
-1000.0
+500.0
 100
 1
 NIL
@@ -1512,7 +1518,7 @@ cost_of_mutation
 cost_of_mutation
 0
 1000
-0.0
+500.0
 100
 1
 NIL
@@ -1527,7 +1533,7 @@ cost_of_development
 cost_of_development
 0
 1000
-0.0
+500.0
 100
 1
 NIL
@@ -1669,7 +1675,7 @@ integration_boost
 integration_boost
 0
 1
-0.5
+0.1
 0.05
 1
 NIL
