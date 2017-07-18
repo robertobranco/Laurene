@@ -94,34 +94,47 @@ to setup
 
   clear-all
 
-  ;; Fixes the seed that will create the random numbers in the model, making it repeatable
-  ;; The seed may be choosen by the user, or randomly chosen by the use
-  ifelse set_input_seed? [
+  ;; Makes the seed that will create the random numbers in the model known, making it repeatable
+  ;; The seed may be choosen by the user, or randomly chosen by the model
+  ;; The seed being used will be displayed in the interface in the my-seed-repeat input.
+  ifelse repeat_simulation? [
 
-    ;; Use a seed entered by the user
-    let suitable-seed? false
-    while not suitable-seed? [
-      set my-seed user-input "Enter a random seed (an integer):"
-      ;; Tries to set my-seed from the input. If it is not possible, does nothing
-      carefully [ set my-seed read-from-string my-seed ] [ ]
-      ;; Tests the value from my-seed. If it is suitable (number and integer), sets the random-seed
-      ;; If not, asks for a new one
-      ifelse is-number? my-seed and round my-seed = my-seed [
-        random-seed my-seed ;; use the new seed
-        output-print word "User-entered seed: " my-seed  ;; print it out
-        set suitable-seed? true
-      ][
-        user-message "Please enter an integer."
-      ]
-    ]
+    ;; Takes the seed stored in the my-seed-repeat from the last simulation / user intervention during simulation
+    random-seed my-seed-repeat
 
   ][
-    ;; Use a seed created by the NEW-SEED reporter
-    set my-seed new-seed            ;; generate a new seed
-    output-print word "Generated seed: " my-seed  ;; print it out
-    random-seed my-seed             ;; use the new seed
-  ]
+    ifelse set_input_seed? [
 
+      ;; Use a seed entered by the user
+      let suitable-seed? false
+      while [not suitable-seed?] [
+
+        set my-seed user-input "Enter a random seed (an integer):"
+
+        ;; Tries to set my-seed from the input. If it is not possible, does nothing
+        carefully [ set my-seed read-from-string my-seed ] [ ]
+
+        ;; Tests the value from my-seed. If it is suitable (number and integer), sets the random-seed
+        ;; If not, asks for a new one
+        ifelse is-number? my-seed and round my-seed = my-seed [
+          random-seed my-seed ;; use the new seed
+          output-print word "User-entered seed: " my-seed  ;; print it out
+          set my-seed-repeat my-seed
+          set suitable-seed? true
+        ][
+          user-message "Please enter an integer."
+        ]
+      ]
+
+    ][
+      ;; Use a seed created by the NEW-SEED reporter
+      set my-seed new-seed            ;; generate a new seed
+      output-print word "Generated seed: " my-seed  ;; print it out
+      random-seed my-seed             ;; use the new seed
+      ;; Displays the new seed in the my-seed-repeat input
+      set my-seed-repeat my-seed
+    ]
+  ]
 
   ask patches [set pcolor black];
   set-default-shape entities "circle";
@@ -382,6 +395,7 @@ to create-knowledge-DNA
 end
 
 ;; evaluates the hamming distance between the niche's demand and the consumers tech-knowledge
+
 to test-fitness
 
   set fitness 0
@@ -441,7 +455,6 @@ to calculate-resource
     ]
   ]
 
-  ;;********************
 
   ;;*******************************old code for resources of non market entities
 
@@ -520,6 +533,7 @@ end
 
 ;; creates agentsets of possible partners who possess the same kind of knowledge possessed by the choosing entity
 ;; *** issue - something has to be done with the agentsets before it is closed. The lottery for an instance
+
 to-report choose-partner
 
   ;; creates an agentset with entities possessing knowledge similar to the knowledge of the choosing entity
@@ -677,6 +691,7 @@ ifelse (random-float 1 < motivation-to-learn-actual) and (resources > cost_of_cr
 end
 
 ;; The integrator facilitates interaction
+
 to integrate
 
 set integrated? true
@@ -884,17 +899,24 @@ to-report instructions
      "their role in the ecosystem, and their"
      "color denotes their absolute fitness or"
      "their ability to stay alive for several"
-     "periods"
+     "periods. It may also display colors only"
+     "for entities competing in the market, as"
+     "the other ones may get support from other"
+     "sources other than the market itself."
     ]
     [
-     "When you press SETUP, a population of"
-     "entities is randomly created."
+     "When you press SETUP, if you chose to "
+     "input a known seed for random numbers,"
+     "you will be prompted for a integer number."
+     "Otherwise, the system you choose one and "
+     "display it in the interface."
+     "A population of entities is then randomly"
+     "created."
      "Their roles and knowledge DNA's are"
      "randomly created."
      "Scientific knowledge and technological"
      "knowledge is assigned according to the"
      "entities roles in the ecosystem."
-
     ]
     [
      "Choose the amount of entities you want"
@@ -1172,7 +1194,7 @@ expense_to_live_growth
 expense_to_live_growth
 0
 1
-0.1
+0.15
 0.05
 1
 NIL
@@ -1280,7 +1302,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-0
+2
 
 MONITOR
 812
@@ -1344,12 +1366,12 @@ min [resources] of entities
 11
 
 INPUTBOX
-277
+278
 10
-369
+364
 70
 stop_trigger
-50.0
+200.0
 1
 0
 Number
@@ -1585,7 +1607,7 @@ development_performance
 development_performance
 0
 1
-0.7
+0.5
 0.05
 1
 NIL
@@ -1615,7 +1637,7 @@ std_dev_creation_performance
 std_dev_creation_performance
 0
 .5
-0.05
+0.0
 .05
 1
 NIL
@@ -1660,15 +1682,15 @@ SWITCH
 516
 super_share?
 super_share?
-1
+0
 1
 -1000
 
 BUTTON
-637
-525
-808
-558
+636
+519
+807
+552
 NIL
 mutate-market
 NIL
@@ -1688,7 +1710,7 @@ SWITCH
 342
 non_economical_entities?
 non_economical_entities?
-1
+0
 1
 -1000
 
@@ -1701,33 +1723,44 @@ integration_boost
 integration_boost
 0
 1
-0.1
+0.05
 0.05
 1
 NIL
 HORIZONTAL
 
-MONITOR
-14
-51
-190
-96
-NIL
-my-seed
-17
-1
-11
-
 SWITCH
-13
-103
-189
-136
+14
+88
+190
+121
 set_input_seed?
 set_input_seed?
 0
 1
 -1000
+
+SWITCH
+14
+49
+191
+82
+repeat_simulation?
+repeat_simulation?
+0
+1
+-1000
+
+INPUTBOX
+193
+10
+277
+70
+my-seed-repeat
+8.0
+1
+0
+Number
 
 @#$#@#$#@
 ## WHAT IS IT?
