@@ -81,16 +81,48 @@ globals [
  niche-demand-now
  ;; agentset of possible partners for crossover
  possible-partners
-
+ ;; seed used to generate random-numbers
+ my-seed
 ]
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; setup procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
 to setup
 
   clear-all
+
+  ;; Fixes the seed that will create the random numbers in the model, making it repeatable
+  ;; The seed may be choosen by the user, or randomly chosen by the use
+  ifelse set_input_seed? [
+
+    ;; Use a seed entered by the user
+    let suitable-seed? false
+    while not suitable-seed? [
+      set my-seed user-input "Enter a random seed (an integer):"
+      ;; Tries to set my-seed from the input. If it is not possible, does nothing
+      carefully [ set my-seed read-from-string my-seed ] [ ]
+      ;; Tests the value from my-seed. If it is suitable (number and integer), sets the random-seed
+      ;; If not, asks for a new one
+      ifelse is-number? my-seed and round my-seed = my-seed [
+        random-seed my-seed ;; use the new seed
+        output-print word "User-entered seed: " my-seed  ;; print it out
+        set suitable-seed? true
+      ][
+        user-message "Please enter an integer."
+      ]
+    ]
+
+  ][
+    ;; Use a seed created by the NEW-SEED reporter
+    set my-seed new-seed            ;; generate a new seed
+    output-print word "Generated seed: " my-seed  ;; print it out
+    random-seed my-seed             ;; use the new seed
+  ]
+
+
   ask patches [set pcolor black];
   set-default-shape entities "circle";
 
@@ -131,6 +163,8 @@ to setup
     hide-turtle
     show niche-demand
   ]
+
+
   ;; resets the tick clock
   reset-ticks
 
@@ -788,8 +822,10 @@ end
 ;; sets the size of the entity proportional to its resources, related to the amount of periods it could live without receiving resources
 to set-size-entity
 
-     set size resources / (minimum_resources_to_live + (resources * expense_to_live_growth))
-
+  set size resources / (minimum_resources_to_live + (resources * expense_to_live_growth))
+  if size < 0.5 [
+    set size 0.5
+  ]
 
 end
 
@@ -970,7 +1006,7 @@ BUTTON
 14
 10
 69
-57
+43
 NIL
 setup
 NIL
@@ -985,9 +1021,9 @@ NIL
 
 SLIDER
 14
-126
+170
 189
-159
+203
 number_of_entities
 number_of_entities
 1
@@ -1000,9 +1036,9 @@ HORIZONTAL
 
 SLIDER
 14
-93
+137
 189
-126
+170
 Knowledge
 Knowledge
 2
@@ -1015,9 +1051,9 @@ HORIZONTAL
 
 SLIDER
 14
-158
+202
 189
-191
+235
 initial_resources
 initial_resources
 1
@@ -1029,10 +1065,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-72
+73
 10
-130
-57
+131
+43
 NIL
 go
 T
@@ -1047,16 +1083,16 @@ NIL
 
 OUTPUT
 16
-529
+537
 359
-712
+720
 12
 
 BUTTON
 15
-495
+503
 193
-528
+536
 Previous Instruction
 previous-instruction
 NIL
@@ -1071,9 +1107,9 @@ NIL
 
 BUTTON
 194
-495
+503
 358
-528
+536
 Next Instruction
 next-instruction
 NIL
@@ -1099,9 +1135,9 @@ current-instruction-label
 
 SLIDER
 14
-191
+235
 189
-224
+268
 niche_resources
 niche_resources
 0
@@ -1114,9 +1150,9 @@ HORIZONTAL
 
 SLIDER
 14
-224
+268
 189
-257
+301
 minimum_resources_to_live
 minimum_resources_to_live
 1
@@ -1129,9 +1165,9 @@ HORIZONTAL
 
 SLIDER
 14
-257
+301
 189
-290
+334
 expense_to_live_growth
 expense_to_live_growth
 0
@@ -1269,10 +1305,10 @@ standard-deviation [resources] of entities
 11
 
 BUTTON
-134
+136
 10
-189
-58
+191
+43
 NIL
 go
 NIL
@@ -1311,18 +1347,18 @@ INPUTBOX
 277
 10
 369
-80
+70
 stop_trigger
-5000.0
+50.0
 1
 0
 Number
 
 SLIDER
 14
-298
+334
 189
-331
+367
 motivation_to_learn
 motivation_to_learn
 0.00
@@ -1335,9 +1371,9 @@ HORIZONTAL
 
 SLIDER
 14
-364
+400
 189
-397
+433
 willingness_to_share
 willingness_to_share
 0
@@ -1350,9 +1386,9 @@ HORIZONTAL
 
 SLIDER
 14
-430
+466
 189
-463
+499
 mutation_rate
 mutation_rate
 0
@@ -1365,14 +1401,14 @@ HORIZONTAL
 
 SLIDER
 14
-331
+367
 189
-364
+400
 std_dev_motivation
 std_dev_motivation
 0
 0.5
-0.05
+0.0
 0.05
 1
 NIL
@@ -1380,14 +1416,14 @@ HORIZONTAL
 
 SLIDER
 14
-397
+433
 189
-430
+466
 std_dev_willingness
 std_dev_willingness
 0
 0.5
-0.05
+0.0
 0.05
 1
 NIL
@@ -1534,7 +1570,7 @@ cost_of_development
 cost_of_development
 0
 1000
-500.0
+400.0
 100
 1
 NIL
@@ -1579,7 +1615,7 @@ std_dev_creation_performance
 std_dev_creation_performance
 0
 .5
-0.15
+0.05
 .05
 1
 NIL
@@ -1611,7 +1647,7 @@ std_dev_development_performance
 std_dev_development_performance
 0
 0.5
-0.05
+0.0
 0.05
 1
 NIL
@@ -1646,17 +1682,6 @@ NIL
 1
 
 SWITCH
-632
-600
-801
-633
-royalties?
-royalties?
-0
-1
--1000
-
-SWITCH
 196
 309
 369
@@ -1681,6 +1706,28 @@ integration_boost
 1
 NIL
 HORIZONTAL
+
+MONITOR
+14
+51
+190
+96
+NIL
+my-seed
+17
+1
+11
+
+SWITCH
+13
+103
+189
+136
+set_input_seed?
+set_input_seed?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
