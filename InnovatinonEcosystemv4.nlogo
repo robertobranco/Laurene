@@ -699,6 +699,8 @@ ifelse (random-float 1 < motivation-to-learn-actual) and (resources > cost_of_cr
 end
 
 ;; The integrator facilitates interaction
+;; The integrator finds an entity asks it to find a partner.
+;; It then boosts the willingness to share an motivation to learn of both of them, facilitating the transaction
 
 to integrate
 
@@ -1051,10 +1053,10 @@ NIL
 1
 
 SLIDER
-14
-170
-189
-203
+16
+180
+191
+213
 number_of_entities
 number_of_entities
 1
@@ -1066,10 +1068,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-14
-137
-189
-170
+16
+147
+191
+180
 Knowledge
 Knowledge
 2
@@ -1081,10 +1083,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-14
-202
-189
-235
+16
+212
+191
+245
 initial_resources
 initial_resources
 1
@@ -1114,16 +1116,16 @@ NIL
 
 OUTPUT
 16
-537
+622
 359
-720
+805
 12
 
 BUTTON
 15
-503
+588
 193
-536
+621
 Previous Instruction
 previous-instruction
 NIL
@@ -1138,9 +1140,9 @@ NIL
 
 BUTTON
 194
-503
+588
 358
-536
+621
 Next Instruction
 next-instruction
 NIL
@@ -1155,9 +1157,9 @@ NIL
 
 MONITOR
 272
-449
+540
 358
-494
+585
 Instruction #
 current-instruction-label
 17
@@ -1165,10 +1167,10 @@ current-instruction-label
 11
 
 SLIDER
-14
-235
-189
-268
+16
+245
+191
+278
 niche_resources
 niche_resources
 0
@@ -1180,10 +1182,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-14
-268
-189
-301
+16
+278
+191
+311
 minimum_resources_to_live
 minimum_resources_to_live
 1
@@ -1195,10 +1197,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-14
-301
-189
-334
+16
+311
+191
+344
 expense_to_live_growth
 expense_to_live_growth
 0
@@ -1386,10 +1388,10 @@ stop_trigger
 Number
 
 SLIDER
-14
-334
-189
-367
+194
+100
+369
+133
 motivation_to_learn
 motivation_to_learn
 0.00
@@ -1401,10 +1403,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-14
-400
-189
-433
+194
+166
+369
+199
 willingness_to_share
 willingness_to_share
 0
@@ -1416,10 +1418,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-14
-466
-189
-499
+194
+232
+369
+265
 mutation_rate
 mutation_rate
 0
@@ -1431,10 +1433,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-14
-367
-189
-400
+194
+133
+369
+166
 std_dev_motivation
 std_dev_motivation
 0
@@ -1446,10 +1448,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-14
-433
-189
-466
+194
+199
+369
+232
 std_dev_willingness
 std_dev_willingness
 0
@@ -1563,10 +1565,10 @@ standard-deviation [willingness-to-share] of entities
 11
 
 SLIDER
-192
-284
-365
-317
+16
+345
+190
+378
 cost_of_crossover
 cost_of_crossover
 0
@@ -1578,10 +1580,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-192
-350
-365
-383
+16
+410
+189
+443
 cost_of_mutation
 cost_of_mutation
 0
@@ -1593,10 +1595,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-192
-317
-365
-350
+16
+377
+189
+410
 cost_of_development
 cost_of_development
 0
@@ -1608,25 +1610,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-192
-93
-365
-126
+195
+352
+368
+385
 development_performance
 development_performance
 0
 1
-0.0
+0.05
 0.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-192
-164
-365
-197
+195
+428
+368
+461
 creation_performance
 creation_performance
 0
@@ -1638,10 +1640,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-192
-197
-365
-230
+195
+461
+368
+494
 std_dev_creation_performance
 std_dev_creation_performance
 0
@@ -1653,10 +1655,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-634
-450
-809
-483
+633
+485
+808
+518
 NIL
 create-super-competitor
 NIL
@@ -1670,10 +1672,10 @@ NIL
 1
 
 SLIDER
-192
-125
-365
-158
+195
+384
+368
+417
 std_dev_development_performance
 std_dev_development_performance
 0
@@ -1685,10 +1687,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-635
-483
-809
-516
+634
+518
+808
+551
 super_share?
 super_share?
 1
@@ -1696,10 +1698,10 @@ super_share?
 -1000
 
 BUTTON
-636
-519
-807
-552
+635
+554
+806
+587
 NIL
 mutate-market
 NIL
@@ -1713,10 +1715,10 @@ NIL
 1
 
 SWITCH
-636
-556
-809
-589
+635
+591
+808
+624
 non_economical_entities?
 non_economical_entities?
 0
@@ -1724,10 +1726,10 @@ non_economical_entities?
 -1000
 
 SLIDER
-192
-236
-364
-269
+196
+289
+368
+322
 integration_boost
 integration_boost
 0
@@ -1914,6 +1916,66 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot count entities"
+
+TEXTBOX
+54
+127
+204
+145
+World parameters
+11
+0.0
+1
+
+TEXTBOX
+218
+82
+368
+100
+General Agent Parameters
+11
+0.0
+1
+
+TEXTBOX
+230
+274
+380
+292
+Integrator's parameter
+11
+0.0
+1
+
+TEXTBOX
+215
+331
+365
+349
+Generation and development
+11
+0.0
+1
+
+TEXTBOX
+21
+555
+171
+573
+Instructions and seed origin
+11
+0.0
+1
+
+TEXTBOX
+676
+464
+826
+482
+Special functions
+11
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
