@@ -40,10 +40,10 @@ entities-own [
 
   ;; entity's motivation to learn from others
   motivation-to-learn
-
-  ;; entity's creation performance
+  ;; entity's performance in creating oportunities to create new knowledge
   creation-performance
-  ;; entity's development performance
+  ;; entity's performance in creating oportunities to develop science into technology
+  development-performance
   ;; lets the model know if the agent performed crossover
   crossover?
   ;; lets the model know if the agent performed mutation
@@ -155,6 +155,8 @@ to setup
     ;; this is done as a normal distribution
     set willingness-to-share random-normal willingness_to_share std_dev_willingness
     set motivation-to-learn random-normal motivation_to_learn std_dev_motivation
+    set creation-performance random-normal creation_performance std_dev_creation_performance
+    set development-performance random-normal development_performance std_dev_development_performance
 
     ;; tells the model they the entities have not performed any of these actions yet
     set crossover? false
@@ -212,39 +214,45 @@ to go
     stop
   ]
 
-  ;; ask entities to convert knowledge
+
   ;; ask entities to update its own parameters (adapt)
   ;; create new entities to replace the dead from crossover of other fit entities and mutations
-  ;; the impact of integrators on relations
+  ;; the impact of environment in relations
 
-
+  ;; *** review this statement, as the code has changed 19-07
   ;; this has to be called before the crossover is called by GO, as it falsifies the crossover? flag
   ;; the development is implemented as an internal crossover, done among the people and structures within the organization
   ;; therefore, it has to falsify the regular crossover? cost, as it may also be performed by the entity during an iteration
   ;; asks entities with scientific and technological knowledge to develop science into technology
   ask entities with [science? and technology?] [
     if resources > cost_of_development [
-      set new-tech-knowledge crossover tech-knowledge science-knowledge
-      ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
-      set development? true
+      if random-float 1 < developmentperformance [
+        set new-tech-knowledge crossover tech-knowledge science-knowledge
+        ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
+        set development? true
+      ]
     ]
   ]
 
   ;; ask entities with some kind of knowledge  to look for partners and possibly, to crossover
   ;; the crossover? flag is set by the interact procedure after both entities have agreed to interact
   ask entities with [science? or technology?] [
-    if resources > cost_of_crossover [interact]
+    if resources > cost_of_crossover [
+      interact
+    ]
   ]
 
 
-  ;; *** inserir aqui a probabilidade de mutar
-  ask entities with [science?] [
-    if resources > cost_of_mutation [
-      set mutation? true
-      let new-science-knowledge1 new-science-knowledge
-      set new-science-knowledge mutate new-science-knowledge
-      if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [
-        set mutated? true
+  ;; ask generators to perform research, in other words, mutate knowledge
+  ask entities with [generator?] [
+    if random-float 1 < creation-performance [
+      if resources > cost_of_mutation [
+        set mutation? true
+        let new-science-knowledge1 new-science-knowledge
+        set new-science-knowledge mutate new-science-knowledge
+        if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [
+          set mutated? true
+        ]
       ]
     ]
   ]
@@ -759,10 +767,13 @@ to mutate-market
 end
 
 ;; mutation
+;; makes the niche call the mutation procedure
 
 ;; niche swap
+;; not necessary anymore since the simulation only covers the mainstream at this iteration
 
 ;; niche learning from introduced products (crossover with consumers)
+;; makes the niche call a crossover to one of the consumers. Not necessarily the fittest
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -856,8 +867,6 @@ to update-link-appearance [bits1 bits2 color-link]
   ifelse counter-change > 0 [ ask my-links [set color color-link set thickness counter-change / 100]] [ask my-links [set color red]]
 
 end
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; (modelo DNA Protein Synthesis)
 ;;;;;;;;;;;;;;;;;;;;;; instructions for players ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1080,7 +1089,7 @@ initial_resources
 initial_resources
 1
 1000
-1000.0
+501.0
 1
 1
 NIL
@@ -1179,7 +1188,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1000
-501.0
+401.0
 100
 1
 NIL
@@ -1194,7 +1203,7 @@ expense_to_live_growth
 expense_to_live_growth
 0
 1
-0.15
+0.2
 0.05
 1
 NIL
@@ -1302,7 +1311,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-2
+0
 
 MONITOR
 812
@@ -1371,7 +1380,7 @@ INPUTBOX
 364
 70
 stop_trigger
-200.0
+1000.0
 1
 0
 Number
@@ -1415,7 +1424,7 @@ mutation_rate
 mutation_rate
 0
 0.1
-0.05
+0.1
 0.01
 1
 NIL
@@ -1554,45 +1563,45 @@ standard-deviation [willingness-to-share] of entities
 11
 
 SLIDER
-196
-342
-369
-375
+192
+284
+365
+317
 cost_of_crossover
 cost_of_crossover
 0
 1000
-500.0
+0.0
 100
 1
 NIL
 HORIZONTAL
 
 SLIDER
-196
-408
-369
-441
+192
+350
+365
+383
 cost_of_mutation
 cost_of_mutation
 0
 1000
-500.0
+0.0
 100
 1
 NIL
 HORIZONTAL
 
 SLIDER
-196
-375
-369
-408
+192
+317
+365
+350
 cost_of_development
 cost_of_development
 0
 1000
-400.0
+0.0
 100
 1
 NIL
@@ -1607,7 +1616,7 @@ development_performance
 development_performance
 0
 1
-0.5
+0.0
 0.05
 1
 NIL
@@ -1622,7 +1631,7 @@ creation_performance
 creation_performance
 0
 1
-0.5
+1.0
 0.05
 1
 NIL
@@ -1682,7 +1691,7 @@ SWITCH
 516
 super_share?
 super_share?
-0
+1
 1
 -1000
 
@@ -1704,10 +1713,10 @@ NIL
 1
 
 SWITCH
-196
-309
-369
-342
+636
+556
+809
+589
 non_economical_entities?
 non_economical_entities?
 0
@@ -1723,7 +1732,7 @@ integration_boost
 integration_boost
 0
 1
-0.05
+0.0
 0.05
 1
 NIL
@@ -1736,7 +1745,7 @@ SWITCH
 121
 set_input_seed?
 set_input_seed?
-0
+1
 1
 -1000
 
@@ -1757,10 +1766,154 @@ INPUTBOX
 277
 70
 my-seed-repeat
-8.0
+-1.392489156E9
 1
 0
 Number
+
+PLOT
+1274
+51
+1528
+201
+Entities that shared knowledge
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -13840069 true "" "plot count entities with [emitted?]"
+
+PLOT
+1533
+51
+1789
+201
+Entities that attempted to learn
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -5825686 true "" "plot count entities with [crossover?]"
+
+PLOT
+1274
+204
+1529
+354
+Entities that attempted mutation
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -13345367 true "" "plot count entities with [mutation?]"
+
+PLOT
+1533
+204
+1789
+354
+Entities that integrated partners
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count entities with [integrated?]"
+
+PLOT
+1274
+357
+1530
+507
+Consumers that attempted crossover
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count entities with [consumer? and crossover?]"
+
+PLOT
+1534
+357
+1790
+507
+Generators that attempted mutation
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -10899396 true "" "plot count entities with [generator? and mutation?]"
+
+PLOT
+1274
+510
+1530
+660
+Entities that attempted development
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count entities with [development?]"
+
+PLOT
+1534
+509
+1790
+659
+Entities alive
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count entities"
 
 @#$#@#$#@
 ## WHAT IS IT?
