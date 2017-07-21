@@ -394,6 +394,35 @@ to set-entity-parameters
 end
 
 ;; creates a superfit entity, perhaps an entity that comes from another market
+to create-super-generator
+
+
+  create-entities 1 [
+
+    set generator? true
+    set consumer? false
+    set diffuser? false
+    set integrator? false
+
+    set-entity-parameters
+
+    ;; sets the creation performance to 0 and the motivation to learn to 0 to preserve the super-fitness
+    if not super_share? [
+      set creation-performance 0
+      set motivation-to-learn 0
+    ]
+
+    ;; creates a perfect match to the market demand
+    set science-knowledge [niche-demand] of one-of niches
+    set new-science-knowledge science-knowledge
+
+    ;; assigns the supercompetitor the best fitness score possible from the start
+    test-fitness
+    set color magenta
+  ]
+
+end
+
 to create-super-competitor
 
 
@@ -406,7 +435,7 @@ to create-super-competitor
 
     set-entity-parameters
 
-    ;; sets its willingness to share its knowledge according to a normal distribution
+    ;; sets the motivation to learn and willingness to share to 0 to preserve the competitivity of the super competitor
     if not super_share? [
       set willingness-to-share 0
       set motivation-to-learn 0
@@ -423,6 +452,38 @@ to create-super-competitor
 
 end
 
+
+;; creates a superfit diffuser. Different from the other super entities, this one assumes
+to create-super-diffuser
+
+
+  create-entities 1 [
+
+    set generator? false
+    set consumer? false
+    set diffuser? true
+    set integrator? false
+
+    set-entity-parameters
+
+    ;; a super diffuser gets maximum efficiency when sharing knowledge
+    if not super_share? [
+      set willingness-to-share 1
+      set motivation-to-learn 0
+    ]
+
+    ;; creates a perfect match to the market demand
+    set tech-knowledge [niche-demand] of one-of niches
+    set new-tech-knowledge tech-knowledge
+    set science-knowledge tech-knowledge
+    set new-science-knowledge science-knowledge
+
+    ;; assigns the supercompetitor the best fitness score possible from the start
+    test-fitness
+    set color magenta
+  ]
+
+end
 
 
 to select-role
@@ -1134,7 +1195,7 @@ number_of_entities
 number_of_entities
 1
 600
-107.0
+120.0
 1
 1
 NIL
@@ -1188,17 +1249,17 @@ NIL
 1
 
 OUTPUT
-19
-664
-362
-847
+16
+734
+359
+917
 12
 
 BUTTON
-18
-630
-196
-663
+15
+700
+193
+733
 Previous Instruction
 previous-instruction
 NIL
@@ -1212,10 +1273,10 @@ NIL
 1
 
 BUTTON
-197
-630
-361
-663
+194
+700
+358
+733
 Next Instruction
 next-instruction
 NIL
@@ -1229,10 +1290,10 @@ NIL
 1
 
 MONITOR
-275
-582
-361
-627
+272
+652
+358
+697
 Instruction #
 current-instruction-label
 17
@@ -1278,7 +1339,7 @@ expense_to_live_growth
 expense_to_live_growth
 0
 1
-0.2
+0.1
 0.05
 1
 NIL
@@ -1499,7 +1560,7 @@ mutation_rate
 mutation_rate
 0
 0.1
-0.0
+0.05
 0.01
 1
 NIL
@@ -1514,7 +1575,7 @@ std_dev_motivation
 std_dev_motivation
 0
 0.5
-0.0
+0.2
 0.05
 1
 NIL
@@ -1529,7 +1590,7 @@ std_dev_willingness
 std_dev_willingness
 0
 0.5
-0.0
+0.2
 0.05
 1
 NIL
@@ -1646,7 +1707,7 @@ cost_of_crossover
 cost_of_crossover
 0
 1000
-0.0
+100.0
 100
 1
 NIL
@@ -1661,7 +1722,7 @@ cost_of_mutation
 cost_of_mutation
 0
 1000
-0.0
+100.0
 100
 1
 NIL
@@ -1676,7 +1737,7 @@ cost_of_development
 cost_of_development
 0
 1000
-0.0
+100.0
 100
 1
 NIL
@@ -1706,7 +1767,7 @@ creation_performance
 creation_performance
 0
 1
-0.0
+0.5
 0.05
 1
 NIL
@@ -1721,7 +1782,7 @@ std_dev_creation_performance
 std_dev_creation_performance
 0
 .5
-0.0
+0.2
 .05
 1
 NIL
@@ -1753,7 +1814,7 @@ std_dev_development_performance
 std_dev_development_performance
 0
 0.5
-0.0
+0.2
 0.05
 1
 NIL
@@ -1761,20 +1822,20 @@ HORIZONTAL
 
 SWITCH
 13
-470
+536
 187
-503
+569
 super_share?
 super_share?
-1
+0
 1
 -1000
 
 BUTTON
-14
-506
-185
-539
+13
+577
+184
+610
 NIL
 mutate-market
 NIL
@@ -1788,10 +1849,10 @@ NIL
 1
 
 SWITCH
-14
-543
-187
-576
+13
+614
+186
+647
 non_economical_entities?
 non_economical_entities?
 0
@@ -1807,7 +1868,7 @@ integration_boost
 integration_boost
 0
 1
-0.3
+0.2
 0.05
 1
 NIL
@@ -2031,10 +2092,10 @@ Generation and development
 1
 
 TEXTBOX
-24
-597
-174
-615
+21
+667
+171
+685
 Instructions and seed origin
 11
 0.0
@@ -2059,7 +2120,7 @@ number_of_generators
 number_of_generators
 0
 100
-6.0
+5.0
 1
 1
 NIL
@@ -2074,7 +2135,7 @@ number_of_consumers
 number_of_consumers
 0
 100
-50.0
+75.0
 1
 1
 NIL
@@ -2089,7 +2150,7 @@ number_of_integrators
 number_of_integrators
 0
 100
-10.0
+5.0
 1
 1
 NIL
@@ -2104,7 +2165,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-8.0
+5.0
 1
 1
 NIL
@@ -2154,7 +2215,7 @@ number_of_gen_dif
 number_of_gen_dif
 0
 100
-8.0
+5.0
 1
 1
 NIL
@@ -2247,6 +2308,40 @@ count entities with [generator? and not consumer? and diffuser? and not integrat
 17
 1
 11
+
+BUTTON
+12
+470
+187
+503
+NIL
+create-super-generator
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+12
+503
+187
+536
+NIL
+create-super-diffuser
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?

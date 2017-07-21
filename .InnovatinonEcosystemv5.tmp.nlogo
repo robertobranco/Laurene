@@ -394,6 +394,35 @@ to set-entity-parameters
 end
 
 ;; creates a superfit entity, perhaps an entity that comes from another market
+to create-super-generator
+
+
+  create-entities 1 [
+
+    set generator? true
+    set consumer? false
+    set diffuser? false
+    set integrator? false
+
+    set-entity-parameters
+
+    ;; sets the creation performance to 0 and the motivation to learn to 0 to preserve the super-fitness
+    if not super_share? [
+      set creation-performance 0
+      set motivation-to-learn 0
+    ]
+
+    ;; creates a perfect match to the market demand
+    set science-knowledge [niche-demand] of one-of niches
+    set new-science-knowledge science-knowledge
+
+    ;; assigns the supercompetitor the best fitness score possible from the start
+    test-fitness
+    set color magenta
+  ]
+
+end
+
 to create-super-competitor
 
 
@@ -404,11 +433,9 @@ to create-super-competitor
     set diffuser? false
     set integrator? false
 
-    set color magenta
-
     set-entity-parameters
 
-    ;; sets its willingness to share its knowledge according to a normal distribution
+    ;; sets the motivation to learn and willingness to share to 0 to preserve the competitivity of the super competitor
     if not super_share? [
       set willingness-to-share 0
       set motivation-to-learn 0
@@ -420,11 +447,43 @@ to create-super-competitor
 
     ;; assigns the supercompetitor the best fitness score possible from the start
     test-fitness
-
+    set color magenta
   ]
 
 end
 
+
+;; creates a superfit diffuser. Different from the other super entities, this one assumes
+to create-super-diffuser
+
+
+  create-entities 1 [
+
+    set generator? false
+    set consumer? false
+    set diffuser? true
+    set integrator? false
+
+    set-entity-parameters
+
+    ;; a super diffuser gets maximum efficiency when sharing knowledge
+    if not super_share? [
+      set willingness-to-share 1
+      set motivation-to-learn 0
+    ]
+
+    ;; creates a perfect match to the market demand
+    set tech-knowledge [niche-demand] of one-of niches
+    set new-tech-knowledge tech-knowledge
+    set science-knowledge tech-knowledge
+    set new-science-knowledge science-knowledge
+
+    ;; assigns the supercompetitor the best fitness score possible from the start
+    test-fitness
+    set color magenta
+  ]
+
+end
 
 
 to select-role
@@ -1190,17 +1249,17 @@ NIL
 1
 
 OUTPUT
-19
-664
-362
-847
+16
+734
+359
+917
 12
 
 BUTTON
-18
-630
-196
-663
+15
+700
+193
+733
 Previous Instruction
 previous-instruction
 NIL
@@ -1214,10 +1273,10 @@ NIL
 1
 
 BUTTON
-197
-630
-361
-663
+194
+700
+358
+733
 Next Instruction
 next-instruction
 NIL
@@ -1231,10 +1290,10 @@ NIL
 1
 
 MONITOR
-275
-582
-361
-627
+272
+652
+358
+697
 Instruction #
 current-instruction-label
 17
@@ -1763,9 +1822,9 @@ HORIZONTAL
 
 SWITCH
 13
-470
+536
 187
-503
+569
 super_share?
 super_share?
 1
@@ -1773,10 +1832,10 @@ super_share?
 -1000
 
 BUTTON
-14
-506
-185
-539
+13
+577
+184
+610
 NIL
 mutate-market
 NIL
@@ -1790,10 +1849,10 @@ NIL
 1
 
 SWITCH
-14
-543
-187
-576
+13
+614
+186
+647
 non_economical_entities?
 non_economical_entities?
 0
@@ -2033,10 +2092,10 @@ Generation and development
 1
 
 TEXTBOX
-24
-597
-174
-615
+21
+667
+171
+685
 Instructions and seed origin
 11
 0.0
@@ -2249,6 +2308,40 @@ count entities with [generator? and not consumer? and diffuser? and not integrat
 17
 1
 11
+
+BUTTON
+12
+470
+187
+503
+NIL
+create-super-generator
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+12
+503
+187
+536
+NIL
+create-super-diffuser
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
