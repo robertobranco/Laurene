@@ -273,6 +273,11 @@ to go
     stop
   ]
 
+  if count entities with [science? or technology?] = 0 [
+    print "There are no knowledge entities left"
+    stop
+  ]
+
   ;; *** to do list
   ;; ask entities to update its own parameters (adapt)
   ;; create new entities to replace the dead from crossover of other fit entities and mutations
@@ -419,6 +424,8 @@ to create-super-generator
     ;; assigns the supercompetitor the best fitness score possible from the start
     test-fitness
     set color magenta
+    set shape "star 2"
+
   ]
 
 end
@@ -448,6 +455,7 @@ to create-super-competitor
     ;; assigns the supercompetitor the best fitness score possible from the start
     test-fitness
     set color magenta
+    set shape "square 2"
   ]
 
 end
@@ -481,6 +489,7 @@ to create-super-diffuser
     ;; assigns the supercompetitor the best fitness score possible from the start
     test-fitness
     set color magenta
+    set shape "triangle 2"
   ]
 
 end
@@ -693,19 +702,42 @@ to-report choose-partner
 
   ;; creates roulette that will select the partner from the agentset of suitable partners (Lottery Example model from Netlogo)
   ;; the method favours those with higher reputation and more resouces, but it doesnt rule anyone out.
-  let pick random-float (sum [fitness] of possible-partners  + sum [resources] of possible-partners)
+
+  ;; sums the fitness and resources of all possible partners to perform the normalization
+  let total-fitness sum [fitness] of possible-partners
+  let total-resources sum [resources] of possible-partners
+
+  ;; this represents the sum of 100% of the normalized reputation and 100% of the normalized resources
+  ;; but with less computational cost
+  let pick random-float (1 + 1)
   let partner nobody
   ask possible-partners [
     ;; if there's no winner yet...
     if partner = nobody [
-      ifelse (resources + fitness) > pick [
+      ;; gives the chance of the entity given the sum of its normalized resources and normalized fitness
+      ifelse ((resources / total-resources) + (fitness / total-fitness)) > pick [
         set partner self
       ]
       [
-       set pick pick - (resources + fitness)
+       set pick pick - ((resources / total-resources) + (fitness / total-fitness))
       ]
     ]
   ]
+
+;;  old non normalized code
+;;  let pick random-float (sum [fitness] of possible-partners  + sum [resources] of possible-partners)
+;;  let partner nobody
+;;  ask possible-partners [
+    ;; if there's no winner yet...
+;;    if partner = nobody [
+;;      ifelse (resources + (fitness)) > pick [
+;;        set partner self
+;;      ]
+;;      [
+;;       set pick pick - (resources + (fitness))
+;;      ]
+;;    ]
+;;  ]
 
   report partner
 
@@ -1195,7 +1227,7 @@ number_of_entities
 number_of_entities
 1
 600
-120.0
+50.0
 1
 1
 NIL
@@ -1447,7 +1479,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-0
+2
 
 MONITOR
 812
@@ -1560,7 +1592,7 @@ mutation_rate
 mutation_rate
 0
 0.1
-0.05
+0.1
 0.01
 1
 NIL
@@ -1707,7 +1739,7 @@ cost_of_crossover
 cost_of_crossover
 0
 1000
-100.0
+500.0
 100
 1
 NIL
@@ -1722,7 +1754,7 @@ cost_of_mutation
 cost_of_mutation
 0
 1000
-100.0
+500.0
 100
 1
 NIL
@@ -1737,7 +1769,7 @@ cost_of_development
 cost_of_development
 0
 1000
-100.0
+500.0
 100
 1
 NIL
@@ -1767,7 +1799,7 @@ creation_performance
 creation_performance
 0
 1
-0.5
+1.0
 0.05
 1
 NIL
@@ -2120,7 +2152,7 @@ number_of_generators
 number_of_generators
 0
 100
-5.0
+0.0
 1
 1
 NIL
@@ -2135,7 +2167,7 @@ number_of_consumers
 number_of_consumers
 0
 100
-75.0
+0.0
 1
 1
 NIL
@@ -2150,7 +2182,7 @@ number_of_integrators
 number_of_integrators
 0
 100
-5.0
+50.0
 1
 1
 NIL
@@ -2165,7 +2197,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-5.0
+0.0
 1
 1
 NIL
@@ -2180,7 +2212,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-25.0
+0.0
 1
 1
 NIL
@@ -2215,7 +2247,7 @@ number_of_gen_dif
 number_of_gen_dif
 0
 100
-5.0
+0.0
 1
 1
 NIL
@@ -2632,6 +2664,13 @@ star
 false
 0
 Polygon -7500403 true true 151 1 185 108 298 108 207 175 242 282 151 216 59 282 94 175 3 108 116 108
+
+star 2
+false
+0
+Polygon -7500403 true true 151 1 185 108 298 108 207 175 242 282 151 216 59 282 94 175 3 108 116 108
+Rectangle -7500403 true true 15 45 15 45
+Rectangle -16777216 true false 105 120 195 210
 
 target
 false
