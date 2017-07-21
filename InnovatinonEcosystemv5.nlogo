@@ -223,6 +223,7 @@ to setup
       set-entity-parameters
 
     ]
+
   set number_of_entities (number_of_generators + number_of_consumers + number_of_integrators + number_of_diffusers + number_of_cons_gen + number_of_gen_dif)
 
   ]
@@ -286,52 +287,43 @@ to go
   ;; knowledge activities inside the entities
 
   ;; ask generators to perform research, in other words, mutate knowledge
-  ;; *** has to be called before the call to interact, as it may destroy newly developed science
+  ;; *** has to be called before the call to interact, as it may alter newly developed science
   ask entities with [generator?] [
-    if random-float 1 < creation-performance [
-      if resources > cost_of_mutation [
-        set mutation? true
-        let new-science-knowledge1 new-science-knowledge
-        set new-science-knowledge mutate new-science-knowledge
-        if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [
-          set mutated? true
-        ]
-      ]
-    ]
+
+    generate
+
   ]
 
 
   ;; asks entities with scientific and technological knowledge to develop science into technology
+  ;; *** has to be called before interact to prevent the altering of newly developed knowledge
   ask entities with [science? and technology?] [
-    if resources > cost_of_development [
-      if random-float 1 < development-performance [
-        set new-tech-knowledge crossover tech-knowledge science-knowledge
-        ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
-        set development? true
-      ]
-    ]
+
+    develop
+
   ]
 
   ;; knowledge activities with other entities
 
   ;; asks integrators to facilitate the interaction and crossover between two entities
   ask entities with [integrator?] [
+
     integrate
+
   ]
 
   ;; ask entities with some kind of knowledge  to look for partners and possibly, to crossover
-  ;; *** has to be called after the call for development, to prevent the destruction of newly developed knowledge
+  ;; *** has to be called after the call for development, to prevent the destruction of newly developed knowledge, unless
+  ;; it is the intention to allow entities to perform more than one activity per iteration - in that case some of the learning may be overwritten
   ;; the crossover? flag is set by the interact procedure after both entities have agreed to interact
+  ;; since integrated entities also perform interact, it is possible that an entity has already performed crossover when the code gets to this point
   ask entities with [science? or technology?] [
     if resources > cost_of_crossover and not development? and not mutation? and not crossover? [
+
       interact
+
     ]
   ]
-
-
-
-
-
 
   ;; ask entities to update their knowledge given the actions performed on the iteration
   ask entities [
@@ -346,6 +338,34 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; entities' procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to develop
+
+  if resources > cost_of_development [
+      if random-float 1 < development-performance [
+
+        ;;using new-tech-knowledge instead of tech-knowledge allows several knowledge activities to be performed without loosing the notion of paralelism
+        ;; although some of the learning of the previous activity may be altered
+        set new-tech-knowledge crossover new-tech-knowledge new-science-knowledge
+        ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
+        set development? true
+      ]
+    ]
+
+end
+
+to generate
+
+  if random-float 1 < creation-performance [
+      if resources > cost_of_mutation [
+        set mutation? true
+        let new-science-knowledge1 new-science-knowledge
+        set new-science-knowledge mutate new-science-knowledge
+        if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [
+          set mutated? true
+        ]
+      ]
+    ]
+end
 
 to set-entity-parameters
 
@@ -870,10 +890,10 @@ end
 
 to integrate
 
-set integrated? true
-let partner1 one-of other entities with [science? or technology?]
-ask partner1 [
-set integration? true
+  set integrated? true
+  let partner1 one-of other entities with [science? or technology?]
+  ask partner1 [
+  set integration? true
   interact
 ]
 
@@ -1227,7 +1247,7 @@ number_of_entities
 number_of_entities
 1
 600
-50.0
+283.0
 1
 1
 NIL
@@ -1479,7 +1499,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-2
+0
 
 MONITOR
 812
@@ -1739,7 +1759,7 @@ cost_of_crossover
 cost_of_crossover
 0
 1000
-500.0
+0.0
 100
 1
 NIL
@@ -1754,7 +1774,7 @@ cost_of_mutation
 cost_of_mutation
 0
 1000
-500.0
+0.0
 100
 1
 NIL
@@ -1769,7 +1789,7 @@ cost_of_development
 cost_of_development
 0
 1000
-500.0
+0.0
 100
 1
 NIL
@@ -2152,7 +2172,7 @@ number_of_generators
 number_of_generators
 0
 100
-0.0
+48.0
 1
 1
 NIL
@@ -2167,7 +2187,7 @@ number_of_consumers
 number_of_consumers
 0
 100
-0.0
+51.0
 1
 1
 NIL
@@ -2182,7 +2202,7 @@ number_of_integrators
 number_of_integrators
 0
 100
-50.0
+47.0
 1
 1
 NIL
@@ -2197,7 +2217,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-0.0
+44.0
 1
 1
 NIL
@@ -2212,7 +2232,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-0.0
+42.0
 1
 1
 NIL
@@ -2247,7 +2267,7 @@ number_of_gen_dif
 number_of_gen_dif
 0
 100
-0.0
+51.0
 1
 1
 NIL
