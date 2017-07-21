@@ -139,7 +139,7 @@ to setup
   ask patches [set pcolor black];
   set-default-shape entities "circle";
 
-  if random_ent_creation? [
+  ifelse random_ent_creation? [
 
     ;; creates random amounts of each kind of entity and assigns them resources, a knowledge DNA and others
     create-entities number_of_entities [
@@ -223,6 +223,7 @@ to setup
       set-entity-parameters
 
     ]
+  set number_of_entities (number_of_generators + number_of_consumers + number_of_integrators + number_of_diffusers + number_of_cons_gen + number_of_gen_dif)
 
   ]
 
@@ -272,36 +273,15 @@ to go
     stop
   ]
 
-
+  ;; *** to do list
   ;; ask entities to update its own parameters (adapt)
   ;; create new entities to replace the dead from crossover of other fit entities and mutations
   ;; the impact of environment in relations
 
-  ;; *** review this statement, as the code has changed 19-07
-  ;; this has to be called before the crossover is called by GO, as it falsifies the crossover? flag
-  ;; the development is implemented as an internal crossover, done among the people and structures within the organization
-  ;; therefore, it has to falsify the regular crossover? cost, as it may also be performed by the entity during an iteration
-  ;; asks entities with scientific and technological knowledge to develop science into technology
-  ask entities with [science? and technology?] [
-    if resources > cost_of_development [
-      if random-float 1 < development-performance [
-        set new-tech-knowledge crossover tech-knowledge science-knowledge
-        ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
-        set development? true
-      ]
-    ]
-  ]
-
-  ;; ask entities with some kind of knowledge  to look for partners and possibly, to crossover
-  ;; the crossover? flag is set by the interact procedure after both entities have agreed to interact
-  ask entities with [science? or technology?] [
-    if resources > cost_of_crossover [
-      interact
-    ]
-  ]
-
+  ;; knowledge activities inside the entities
 
   ;; ask generators to perform research, in other words, mutate knowledge
+  ;; *** has to be called before the call to interact, as it may destroy newly developed science
   ask entities with [generator?] [
     if random-float 1 < creation-performance [
       if resources > cost_of_mutation [
@@ -315,9 +295,38 @@ to go
     ]
   ]
 
+
+  ;; asks entities with scientific and technological knowledge to develop science into technology
+  ask entities with [science? and technology?] [
+    if resources > cost_of_development [
+      if random-float 1 < development-performance [
+        set new-tech-knowledge crossover tech-knowledge science-knowledge
+        ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
+        set development? true
+      ]
+    ]
+  ]
+
+  ;; knowledge activities with other entities
+
+  ;; asks integrators to facilitate the interaction and crossover between two entities
   ask entities with [integrator?] [
     integrate
   ]
+
+  ;; ask entities with some kind of knowledge  to look for partners and possibly, to crossover
+  ;; *** has to be called after the call for development, to prevent the destruction of newly developed knowledge
+  ;; the crossover? flag is set by the interact procedure after both entities have agreed to interact
+  ask entities with [science? or technology?] [
+    if resources > cost_of_crossover and not development? and not mutation? and not crossover? [
+      interact
+    ]
+  ]
+
+
+
+
+
 
   ;; ask entities to update their knowledge given the actions performed on the iteration
   ask entities [
@@ -394,30 +403,20 @@ to create-super-competitor
     set consumer? true
     set diffuser? false
     set integrator? false
+
     set color magenta
 
     set-entity-parameters
 
-
-    ;; gives the entities its initial resources
-    set resources initial_resources
-
     ;; sets its willingness to share its knowledge according to a normal distribution
-    ifelse super_share? [
-      set willingness-to-share random-normal willingness_to_share std_dev_willingness
-    ]
-    [
+    if not super_share? [
       set willingness-to-share 0
+      set motivation-to-learn 0
     ]
-    ;; protects the great advantage of the supercompetitor
-    set motivation-to-learn 0
 
-
-
-    ;; it has a perfect match to the market
+    ;; creates a perfect match to the market demand
     set tech-knowledge [niche-demand] of one-of niches
     set new-tech-knowledge tech-knowledge
-
 
     ;; assigns the supercompetitor the best fitness score possible from the start
     set fitness Knowledge / 2
@@ -1128,15 +1127,15 @@ NIL
 1
 
 SLIDER
-402
-506
-577
-539
+399
+547
+574
+580
 number_of_entities
 number_of_entities
 1
-100
-100.0
+600
+304.0
 1
 1
 NIL
@@ -1388,7 +1387,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-0
+2
 
 MONITOR
 812
@@ -2053,25 +2052,25 @@ Special functions
 1
 
 SLIDER
-401
-561
-579
-594
+398
+645
+576
+678
 number_of_generators
 number_of_generators
 0
 100
-50.0
+54.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-581
-561
-756
-594
+578
+645
+753
+678
 number_of_consumers
 number_of_consumers
 0
@@ -2083,10 +2082,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-401
-595
-579
-628
+398
+725
+576
+758
 number_of_integrators
 number_of_integrators
 0
@@ -2098,10 +2097,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-581
-595
-756
-628
+578
+725
+753
+758
 number_of_diffusers
 number_of_diffusers
 0
@@ -2113,10 +2112,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-407
-649
-579
-682
+405
+815
+577
+848
 number_of_cons_gen
 number_of_cons_gen
 0
@@ -2128,30 +2127,30 @@ NIL
 HORIZONTAL
 
 TEXTBOX
-557
-541
-707
-559
+554
+582
+704
+600
 Pure entities
 11
 0.0
 1
 
 TEXTBOX
-549
-633
-699
-651
+546
+763
+696
+781
 Hybrid entities
 11
 0.0
 1
 
 SLIDER
-581
-649
-753
-682
+579
+815
+751
+848
 number_of_gen_dif
 number_of_gen_dif
 0
@@ -2163,15 +2162,92 @@ NIL
 HORIZONTAL
 
 SWITCH
-578
-506
-758
-539
+575
+547
+755
+580
 random_ent_creation?
 random_ent_creation?
 1
 1
 -1000
+
+MONITOR
+529
+501
+617
+546
+NIL
+count entities
+17
+1
+11
+
+MONITOR
+398
+599
+576
+644
+Pure generators
+count entities with [generator? and not consumer? and not diffuser? and not integrator?]
+17
+1
+11
+
+MONITOR
+577
+599
+753
+644
+Pure consumers
+count entities with [ not generator? and consumer? and not diffuser? and not integrator?]
+17
+1
+11
+
+MONITOR
+398
+679
+576
+724
+Pure integrators
+count entities with [not generator? and not consumer? and not diffuser? and integrator?]
+17
+1
+11
+
+MONITOR
+577
+679
+753
+724
+Pure diffusers
+count entities with [not generator? and not consumer? and diffuser? and not integrator?]
+17
+1
+11
+
+MONITOR
+405
+770
+577
+815
+Generators-consumers
+count entities with [generator? and consumer? and not diffuser? and not integrator?]
+17
+1
+11
+
+MONITOR
+705
+803
+833
+848
+Generators-diffusers
+count entities with [generator? and not consumer? and diffuser? and not integrator?]
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
