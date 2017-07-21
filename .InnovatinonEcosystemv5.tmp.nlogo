@@ -316,7 +316,7 @@ to go
   ;; *** has to be called after the call for development, to prevent the destruction of newly developed knowledge, unless
   ;; it is the intention to allow entities to perform more than one activity per iteration - in that case some of the learning may be overwritten
   ;; the crossover? flag is set by the interact procedure after both entities have agreed to interact
-
+  ;; since integrated entities also perform interact, it is possible that an entity has already performed crossover when the code gets to this point
   ask entities with [science? or technology?] [
     if resources > cost_of_crossover and not development? and not mutation? and not crossover? [
 
@@ -338,6 +338,97 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; entities' procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to create-startup [number-of-startups]
+
+  create-entities number-of-startups [
+
+    set generator? false
+    ;; set generator? one-of [true false] ;; if a chance of creating a generator consumer is desired
+    set consumer? true
+    set diffuser? false
+    set integrator? false
+
+    set color orange
+    set-entity-parameters
+
+
+    let parent1 choose-partner
+
+    ;; here it is performed a roulette with replacement
+    let parent2 choose-partner
+    show parent1
+    show parent2
+
+     ;; if the new startup has both kinds of knowledge, and so do the chosen parents
+     ifelse science? and technology? and [science? and technology?] of parent1 and [science? and technology?] of parent2 [
+
+      ;; bits1 is the science-knowledge of the parent 1
+      let bits1 [science-knowledge] of parent1
+      ;; bits2 is the science-knowledge of the parent 2
+      let bits2 [science-knowledge] of parent2
+      set new-science-knowledge crossover bits1 bits2
+
+      ;; also performs a mutation in science knowledge
+      set new-science-knowledge mutate new-science-knowledge
+
+      set science-knowledge new-science-knowledge
+
+      ;; bits1 is the tech-knowledge of the parent 1
+      set bits1 [tech-knowledge] of parent1
+      ;; bits2 is the tech-knowledge of the emitter
+      set bits2 [tech-knowledge] of parent2
+      set new-tech-knowledge crossover bits1 bits2
+
+      ;; also performs a mutation in technological knowledge
+      set new-tech-knowledge mutate new-tech-knowledge
+
+      set tech-knowledge new-tech-knowledge
+
+    ]
+
+    ;; if the startup and both parents have only scientific knowledge in commmon
+    [
+      ifelse science? and [science?] of parent1 and [science?] of parent2 [
+        ;; bits1 is the science-knowledge of the parent 1
+        let bits1 [science-knowledge] of parent1
+        ;; bits2 is the science-knowledge of the parent 2
+        let bits2 [science-knowledge] of parent2
+        set new-science-knowledge crossover bits1 bits2
+
+        ;; also performs a mutation in science knowledge
+        set new-science-knowledge mutate new-science-knowledge
+
+        set science-knowledge new-science-knowledge
+
+      ]
+
+      ;; if the startup and both parents have only technological knowledge in commmon
+      ;; the code ignores the cases where the chosen parents do not have matching knowledge
+      ;; that is only a possibility when the startup is a generator-consumer
+      ;; in that case, the startup will remain with the select-parameters assigned knowledge
+      ;; *** code can be writen so that the startup would fetch the scientific knowledge from one and the tech knowledge from the other
+      [
+        if technology? and [technology?] of parent1 a [
+          ;; bits1 is the tech-knowledge of the parent 1
+          set bits1 [tech-knowledge] of parent1
+          ;; bits2 is the tech-knowledge of the emitter
+          set bits2 [tech-knowledge] of parent2
+          set new-tech-knowledge crossover bits1 bits2
+
+          ;; also performs a mutation in technological knowledge
+          set new-tech-knowledge mutate new-tech-knowledge
+
+          set tech-knowledge new-tech-knowledge
+
+        ]
+      ]
+    ]
+  ]
+
+end
+
+
+
 to develop
 
   if resources > cost_of_development [
@@ -1247,7 +1338,7 @@ number_of_entities
 number_of_entities
 1
 600
-200.0
+283.0
 1
 1
 NIL
@@ -1759,7 +1850,7 @@ cost_of_crossover
 cost_of_crossover
 0
 1000
-500.0
+0.0
 100
 1
 NIL
@@ -1774,7 +1865,7 @@ cost_of_mutation
 cost_of_mutation
 0
 1000
-500.0
+0.0
 100
 1
 NIL
@@ -1789,7 +1880,7 @@ cost_of_development
 cost_of_development
 0
 1000
-500.0
+0.0
 100
 1
 NIL
@@ -2172,7 +2263,7 @@ number_of_generators
 number_of_generators
 0
 100
-0.0
+48.0
 1
 1
 NIL
@@ -2187,7 +2278,7 @@ number_of_consumers
 number_of_consumers
 0
 100
-0.0
+51.0
 1
 1
 NIL
@@ -2202,7 +2293,7 @@ number_of_integrators
 number_of_integrators
 0
 100
-0.0
+47.0
 1
 1
 NIL
@@ -2217,7 +2308,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-100.0
+44.0
 1
 1
 NIL
@@ -2232,7 +2323,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-100.0
+42.0
 1
 1
 NIL
@@ -2267,7 +2358,7 @@ number_of_gen_dif
 number_of_gen_dif
 0
 100
-0.0
+51.0
 1
 1
 NIL
