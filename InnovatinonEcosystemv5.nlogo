@@ -404,8 +404,6 @@ to create-super-competitor
     set diffuser? false
     set integrator? false
 
-    set color magenta
-
     set-entity-parameters
 
     ;; sets its willingness to share its knowledge according to a normal distribution
@@ -419,7 +417,8 @@ to create-super-competitor
     set new-tech-knowledge tech-knowledge
 
     ;; assigns the supercompetitor the best fitness score possible from the start
-    set fitness Knowledge / 2
+    test-fitness
+    set color magenta
   ]
 
 end
@@ -1135,7 +1134,7 @@ number_of_entities
 number_of_entities
 1
 600
-304.0
+107.0
 1
 1
 NIL
@@ -1249,7 +1248,7 @@ niche_resources
 niche_resources
 0
 20000
-5000.0
+20000.0
 1000
 1
 NIL
@@ -1470,7 +1469,7 @@ motivation_to_learn
 motivation_to_learn
 0.00
 1
-0.0
+0.5
 0.05
 1
 NIL
@@ -1485,7 +1484,7 @@ willingness_to_share
 willingness_to_share
 0
 1
-0.0
+0.5
 0.05
 1
 NIL
@@ -1692,7 +1691,7 @@ development_performance
 development_performance
 0
 1
-0.05
+0.5
 0.05
 1
 NIL
@@ -1808,7 +1807,7 @@ integration_boost
 integration_boost
 0
 1
-0.0
+0.3
 0.05
 1
 NIL
@@ -2060,7 +2059,7 @@ number_of_generators
 number_of_generators
 0
 100
-54.0
+6.0
 1
 1
 NIL
@@ -2090,7 +2089,7 @@ number_of_integrators
 number_of_integrators
 0
 100
-50.0
+10.0
 1
 1
 NIL
@@ -2105,7 +2104,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-50.0
+8.0
 1
 1
 NIL
@@ -2120,7 +2119,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-50.0
+25.0
 1
 1
 NIL
@@ -2155,7 +2154,7 @@ number_of_gen_dif
 number_of_gen_dif
 0
 100
-50.0
+8.0
 1
 1
 NIL
