@@ -990,9 +990,9 @@ to integrate
     ask partner1 [
       set integration? true
       interact
-      set integrated? true
-    ]
 
+    ]
+  ]
 
 end
 
