@@ -139,6 +139,20 @@ to setup
   ask patches [set pcolor black];
   set-default-shape entities "circle";
 
+  ;; creates the niches where entities will compete and assigns them a demand DNA
+  ;; has to be created before the entities, so they can assess their fitness from the start
+
+  create-niches 1 [
+
+    ;; set the niche demand randomly
+    ;; set niche-demand n-values (knowledge / 2) [random 2]
+
+    ;; sets the niche demand as a full specification of what would be desirable, or all ones
+    set niche-demand n-values (knowledge / 2) [1]
+    hide-turtle
+    show niche-demand
+  ]
+
   ifelse random_ent_creation? [
 
     ;; creates random amounts of each kind of entity and assigns them resources, a knowledge DNA and others
@@ -226,18 +240,6 @@ to setup
 
   set number_of_entities (number_of_generators + number_of_consumers + number_of_integrators + number_of_diffusers + number_of_cons_gen + number_of_gen_dif)
 
-  ]
-
-  ;; creates the niches where entities will compete and assigns them a demand DNA
-  create-niches 1 [
-
-    ;; set the niche demand randomly
-    ;; set niche-demand n-values (knowledge / 2) [random 2]
-
-    ;; sets the niche demand as a full specification of what would be desirable, or all ones
-    set niche-demand n-values (knowledge / 2) [1]
-    hide-turtle
-    show niche-demand
   ]
 
   ;; resets the tick clock
@@ -512,6 +514,7 @@ to set-entity-parameters
   ;; selects the shape of the entity given its role in the ecosystem
   select-shape
   create-knowledge-DNA
+
 
 end
 
@@ -886,6 +889,7 @@ to interact
   let motivation-to-learn-actual 0
   let willingness-to-share-actual 0
 
+  ;; if this interaction is happening through an integrator, boos the motivation to learn
   ifelse integration? [
     ;; uses the integration_boost from the slider in the interface
     set motivation-to-learn-actual (motivation-to-learn + integration_boost)
@@ -894,8 +898,11 @@ to interact
     set motivation-to-learn-actual motivation-to-learn
   ]
 
+  ;; if the receiver decides, given its motivation (boosted or not) to interact and it has resources, look for partner
   ifelse (random-float 1 < motivation-to-learn-actual) and (resources > cost_of_crossover) [
     let partner choose-partner
+
+    ;; if a emitter partner is found and the interaction is happening through an integrator, boost its willingness to share
     if partner != nobody [
       ifelse integration? [
         set willingness-to-share-actual ([willingness-to-share] of partner + integration_boost)
@@ -904,13 +911,15 @@ to interact
       ]
     ]
 
+    ;; *** decide whether to falsify this only if the crossover did not happen - giving info about how many attempts of integration have been successful
     ;; the integration flag has served its purpose and has to be reset
     set integration? false
 
-    ;; given the partners willingness to share, begin crossover
+    ;; given the partners willingness to share (boosted or not), begin crossover
     if partner != nobody and (random-float 1 < willingness-to-share-actual) [
       ;;  asks the partner to create a directional link to the receiver
       let receiver self
+
       ask partner [
         create-link-to receiver
         set emitted? true
@@ -973,6 +982,7 @@ to interact
       ]
     ]
   ][;; in case the motivation-to-learn-actual or the resources are not enough to make the emitter look for a partner
+    ;; falsify integration here
     set integration? false
   ]
 
@@ -984,14 +994,16 @@ end
 
 to integrate
 
-
   let partner1 one-of other entities with [science? or technology?]
   if partner1 != nobody [
     ask partner1 [
       set integration? true
       interact
-
     ]
+
+    ;; If the integrator has found an receiver partner, it attempted to integrate, even though it may not have resulted
+    ;; in a successful integration
+    set integrated? true
   ]
 
 end
@@ -1665,7 +1677,7 @@ INPUTBOX
 364
 70
 stop_trigger
-250.0
+1000.0
 1
 0
 Number
@@ -1871,7 +1883,7 @@ cost_of_mutation
 cost_of_mutation
 0
 1000
-0.0
+1000.0
 100
 1
 NIL
