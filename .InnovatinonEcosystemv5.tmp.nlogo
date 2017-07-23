@@ -879,76 +879,50 @@ end
 
 to interact
 
-;; given the receiver's motivation to learn
-;; chooses a suitable partner to be the emitter
-;; If the interaction is intermediated by an integrator, there is an motivation-to-learn boost, increasing the chance of interaction
+  ;; given the receiver's motivation to learn
+  ;; chooses a suitable partner to be the emitter
+  ;; If the interaction is intermediated by an integrator, there is a receiver's motivation-to-learn boost, increasing the chance of interaction
 
-let motivation-to-learn-actual 0
-let willingness-to-share-actual 0
+  let motivation-to-learn-actual 0
+  let willingness-to-share-actual 0
 
-ifelse integration? [
-  ;; uses the integration_boost from the slider in the interface
-  set motivation-to-learn-actual (motivation-to-learn + integration_boost)
-]
-[
-  set motivation-to-learn-actual motivation-to-learn
-]
-
-ifelse (random-float 1 < motivation-to-learn-actual) and (resources > cost_of_crossover) [
-  let partner choose-partner
-
-  ifelse integration?  [
-    set willingness-to-share-actual ([willingness-to-share] of partner + integration_boost)
+  ifelse integration? [
+    ;; uses the integration_boost from the slider in the interface
+    set motivation-to-learn-actual (motivation-to-learn + integration_boost)
   ]
   [
-    set willingness-to-share-actual [willingness-to-share] of partner
+    set motivation-to-learn-actual motivation-to-learn
   ]
 
-  ;; the integration flag has served its purpose and has to be reset
-  set integration? false
-
-  ;; given the partners willingness to share, begin crossover
-  if partner != nobody and (random-float 1 < willingness-to-share-actual) [
-    ;;  asks the partner to create a directional link to the receiver
-    let receiver self
-    ask partner [
-      create-link-to receiver
-      set emitted? true
+  ifelse (random-float 1 < motivation-to-learn-actual) and (resources > cost_of_crossover) [
+    let partner choose-partner
+    if partner != nobody [
+      ifelse integration? [
+        set willingness-to-share-actual ([willingness-to-share] of partner + integration_boost)
+      ][
+        set willingness-to-share-actual [willingness-to-share] of partner
+      ]
     ]
 
-    set crossover? true
+    ;; the integration flag has served its purpose and has to be reset
+    set integration? false
 
+    ;; given the partners willingness to share, begin crossover
+    if partner != nobody and (random-float 1 < willingness-to-share-actual) [
+      ;;  asks the partner to create a directional link to the receiver
+      let receiver self
+      ask partner [
+        create-link-to receiver
+        set emitted? true
+      ]
 
-    ;; *** decide whether an interaction between entities with both kinds of knowledge results in changes in both
-    ;; kinds of knowledge
-    ;; if both the entity (receiver) and the partner (emitter) possess scientific and technological knowledge
-    ifelse science? and technology? and [science? and technology?] of partner [
+      set crossover? true
 
-      ;; bits1 is the science-knowledge of the receiver
-      let bits1 science-knowledge
-      ;; bits2 is the science-knowledge of the emitter
-      let bits2 [science-knowledge] of partner
-      set new-science-knowledge crossover bits1 bits2
+      ;; *** decide whether an interaction between entities with both kinds of knowledge results in changes in both
+      ;; kinds of knowledge
+      ;; if both the entity (receiver) and the partner (emitter) possess scientific and technological knowledge
+      ifelse science? and technology? and [science? and technology?] of partner [
 
-      ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
-      ;;let new-science-knowledge1 new-science-knowledge ;;*** used to assess whether the mutation is working
-      set new-science-knowledge mutate new-science-knowledge
-      ;;if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]  ;;*** used to assess whether mutation is working
-
-      ;; bits1 is the tech-knowledge of the receiver
-      set bits1 tech-knowledge
-      ;; bits2 is the tech-knowledge of the emitter
-      set bits2 [tech-knowledge] of partner
-      set new-tech-knowledge crossover bits1 bits2
-      update-link-appearance new-tech-knowledge tech-knowledge yellow
-
-      ;;**** i can create a string with both knowledge for the update link, and it will sum the differences in both knowledges
-
-    ]
-
-    ;; if both the entity (receiver) and the partner (emitter) possess only scientific knowledge
-    [
-      ifelse science? and [science?] of partner [
         ;; bits1 is the science-knowledge of the receiver
         let bits1 science-knowledge
         ;; bits2 is the science-knowledge of the emitter
@@ -956,28 +930,51 @@ ifelse (random-float 1 < motivation-to-learn-actual) and (resources > cost_of_cr
         set new-science-knowledge crossover bits1 bits2
 
         ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
-        ;; let new-science-knowledge1 new-science-knowledge *** used to assess whether the mutation is working
+        ;;let new-science-knowledge1 new-science-knowledge ;;*** used to assess whether the mutation is working
         set new-science-knowledge mutate new-science-knowledge
-        update-link-appearance new-science-knowledge science-knowledge green
-        ;; if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"] *** used to assess whether the mutation is working
-      ]
+        ;;if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]  ;;*** used to assess whether mutation is working
 
-      ;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
-      ;; the code ignores those who don't have any knowledge, but these have been ignored already by the choose-partner procedure
-      [
-        if technology? and [technology?] of partner [
-          ;; bits1 is the tech-knowledge of the receiver
-          let bits1 tech-knowledge
-          ;; bits2 is the tech-knowledge of the emitter
-          let bits2 [tech-knowledge] of partner
-          set new-tech-knowledge crossover bits1 bits2
-          update-link-appearance new-tech-knowledge tech-knowledge blue
+        ;; bits1 is the tech-knowledge of the receiver
+        set bits1 tech-knowledge
+        ;; bits2 is the tech-knowledge of the emitter
+        set bits2 [tech-knowledge] of partner
+        set new-tech-knowledge crossover bits1 bits2
+        update-link-appearance new-tech-knowledge tech-knowledge yellow
+
+        ;;**** i can create a string with both knowledge for the update link, and it will sum the differences in both knowledges
+
+      ][;; if both the entity (receiver) and the partner (emitter) possess only scientific knowledge
+
+        ifelse science? and [science?] of partner [
+          ;; bits1 is the science-knowledge of the receiver
+          let bits1 science-knowledge
+          ;; bits2 is the science-knowledge of the emitter
+          let bits2 [science-knowledge] of partner
+          set new-science-knowledge crossover bits1 bits2
+
+          ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
+          ;; let new-science-knowledge1 new-science-knowledge *** used to assess whether the mutation is working
+          set new-science-knowledge mutate new-science-knowledge
+          update-link-appearance new-science-knowledge science-knowledge green
+          ;; if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"] *** used to assess whether the mutation is working
+
+        ][;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
+          ;; the code ignores those who don't have any knowledge, but these have been ignored already by the choose-partner procedure
+
+          if technology? and [technology?] of partner [
+            ;; bits1 is the tech-knowledge of the receiver
+            let bits1 tech-knowledge
+            ;; bits2 is the tech-knowledge of the emitter
+            let bits2 [tech-knowledge] of partner
+            set new-tech-knowledge crossover bits1 bits2
+            update-link-appearance new-tech-knowledge tech-knowledge blue
+          ]
         ]
       ]
     ]
+  ][;; in case the motivation-to-learn-actual or the resources are not enough to make the emitter look for a partner
+    set integration? false
   ]
-]
-[ set integration? false ]
 
 end
 
@@ -987,12 +984,15 @@ end
 
 to integrate
 
-  set integrated? true
+
   let partner1 one-of other entities with [science? or technology?]
-  ask partner1 [
-  set integration? true
-  interact
-]
+  if partner1 != nobody [
+    ask partner1 [
+      set integration? true
+      interact
+      set integrated? true
+    ]
+
 
 end
 
