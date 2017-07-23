@@ -255,6 +255,11 @@ to go
   ;; implements the stop trigger
   if ticks >= stop_trigger [ stop ]
 
+  ;; replaces dead entities with new startups, keeping the competition high
+  if (count entities) !=  number_of_entities [
+   create-startup (number_of_entities - (count entities))
+  ]
+
   ;; clears the links from previous iteration to keep a clean interface
   ask links [die]
 
@@ -348,7 +353,7 @@ to create-startup [number-of-startups]
     set diffuser? false
     set integrator? false
 
-    set color orange
+    set color cyan
     set-entity-parameters
 
 

@@ -264,6 +264,12 @@ to go
   ;; gives the entities resources proportional to their fitness, and collects resources
   ask entities [calculate-resource]
 
+  ;; replaces dead entities with new startups, keeping the competition high
+  ;; has to be called after calculate-resources, to avoid choosing dead parents
+ ;; if (count entities) !=  number_of_entities [
+ ;;  spawn-startup (number_of_entities - (count entities))
+ ;; ]
+
   ;; stops the simulation if all the entities have died after calculating the resources
   if not any? entities [
     print "There are no entities left"
@@ -338,9 +344,10 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; entities' procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-to create-startup [number-of-startups]
+to spawn-startup [number-of-startups]
 
-  create-entities number-of-startups [
+repeat number-of-startups[
+  create-entities 1 [
 
     set generator? false
     ;; set generator? one-of [true false] ;; if a chance of creating a generator consumer is desired
@@ -348,9 +355,9 @@ to create-startup [number-of-startups]
     set diffuser? false
     set integrator? false
 
-    set color orange
+    set color cyan
     set-entity-parameters
-
+    print "called set entity parameters"
 
     let parent1 choose-partner
 
@@ -359,36 +366,12 @@ to create-startup [number-of-startups]
     show parent1
     show parent2
 
-     ;; if the new startup has both kinds of knowledge, and so do the chosen parents
-     ifelse science? and technology? and [science? and technology?] of parent1 and [science? and technology?] of parent2 [
+    if parent1 != nobody and parent2 != nobody [
 
-      ;; bits1 is the science-knowledge of the parent 1
-      let bits1 [science-knowledge] of parent1
-      ;; bits2 is the science-knowledge of the parent 2
-      let bits2 [science-knowledge] of parent2
-      set new-science-knowledge crossover bits1 bits2
 
-      ;; also performs a mutation in science knowledge
-      set new-science-knowledge mutate new-science-knowledge
+      ;; if the new startup has both kinds of knowledge, and so do the chosen parents
+      ifelse science? and technology? and [science? and technology?] of parent1 and [science? and technology?] of parent2 [
 
-      set science-knowledge new-science-knowledge
-
-      ;; bits1 is the tech-knowledge of the parent 1
-      set bits1 [tech-knowledge] of parent1
-      ;; bits2 is the tech-knowledge of the emitter
-      set bits2 [tech-knowledge] of parent2
-      set new-tech-knowledge crossover bits1 bits2
-
-      ;; also performs a mutation in technological knowledge
-      set new-tech-knowledge mutate new-tech-knowledge
-
-      set tech-knowledge new-tech-knowledge
-
-    ]
-
-    ;; if the startup and both parents have only scientific knowledge in commmon
-    [
-      ifelse science? and [science?] of parent1 and [science?] of parent2 [
         ;; bits1 is the science-knowledge of the parent 1
         let bits1 [science-knowledge] of parent1
         ;; bits2 is the science-knowledge of the parent 2
@@ -398,35 +381,58 @@ to create-startup [number-of-startups]
         ;; also performs a mutation in science knowledge
         set new-science-knowledge mutate new-science-knowledge
 
-        set science-knowledge new-science-knowledge
+        ;; bits1 is the tech-knowledge of the parent 1
+        set bits1 [tech-knowledge] of parent1
+        ;; bits2 is the tech-knowledge of the emitter
+        set bits2 [tech-knowledge] of parent2
+        set new-tech-knowledge crossover bits1 bits2
 
-      ]
+        ;; also performs a mutation in technological knowledge
+        set new-tech-knowledge mutate new-tech-knowledge
 
-      ;; if the startup and both parents have only technological knowledge in commmon
-      ;; the code ignores the cases where the chosen parents do not have matching knowledge
-      ;; that is only a possibility when the startup is a generator-consumer
-      ;; in that case, the startup will remain with the select-parameters assigned knowledge
-      ;; *** code can be writen so that the startup would fetch the scientific knowledge from one and the tech knowledge from the other
-      [
-        if technology? and [technology?] of parent1 a [
-          ;; bits1 is the tech-knowledge of the parent 1
-          set bits1 [tech-knowledge] of parent1
-          ;; bits2 is the tech-knowledge of the emitter
-          set bits2 [tech-knowledge] of parent2
-          set new-tech-knowledge crossover bits1 bits2
+      ][;; if the startup and both parents have only scientific knowledge in commmon
 
-          ;; also performs a mutation in technological knowledge
-          set new-tech-knowledge mutate new-tech-knowledge
+        ifelse science? and [science?] of parent1 and [science?] of parent2 [
+          ;; bits1 is the science-knowledge of the parent 1
+          let bits1 [science-knowledge] of parent1
+          ;; bits2 is the science-knowledge of the parent 2
+          let bits2 [science-knowledge] of parent2
+          set new-science-knowledge crossover bits1 bits2
 
-          set tech-knowledge new-tech-knowledge
+          ;; also performs a mutation in science knowledge
+          set new-science-knowledge mutate new-science-knowledge
 
+        ][;; if the startup and both parents have only technological knowledge in commmon
+          ;; the code ignores the cases where the chosen parents do not have matching knowledge
+          ;; that is only a possibility when the startup is a generator-consumer
+          ;; in that case, the startup will remain with the select-parameters assigned knowledge
+          ;; *** code can be writen so that the startup would fetch the scientific knowledge from one and the tech knowledge from the other
+
+          if technology? and [technology?] of parent1 and [technology?] of parent2 [
+            ;; bits1 is the tech-knowledge of the parent 1
+            let bits1 [tech-knowledge] of parent1
+            ;; bits2 is the tech-knowledge of the emitter
+            let bits2 [tech-knowledge] of parent2
+            set new-tech-knowledge crossover bits1 bits2
+
+            ;; also performs a mutation in technological knowledge
+            set new-tech-knowledge mutate new-tech-knowledge
+
+          ]
         ]
       ]
+
+      ;; if none gets executed (both parent1 and parent2 = nobody) then the startup uses the knowledge DNA assigned by
+      ;; the set-entity-parameters procedure.
     ]
+
+    ;; finishes by making both new-knowledge and knowledge variables equal, as the entity is starting its life and has not yet learned
+    set science-knowledge new-science-knowledge
+    set tech-knowledge new-tech-knowledge
   ]
+]
 
 end
-
 
 
 to develop
@@ -891,7 +897,7 @@ ifelse integration? [
 ifelse (random-float 1 < motivation-to-learn-actual) and (resources > cost_of_crossover) [
   let partner choose-partner
 
-  ifelse integration? [
+  ifelse integration?  [
     set willingness-to-share-actual ([willingness-to-share] of partner + integration_boost)
   ]
   [
@@ -1338,7 +1344,7 @@ number_of_entities
 number_of_entities
 1
 600
-283.0
+97.0
 1
 1
 NIL
@@ -1659,7 +1665,7 @@ INPUTBOX
 364
 70
 stop_trigger
-2000.0
+250.0
 1
 0
 Number
@@ -1688,7 +1694,7 @@ willingness_to_share
 willingness_to_share
 0
 1
-0.5
+0.15
 0.05
 1
 NIL
@@ -2263,7 +2269,7 @@ number_of_generators
 number_of_generators
 0
 100
-48.0
+50.0
 1
 1
 NIL
@@ -2278,7 +2284,7 @@ number_of_consumers
 number_of_consumers
 0
 100
-51.0
+0.0
 1
 1
 NIL
@@ -2308,7 +2314,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-44.0
+0.0
 1
 1
 NIL
@@ -2323,7 +2329,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-42.0
+0.0
 1
 1
 NIL
@@ -2358,7 +2364,7 @@ number_of_gen_dif
 number_of_gen_dif
 0
 100
-51.0
+0.0
 1
 1
 NIL
