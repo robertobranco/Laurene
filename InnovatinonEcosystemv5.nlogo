@@ -268,9 +268,9 @@ to go
 
   ;; replaces dead entities with new startups, keeping the competition high
   ;; has to be called after calculate-resources, to avoid choosing dead parents
- ;; if (count entities) !=  number_of_entities [
- ;;  spawn-startup (number_of_entities - (count entities))
- ;; ]
+  if (count entities) !=  number_of_entities and startups? [
+    spawn-startup (number_of_entities - (count entities))
+  ]
 
   ;; stops the simulation if all the entities have died after calculating the resources
   if not any? entities [
@@ -357,19 +357,30 @@ repeat number-of-startups[
     set diffuser? false
     set integrator? false
 
-    set color cyan
+    ;; assigns all other variables, as well as a random tech-knowledge and science-knowledge DNA
     set-entity-parameters
+    set color cyan
+    set shape "turtle"
     print "called set entity parameters"
 
+    ;; chooses one of the other entities to be a parent of the new startup
     let parent1 choose-partner
 
-    ;; here it is performed a roulette with replacement
+    ;; chooses the second parent with replacement
     let parent2 choose-partner
     show parent1
     show parent2
 
     if parent1 != nobody and parent2 != nobody [
 
+      print "Parents 1 and 2 successfuly selected"
+
+      ;; the code ignores the cases where the chosen parents do not have matching knowledge
+      ;; that is only a possibility when the startup is a generator-consumer, if one parent has only science?  and the other has only technology?
+      ;; in that case, the startup will remain with the set-entity-parameters randomly assigned knowledge
+      ;; if none gets executed (both parent1 and parent2 = nobody) then the startup uses the knowledge DNA assigned by
+      ;; the set-entity-parameters procedure.
+      ;; *** code can be writen so that the startup would fetch the scientific knowledge from one and the tech knowledge from the other
 
       ;; if the new startup has both kinds of knowledge, and so do the chosen parents
       ifelse science? and technology? and [science? and technology?] of parent1 and [science? and technology?] of parent2 [
@@ -380,16 +391,16 @@ repeat number-of-startups[
         let bits2 [science-knowledge] of parent2
         set new-science-knowledge crossover bits1 bits2
 
-        ;; also performs a mutation in science knowledge
+        ;; also performs a mutation in science knowledge to create the startup
         set new-science-knowledge mutate new-science-knowledge
 
         ;; bits1 is the tech-knowledge of the parent 1
         set bits1 [tech-knowledge] of parent1
-        ;; bits2 is the tech-knowledge of the emitter
+        ;; bits2 is the tech-knowledge of the parent 2
         set bits2 [tech-knowledge] of parent2
         set new-tech-knowledge crossover bits1 bits2
 
-        ;; also performs a mutation in technological knowledge
+        ;; also performs a mutation in technological knowledge to create the startup
         set new-tech-knowledge mutate new-tech-knowledge
 
       ][;; if the startup and both parents have only scientific knowledge in commmon
@@ -405,10 +416,6 @@ repeat number-of-startups[
           set new-science-knowledge mutate new-science-knowledge
 
         ][;; if the startup and both parents have only technological knowledge in commmon
-          ;; the code ignores the cases where the chosen parents do not have matching knowledge
-          ;; that is only a possibility when the startup is a generator-consumer
-          ;; in that case, the startup will remain with the select-parameters assigned knowledge
-          ;; *** code can be writen so that the startup would fetch the scientific knowledge from one and the tech knowledge from the other
 
           if technology? and [technology?] of parent1 and [technology?] of parent2 [
             ;; bits1 is the tech-knowledge of the parent 1
@@ -423,9 +430,6 @@ repeat number-of-startups[
           ]
         ]
       ]
-
-      ;; if none gets executed (both parent1 and parent2 = nobody) then the startup uses the knowledge DNA assigned by
-      ;; the set-entity-parameters procedure.
     ]
 
     ;; finishes by making both new-knowledge and knowledge variables equal, as the entity is starting its life and has not yet learned
@@ -478,7 +482,7 @@ to set-entity-parameters
   if consumer? [set technology? true]
   if diffuser? [
     if not science? [set science? one-of [true false]]
-    if not technology? [set technology? one-of[true false]]
+    if not technology? [set technology? one-of [true false]]
 
     ;; If, by any chance, the diffuser has no knowledge assignment, repeat the random assignment
     while [ not science? and not technology?] [
@@ -1356,7 +1360,7 @@ number_of_entities
 number_of_entities
 1
 600
-97.0
+157.0
 1
 1
 NIL
@@ -1470,7 +1474,7 @@ niche_resources
 niche_resources
 0
 20000
-20000.0
+10000.0
 1000
 1
 NIL
@@ -1547,7 +1551,7 @@ PLOT
 160
 1013
 310
-Fitness average (%)
+Average fitness of generators (%)
 Ticks
 Average Fitness
 0.0
@@ -1558,7 +1562,7 @@ true
 false
 "" ""
 PENS
-"Average fitness" 1.0 0 -2674135 true "" "plot (((sum [fitness] of entities) / (count entities))/(Knowledge / 2)) * 100 "
+"Average fitness" 1.0 0 -2674135 true "" "plot ((mean [fitness] of entities with [generator?])/(Knowledge / 2)) * 100 "
 
 PLOT
 1013
@@ -1677,7 +1681,7 @@ INPUTBOX
 364
 70
 stop_trigger
-1000.0
+2000.0
 1
 0
 Number
@@ -1883,7 +1887,7 @@ cost_of_mutation
 cost_of_mutation
 0
 1000
-1000.0
+0.0
 100
 1
 NIL
@@ -1951,9 +1955,9 @@ HORIZONTAL
 
 BUTTON
 12
-437
+432
 187
-470
+465
 NIL
 create-super-competitor
 NIL
@@ -1983,9 +1987,9 @@ HORIZONTAL
 
 SWITCH
 13
-536
+531
 187
-569
+564
 super_share?
 super_share?
 0
@@ -1994,9 +1998,9 @@ super_share?
 
 BUTTON
 13
-577
+572
 184
-610
+605
 NIL
 mutate-market
 NIL
@@ -2010,10 +2014,10 @@ NIL
 1
 
 SWITCH
-13
-614
-186
-647
+11
+605
+184
+638
 non_economical_entities?
 non_economical_entities?
 0
@@ -2253,10 +2257,10 @@ Generation and development
 1
 
 TEXTBOX
-21
-667
-171
-685
+18
+681
+168
+699
 Instructions and seed origin
 11
 0.0
@@ -2296,7 +2300,7 @@ number_of_consumers
 number_of_consumers
 0
 100
-0.0
+20.0
 1
 1
 NIL
@@ -2326,7 +2330,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-0.0
+40.0
 1
 1
 NIL
@@ -2472,9 +2476,9 @@ count entities with [generator? and not consumer? and diffuser? and not integrat
 
 BUTTON
 12
-470
+465
 187
-503
+498
 NIL
 create-super-generator
 NIL
@@ -2489,9 +2493,9 @@ NIL
 
 BUTTON
 12
-503
+498
 187
-536
+531
 NIL
 create-super-diffuser
 NIL
@@ -2503,6 +2507,35 @@ NIL
 NIL
 NIL
 1
+
+PLOT
+814
+731
+1014
+881
+Average fitness of consumers (%)
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot ((mean [fitness] of entities with [consumer?]) /(Knowledge / 2)) * 100"
+
+SWITCH
+12
+638
+184
+671
+startups?
+startups?
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
