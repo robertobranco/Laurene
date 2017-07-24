@@ -160,8 +160,8 @@ to setup
 
       ;; asks turtles to select their roles
       select-role
-      set color blue
       set-entity-parameters
+      set color blue
 
     ]
   ][
@@ -173,9 +173,8 @@ to setup
       set diffuser? false
       set integrator? false
 
-      set color orange
       set-entity-parameters
-
+      set color orange
     ]
 
     create-entities number_of_consumers [
@@ -185,9 +184,8 @@ to setup
       set diffuser? false
       set integrator? false
 
-      set color orange
       set-entity-parameters
-
+      set color orange
     ]
 
     create-entities number_of_diffusers [
@@ -197,9 +195,8 @@ to setup
       set diffuser? true
       set integrator? false
 
-      set color orange
       set-entity-parameters
-
+      set color orange
       ]
 
     create-entities number_of_integrators [
@@ -209,9 +206,8 @@ to setup
       set diffuser? false
       set integrator? true
 
-      set color orange
       set-entity-parameters
-
+      set color orange
     ]
 
     create-entities number_of_cons_gen [
@@ -221,9 +217,8 @@ to setup
       set diffuser? false
       set integrator? false
 
-      set color orange
       set-entity-parameters
-
+      set color orange
     ]
 
     create-entities number_of_gen_dif [
@@ -233,8 +228,9 @@ to setup
       set diffuser? true
       set integrator? false
 
-      set color orange
+
       set-entity-parameters
+      set color orange
 
     ]
 
@@ -246,7 +242,6 @@ to setup
   reset-ticks
 
 end
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; go procedures   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -289,7 +284,6 @@ to go
 
   ;; *** to do list
   ;; ask entities to update its own parameters (adapt)
-  ;; create new entities to replace the dead from crossover of other fit entities and mutations
   ;; the impact of environment in relations
 
   ;; knowledge activities inside the entities
@@ -301,7 +295,6 @@ to go
     generate
 
   ]
-
 
   ;; asks entities with scientific and technological knowledge to develop science into technology
   ;; *** has to be called before interact to prevent the altering of newly developed knowledge
@@ -344,8 +337,16 @@ to go
 end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;; external sources procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; it has to be on the same directory as the .nlogo model
+;; _includes [ .nls]
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; entities' procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 to spawn-startup [number-of-startups]
 
 repeat number-of-startups[
@@ -1205,7 +1206,14 @@ to-report instructions
      "You will be simulating an innovation"
      "ecosystem based on knowledge flows."
      "The shapes of the entities denote"
-     "their role in the ecosystem, and their"
+     "their role in the ecosystem:"
+     "  - Generators - stars"
+     "  - Consumers - squares"
+     "  - Integrators - pentagons"
+     "  - Diffusers - triangles"
+    ]
+    [
+     ", and their"
      "color denotes their absolute fitness or"
      "their ability to stay alive for several"
      "periods. It may also display colors only"
@@ -1359,7 +1367,7 @@ number_of_entities
 number_of_entities
 1
 600
-70.0
+200.0
 1
 1
 NIL
@@ -2284,7 +2292,7 @@ number_of_generators
 number_of_generators
 0
 100
-10.0
+0.0
 1
 1
 NIL
@@ -2299,7 +2307,7 @@ number_of_consumers
 number_of_consumers
 0
 100
-50.0
+100.0
 1
 1
 NIL
@@ -2314,7 +2322,7 @@ number_of_integrators
 number_of_integrators
 0
 100
-0.0
+50.0
 1
 1
 NIL
@@ -2329,7 +2337,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-10.0
+50.0
 1
 1
 NIL
@@ -2392,7 +2400,7 @@ SWITCH
 580
 random_ent_creation?
 random_ent_creation?
-1
+0
 1
 -1000
 
