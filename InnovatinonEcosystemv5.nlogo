@@ -794,6 +794,7 @@ to calculate-resource
 
   ;; Resets the integration attempt counter
   set integrated? false
+  set integration? false
 
   ;; sets the size of the entity given its accumulated amount of resources
   set-size-entity
@@ -866,12 +867,10 @@ to-report choose-partner
   report partner
 
   ;; *** alternate code for simplicity
-  ;; lottery example e comando 	rnd:weighted-one-of	rnd:weighted-one-of-list
+  ;; lottery example commands	rnd:weighted-one-of	rnd:weighted-one-of-list
   ;; The idea behind this procedure is a bit tricky to understand.
-  ;; Basically we take the sum of the sizes of the turtles, and
-  ;; that's how many "tickets" we have in our lottery.  Then we pick
-  ;; a random "ticket" (a random number).  Then we step through the
-  ;; shorter code option - see netlogo online manual
+  ;; Basically we take the sum of the sizes of the turtles, and that's how many "tickets" we have in our lottery.  Then we pick
+  ;; a random "ticket" (a random number).  Then we step through the shorter code option - see netlogo online manual
   ;;ask rnd:weighted-one-of entities with science? [ resources + fitness ] [set partner self]
 
 end
@@ -915,12 +914,8 @@ to interact
       ]
     ]
 
-    ;; *** decide whether to falsify this only if the crossover did not happen - giving info about how many attempts of integration have been successful
-    ;; the integration flag has served its purpose and has to be reset
-    set integration? false
-
     ;; given the partners willingness to share (boosted or not), begin crossover
-    if partner != nobody and (random-float 1 < willingness-to-share-actual) [
+    ifelse partner != nobody and (random-float 1 < willingness-to-share-actual) [
       ;;  asks the partner to create a directional link to the receiver
       let receiver self
 
@@ -984,9 +979,12 @@ to interact
           ]
         ]
       ]
+    ][;; the crossover failed the test of the willingness-to-share-actual or the search for a partner
+      ;; in either case the integration, if occurred, failed
+      set integration? false
     ]
-  ][;; in case the motivation-to-learn-actual or the resources are not enough to make the emitter look for a partner
-    ;; falsify integration here
+  ][;; the crossover failed the test of the motivation-to-learn-actual or there are not enough resources
+    ;; in either case the integration, if occurred, failed
     set integration? false
   ]
 
@@ -999,15 +997,16 @@ end
 to integrate
 
   let partner1 one-of other entities with [science? or technology?]
-  if partner1 != nobody [
+  if partner1 != nobody and not crossover? [
     ask partner1 [
       set integration? true
       interact
     ]
 
-    ;; If the integrator has found an receiver partner, it attempted to integrate, even though it may not have resulted
-    ;; in a successful integration
-    set integrated? true
+    ;; If the integration was sucessful, set integrated? in the integrator
+    if [integration?] of partner1 [
+      set integrated? true
+    ]
   ]
 
 end
@@ -1360,7 +1359,7 @@ number_of_entities
 number_of_entities
 1
 600
-157.0
+70.0
 1
 1
 NIL
@@ -1474,7 +1473,7 @@ niche_resources
 niche_resources
 0
 20000
-10000.0
+20000.0
 1000
 1
 NIL
@@ -1997,10 +1996,10 @@ super_share?
 -1000
 
 BUTTON
-13
-572
-184
-605
+14
+596
+187
+629
 NIL
 mutate-market
 NIL
@@ -2014,10 +2013,10 @@ NIL
 1
 
 SWITCH
-11
-605
-184
-638
+14
+629
+187
+662
 non_economical_entities?
 non_economical_entities?
 0
@@ -2257,10 +2256,10 @@ Generation and development
 1
 
 TEXTBOX
-18
-681
-168
-699
+20
+580
+170
+598
 Instructions and seed origin
 11
 0.0
@@ -2285,7 +2284,7 @@ number_of_generators
 number_of_generators
 0
 100
-50.0
+10.0
 1
 1
 NIL
@@ -2300,7 +2299,7 @@ number_of_consumers
 number_of_consumers
 0
 100
-20.0
+50.0
 1
 1
 NIL
@@ -2315,7 +2314,7 @@ number_of_integrators
 number_of_integrators
 0
 100
-47.0
+0.0
 1
 1
 NIL
@@ -2330,7 +2329,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-40.0
+10.0
 1
 1
 NIL
@@ -2527,13 +2526,13 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot ((mean [fitness] of entities with [consumer?]) /(Knowledge / 2)) * 100"
 
 SWITCH
-12
-638
-184
-671
+13
+563
+187
+596
 startups?
 startups?
-1
+0
 1
 -1000
 
