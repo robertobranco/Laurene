@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;; Innovation Ecosystem ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-extensions [array table]
+extensions [table]
 
 ;;;;;;;;;;;;;;;;;;;;;; breeds ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -38,7 +38,6 @@ entities-own [
   integrator?
   ;; entity's willingness to share knowledge with others
   willingness-to-share
-
   ;; entity's motivation to learn from others
   motivation-to-learn
   ;; entity's performance in creating oportunities to create new knowledge
@@ -59,6 +58,8 @@ entities-own [
   integrated?
   ;; lets the model know if the interaction of an agent is ocurring through an integrator
   integration?
+  ;; entities memory of past interactions with other agents
+  interaction-memory
 
 ]
 
@@ -353,6 +354,8 @@ end
 
 
 
+
+
 to spawn-startup [number-of-startups]
 
 repeat number-of-startups[
@@ -521,6 +524,9 @@ to set-entity-parameters
   set emitted? false
   set mutated? false
   set integrated? false
+
+  ;; creates a table to implement the interaction memory
+  set interaction-memory table:make
 
   ;; selects the shape of the entity given its role in the ecosystem
   select-shape
