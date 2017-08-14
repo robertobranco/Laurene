@@ -925,6 +925,12 @@ to interact
       ][
         set willingness-to-share-actual [willingness-to-share] of partner
       ]
+
+      if table:has-key? partner [
+        set willingness-to-share-actual (willingness-to-share-actual + table:get interaction-memory partner)
+      ]
+
+
     ]
 
     ;; given the partners willingness to share (boosted or not), begin crossover
