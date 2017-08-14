@@ -1,6 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;; Innovation Ecosystem ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+extensions [array table]
 
 ;;;;;;;;;;;;;;;;;;;;;; breeds ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -346,6 +347,11 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; entities' procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to evaluate-crossover
+
+end
+
+
 
 to spawn-startup [number-of-startups]
 
@@ -1207,41 +1213,65 @@ to-report instructions
      "ecosystem based on knowledge flows."
      "The shapes of the entities denote"
      "their role in the ecosystem:"
-     "  - Generators - stars"
-     "  - Consumers - squares"
+     "  - Generators - stars / hollow stars"
+     "  - Consumers - squares / hollow squares"
      "  - Integrators - pentagons"
-     "  - Diffusers - triangles"
+     "  - Diffusers - triangles / hollow triangles"
+     "  - Hybrids - circles"
+     "The hollow shapes are used when a super"
+     "entity is created, to differentiate it from"
+     "the regular randomly create ones."
     ]
     [
-     ", and their"
-     "color denotes their absolute fitness or"
-     "their ability to stay alive for several"
-     "periods. It may also display colors only"
-     "for entities competing in the market, as"
-     "the other ones may get support from other"
-     "sources other than the market itself."
+     "Their color denotes several information:"
+     " - Blue    - randomly assigned entities"
+     " - Orange  - manually assigned entities"
+     " - Cyan    - startups"
+     " - Magenta - super entities"
+     " - Red     - Equal or less than 33% fitness"
+     "           - Less than 5 iterations in resources"
+     " - Yellow  - More than 33% fitness"
+     "           - More than 5 iterations in resources"
+     " - Green   - More than 67% fitness"
+     "           - More than 10 iterations in resources"
+     " - Gray    - Entities do not receive resouces from"
+     "the market."
+    ]
+    [
+     "The colors during run time depend on the chooser"
+     "color_update_rule. You can choose:"
+     " - fitness:              colors by fitness"
+     " - survivability:        color by amount of resources"
+     " - market survivability: colors by amount of "
+     "resources and market dependency."
+     "The chooser repeat_simulation? uses the last seed"
+     "used for the random number generator or not."
+     " If you choose not to repeat, the chooser "
+     "set_input_seed? will prompt the user for a seed or"
+     "allow the model to randomly select the seed used."
+     "In any case, the seed used will be displayed in "
+     "the my-seed-repeat monitor."
     ]
     [
      "When you press SETUP, if you chose to "
      "input a known seed for random numbers,"
      "you will be prompted for a integer number."
-     "Otherwise, the system you choose one and "
-     "display it in the interface."
-     "A population of entities is then randomly"
-     "created."
-     "Their roles and knowledge DNA's are"
-     "randomly created."
+     "A population of entities with parameters "
+     "randomly set is created."
+     "The amount of entities at each role may"
+     "be randomly or manually chosen through sliders"
+     "and the random_ent_creation? chooser."
+     "The first color the entities display depend"
+     "on how they were created."
+    ]
+    [
+     "Their DNA's are randomly created, and their"
+     "parameters are randomly set according to the"
+     "mean value and standard deviation chosen,"
+     "in a normal distribution fashion."
      "Scientific knowledge and technological"
      "knowledge is assigned according to the"
      "entities roles in the ecosystem."
-    ]
-    [
-     "Choose the amount of entities you want"
-     "in the ecosystem by sliding the"
-     "number_of_entities slider"
-     "Choose the number of market niches "
-     "where the entities will compete by"
-     "sliding the number_of_niches slider"
     ]
     [
       "Choose the initial amount of resources"
