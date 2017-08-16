@@ -853,12 +853,27 @@ to-report choose-partner
     ;; if there's no winner yet...
     if partner = nobody [
       ;; gives the chance of the entity given the sum of its normalized resources and normalized fitness
-      ifelse ((resources / total-resources) + (fitness / total-fitness)) > pick [
-        set partner self
-      ]
-      [
-       set pick pick - ((resources / total-resources) + (fitness / total-fitness))
-      ]
+      ;; if there is a memory of having interacted with that entity in the past, it also boosts the chances of the agent
+      ;; to be selected. The myself command uses the interaction-memory of the entity who is calling the choose-partner procedure
+      ifelse table:has-key? [interaction-memory] of myself who [
+
+        ifelse ((resources / total-resources) + (fitness / total-fitness) + (table:get [interaction-memory] of myself who)) > pick [
+          set partner self
+        ]
+        [
+          set pick pick - ((resources / total-resources) + (fitness / total-fitness))
+        ]
+      ][
+        ifelse ((resources / total-resources) + (fitness / total-fitness)) > pick [
+          set partner self
+        ]
+        [
+          set pick pick - ((resources / total-resources) + (fitness / total-fitness))
+        ]
+        ]
+
+
+
     ]
   ]
 
@@ -927,21 +942,10 @@ to interact
         set willingness-to-share-actual [willingness-to-share] of partner
       ]
 
-      **** para fins de teste
-     print willingness-to-share-actual
-
       ;; adds to the willingness to share of the chosen partner the interaction memory the partner has of the receiver
-      ifelse (table:has-key? [interaction-memory] of partner [who] of receiver) [
+      if (table:has-key? [interaction-memory] of partner [who] of receiver) [
         set willingness-to-share-actual (willingness-to-share-actual + table:get [interaction-memory] of partner [who] of receiver )
-        print "lembrou do parceiro"
-      ][
-        print "nao lembrou do parceiro mas procurou"
       ]
-
-      **** para fins de teste
-     print willingness-to-share-actual
-
-
     ]
 
     ;; given the partners willingness to share (boosted or not), begin crossover
@@ -1007,15 +1011,12 @@ to interact
           ]
         ]
       ]
+
       ;; inserts a memory of this interaction in the receiver's memory
       table:put interaction-memory [who] of partner 0.1
       ;; inserts a memory of this interaction in the emitter's (partner) memory
       table:put [interaction-memory] of partner who 0.1
-      print "estes dois interagiram"
-      print who
-      print interaction-memory
-      print [who] of partner
-      print [interaction-memory] of partner
+
     ][;; the crossover failed the test of the willingness-to-share-actual or the search for a partner
       ;; in either case the integration, if occurred, failed
       set integration? false
@@ -1777,7 +1778,7 @@ willingness_to_share
 willingness_to_share
 0
 1
-0.15
+0.45
 0.05
 1
 NIL
