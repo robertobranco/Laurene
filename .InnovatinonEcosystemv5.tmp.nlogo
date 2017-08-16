@@ -927,7 +927,7 @@ to interact
         set willingness-to-share-actual [willingness-to-share] of partner
       ]
 
-      ;**** para fins de teste
+      **** para fins de teste
      print willingness-to-share-actual
 
       ;; adds to the willingness to share of the chosen partner the interaction memory the partner has of the receiver
@@ -938,8 +938,8 @@ to interact
         print "nao lembrou do parceiro mas procurou"
       ]
 
-      ;**** para fins de teste
-      print willingness-to-share-actual
+      **** para fins de teste
+     print willingness-to-share-actual
 
 
     ]
@@ -1777,7 +1777,7 @@ willingness_to_share
 willingness_to_share
 0
 1
-0.45
+0.15
 0.05
 1
 NIL
