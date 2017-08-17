@@ -696,8 +696,8 @@ to test-fitness
   set niche-demand-now [niche-demand] of one-of niches
   let fitness1 0
   let fitness2 0
-  set fitness1 length remove false ( map [ [ a b ] -> a = b ]  tech-knowledge niche-demand-now )
-  set fitness2 length remove false ( map [ [ a b ] -> a = b ]  science-knowledge niche-demand-now )
+  set fitness1 (knowledge / 2) - (hamming-distance tech-knowledge niche-demand-now)
+  set fitness2 (knowledge / 2) - (hamming-distance science-knowledge niche-demand-now )
   set fitness max (list fitness1 fitness2)
 
   ;; sets the color of the entities based on its absolute fitness

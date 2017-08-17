@@ -696,8 +696,8 @@ to test-fitness
   set niche-demand-now [niche-demand] of one-of niches
   let fitness1 0
   let fitness2 0
-  set fitness1 length remove false ( map [ [ a b ] -> a = b ]  tech-knowledge niche-demand-now )
-  set fitness2 length remove false ( map [ [ a b ] -> a = b ]  science-knowledge niche-demand-now )
+  set fitness1 (knowledge / 2) - (hamming-distance tech-knowledge niche-demand-now)
+  set fitness2 (length remove false ( map [ [ a b ] -> a = b ]  science-knowledge niche-demand-now )
   set fitness max (list fitness1 fitness2)
 
   ;; sets the color of the entities based on its absolute fitness
@@ -1175,10 +1175,9 @@ to set-size-entity
 end
 
 to update-link-appearance [bits1 bits2 color-link]
-  ;; Evaluates whether the crossover and the mutation actually changed bits
-  ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the bits changed. If not, it
-  ;; colors the link red
-
+  ;; Evaluates whether the crossover and the mutation actually changed bits through a hamming distance
+  ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the number of bits changed.
+  ;; If not, it colors the link red
 
   let counter-change hamming-distance bits1 bits2
   ifelse counter-change > 0 [
