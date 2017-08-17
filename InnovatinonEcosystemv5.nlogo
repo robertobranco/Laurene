@@ -77,14 +77,13 @@ niches-own [
 
 globals [
 
- ;; holds counter value for which instruction is being displayed
- current-instruction
- ;; stores the niche-demand DNA for comparison
- niche-demand-now
- ;; agentset of possible partners for crossover
- possible-partners
- ;; seed used to generate random-numbers
- my-seed
+  ;; holds counter value for which instruction is being displayed
+  current-instruction
+  ;; stores the niche-demand DNA for comparison
+  niche-demand-now
+  ;; seed used to generate random-numbers
+  my-seed
+
 ]
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -199,7 +198,7 @@ to setup
 
       set-entity-parameters
       set color orange
-      ]
+    ]
 
     create-entities number_of_integrators [
 
@@ -358,95 +357,95 @@ end
 
 to spawn-startup [number-of-startups]
 
-repeat number-of-startups[
-  create-entities 1 [
+  repeat number-of-startups[
+    create-entities 1 [
 
-    set generator? false
-    ;; set generator? one-of [true false] ;; if a chance of creating a generator consumer is desired
-    set consumer? true
-    set diffuser? false
-    set integrator? false
+      set generator? false
+      ;; set generator? one-of [true false] ;; if a chance of creating a generator consumer is desired
+      set consumer? true
+      set diffuser? false
+      set integrator? false
 
-    ;; assigns all other variables, as well as a random tech-knowledge and science-knowledge DNA
-    set-entity-parameters
-    set color cyan
-    set shape "turtle"
-    print "called set entity parameters"
+      ;; assigns all other variables, as well as a random tech-knowledge and science-knowledge DNA
+      set-entity-parameters
+      set color cyan
+      set shape "turtle"
+      print "called set entity parameters"
 
-    ;; chooses one of the other entities to be a parent of the new startup
-    let parent1 choose-partner
+      ;; chooses one of the other entities to be a parent of the new startup
+      let parent1 choose-partner
 
-    ;; chooses the second parent with replacement
-    let parent2 choose-partner
-    show parent1
-    show parent2
+      ;; chooses the second parent with replacement
+      let parent2 choose-partner
+      show parent1
+      show parent2
 
-    if parent1 != nobody and parent2 != nobody [
+      if parent1 != nobody and parent2 != nobody [
 
-      print "Parents 1 and 2 successfuly selected"
+        print "Parents 1 and 2 successfuly selected"
 
-      ;; the code ignores the cases where the chosen parents do not have matching knowledge
-      ;; that is only a possibility when the startup is a generator-consumer, if one parent has only science?  and the other has only technology?
-      ;; in that case, the startup will remain with the set-entity-parameters randomly assigned knowledge
-      ;; if none gets executed (both parent1 and parent2 = nobody) then the startup uses the knowledge DNA assigned by
-      ;; the set-entity-parameters procedure.
-      ;; *** code can be writen so that the startup would fetch the scientific knowledge from one and the tech knowledge from the other
+        ;; the code ignores the cases where the chosen parents do not have matching knowledge
+        ;; that is only a possibility when the startup is a generator-consumer, if one parent has only science?  and the other has only technology?
+        ;; in that case, the startup will remain with the set-entity-parameters randomly assigned knowledge
+        ;; if none gets executed (both parent1 and parent2 = nobody) then the startup uses the knowledge DNA assigned by
+        ;; the set-entity-parameters procedure.
+        ;; *** code can be writen so that the startup would fetch the scientific knowledge from one and the tech knowledge from the other
 
-      ;; if the new startup has both kinds of knowledge, and so do the chosen parents
-      ifelse science? and technology? and [science? and technology?] of parent1 and [science? and technology?] of parent2 [
+        ;; if the new startup has both kinds of knowledge, and so do the chosen parents
+        ifelse science? and technology? and [science? and technology?] of parent1 and [science? and technology?] of parent2 [
 
-        ;; bits1 is the science-knowledge of the parent 1
-        let bits1 [science-knowledge] of parent1
-        ;; bits2 is the science-knowledge of the parent 2
-        let bits2 [science-knowledge] of parent2
-        set new-science-knowledge crossover bits1 bits2
-
-        ;; also performs a mutation in science knowledge to create the startup
-        set new-science-knowledge mutate new-science-knowledge
-
-        ;; bits1 is the tech-knowledge of the parent 1
-        set bits1 [tech-knowledge] of parent1
-        ;; bits2 is the tech-knowledge of the parent 2
-        set bits2 [tech-knowledge] of parent2
-        set new-tech-knowledge crossover bits1 bits2
-
-        ;; also performs a mutation in technological knowledge to create the startup
-        set new-tech-knowledge mutate new-tech-knowledge
-
-      ][;; if the startup and both parents have only scientific knowledge in commmon
-
-        ifelse science? and [science?] of parent1 and [science?] of parent2 [
           ;; bits1 is the science-knowledge of the parent 1
           let bits1 [science-knowledge] of parent1
           ;; bits2 is the science-knowledge of the parent 2
           let bits2 [science-knowledge] of parent2
           set new-science-knowledge crossover bits1 bits2
 
-          ;; also performs a mutation in science knowledge
+          ;; also performs a mutation in science knowledge to create the startup
           set new-science-knowledge mutate new-science-knowledge
 
-        ][;; if the startup and both parents have only technological knowledge in commmon
+          ;; bits1 is the tech-knowledge of the parent 1
+          set bits1 [tech-knowledge] of parent1
+          ;; bits2 is the tech-knowledge of the parent 2
+          set bits2 [tech-knowledge] of parent2
+          set new-tech-knowledge crossover bits1 bits2
 
-          if technology? and [technology?] of parent1 and [technology?] of parent2 [
-            ;; bits1 is the tech-knowledge of the parent 1
-            let bits1 [tech-knowledge] of parent1
-            ;; bits2 is the tech-knowledge of the emitter
-            let bits2 [tech-knowledge] of parent2
-            set new-tech-knowledge crossover bits1 bits2
+          ;; also performs a mutation in technological knowledge to create the startup
+          set new-tech-knowledge mutate new-tech-knowledge
 
-            ;; also performs a mutation in technological knowledge
-            set new-tech-knowledge mutate new-tech-knowledge
+        ][;; if the startup and both parents have only scientific knowledge in commmon
 
+          ifelse science? and [science?] of parent1 and [science?] of parent2 [
+            ;; bits1 is the science-knowledge of the parent 1
+            let bits1 [science-knowledge] of parent1
+            ;; bits2 is the science-knowledge of the parent 2
+            let bits2 [science-knowledge] of parent2
+            set new-science-knowledge crossover bits1 bits2
+
+            ;; also performs a mutation in science knowledge
+            set new-science-knowledge mutate new-science-knowledge
+
+          ][;; if the startup and both parents have only technological knowledge in commmon
+
+            if technology? and [technology?] of parent1 and [technology?] of parent2 [
+              ;; bits1 is the tech-knowledge of the parent 1
+              let bits1 [tech-knowledge] of parent1
+              ;; bits2 is the tech-knowledge of the emitter
+              let bits2 [tech-knowledge] of parent2
+              set new-tech-knowledge crossover bits1 bits2
+
+              ;; also performs a mutation in technological knowledge
+              set new-tech-knowledge mutate new-tech-knowledge
+
+            ]
           ]
         ]
       ]
-    ]
 
-    ;; finishes by making both new-knowledge and knowledge variables equal, as the entity is starting its life and has not yet learned
-    set science-knowledge new-science-knowledge
-    set tech-knowledge new-tech-knowledge
+      ;; finishes by making both new-knowledge and knowledge variables equal, as the entity is starting its life and has not yet learned
+      set science-knowledge new-science-knowledge
+      set tech-knowledge new-tech-knowledge
+    ]
   ]
-]
 
 end
 
@@ -682,8 +681,15 @@ to create-knowledge-DNA
 
 end
 
-;; evaluates the hamming distance between the niche's demand and the consumers tech-knowledge
+;; reports the hamming distance between two strings
+to-report hamming-distance [bits1 bits2]
+  let h-distance 0
+  set h-distance length remove true (map [ [ a b ] -> a = b ] bits1 bits2 )
+  report h-distance
+end
 
+
+;; evaluates the complement of the hamming distance between the niche's demand and the consumers tech-knowledge
 to test-fitness
 
   set fitness 0
@@ -693,14 +699,6 @@ to test-fitness
   set fitness1 length remove false ( map [ [ a b ] -> a = b ]  tech-knowledge niche-demand-now )
   set fitness2 length remove false ( map [ [ a b ] -> a = b ]  science-knowledge niche-demand-now )
   set fitness max (list fitness1 fitness2)
-
-  ;; alternate code for the hamming distance
-  ;;  let counter 0
-  ;;  foreach tech-knowledge [
-  ;;      if item (counter) tech-knowledge = item (counter) niche-demand-now
-  ;;      [set fitness fitness + 1]
-  ;;       if counter < knowledge [set counter counter + 1]
-  ;;      ]
 
   ;; sets the color of the entities based on its absolute fitness
   select-fitness-color
@@ -825,6 +823,7 @@ end
 
 to-report choose-partner
 
+  let possible-partners nobody
   ;; creates an agentset with entities possessing knowledge similar to the knowledge of the choosing entity
   ifelse science? and technology? [
     set possible-partners other entities with [science? or technology?]
@@ -874,20 +873,6 @@ to-report choose-partner
     ]
   ]
 
-;;  old non normalized code
-;;  let pick random-float (sum [fitness] of possible-partners  + sum [resources] of possible-partners)
-;;  let partner nobody
-;;  ask possible-partners [
-    ;; if there's no winner yet...
-;;    if partner = nobody [
-;;      ifelse (resources + (fitness)) > pick [
-;;        set partner self
-;;      ]
-;;      [
-;;       set pick pick - (resources + (fitness))
-;;      ]
-;;    ]
-;;  ]
 
   report partner
 
@@ -1010,9 +995,9 @@ to interact
       ]
 
       ;; inserts a memory of this interaction in the receiver's memory
-      table:put interaction-memory [who] of partner 0.1
+      table:put interaction-memory [who] of partner trust_in_known_partners
       ;; inserts a memory of this interaction in the emitter's (partner) memory
-      table:put [interaction-memory] of partner who 0.1
+      table:put [interaction-memory] of partner who trust_in_known_partners
 
     ][;; the crossover failed the test of the willingness-to-share-actual or the search for a partner
       ;; in either case the integration, if occurred, failed
@@ -1028,7 +1013,6 @@ end
 ;; The integrator facilitates interaction
 ;; The integrator finds an entity asks it to find a partner.
 ;; It then boosts the willingness to share an motivation to learn of both of them, facilitating the transaction
-
 to integrate
 
   let partner1 one-of other entities with [science? or technology?]
@@ -1191,15 +1175,21 @@ to set-size-entity
 end
 
 to update-link-appearance [bits1 bits2 color-link]
-  ;; Evaluates whether the crossover and the mutation actually changed bits
-  ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the bits changed. If not, it
-  ;; colors the link red
+  ;; Evaluates whether the crossover and the mutation actually changed bits through a hamming distance
+  ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the number of bits changed.
+  ;; If not, it colors the link red
 
-  ;let counter-change 0
-  ;foreach ( map [ [a b] -> a = b ] new-tech-knowledge tech-knowledge ) [[a] -> if not a [ set counter-change counter-change + 1]]
-
-  let counter-change length remove true ( map [ [ a b ] -> a = b ]  bits1 bits2 )
-  ifelse counter-change > 0 [ ask my-links [set color color-link set thickness counter-change / 100]] [ask my-links [set color red]]
+  let counter-change hamming-distance bits1 bits2
+  ifelse counter-change > 0 [
+    ask my-links [
+      set color color-link
+      set thickness counter-change / (knowledge / 2)
+    ]
+  ][
+    ask my-links [
+      set color red
+    ]
+  ]
 
 end
 
@@ -1440,7 +1430,7 @@ Knowledge
 Knowledge
 2
 200
-100.0
+200.0
 2
 1
 NIL
@@ -1746,7 +1736,7 @@ INPUTBOX
 364
 70
 stop_trigger
-2000.0
+600.0
 1
 0
 Number
@@ -1783,14 +1773,14 @@ HORIZONTAL
 
 SLIDER
 194
-232
+266
 369
-265
+299
 mutation_rate
 mutation_rate
 0
 0.1
-0.1
+0.0
 0.01
 1
 NIL
@@ -1975,9 +1965,9 @@ HORIZONTAL
 
 SLIDER
 195
-352
+386
 368
-385
+419
 development_performance
 development_performance
 0
@@ -1990,14 +1980,14 @@ HORIZONTAL
 
 SLIDER
 195
-428
+462
 368
-461
+495
 creation_performance
 creation_performance
 0
 1
-1.0
+0.0
 0.05
 1
 NIL
@@ -2005,14 +1995,14 @@ HORIZONTAL
 
 SLIDER
 195
-461
+495
 368
-494
+528
 std_dev_creation_performance
 std_dev_creation_performance
 0
 .5
-0.2
+0.0
 .05
 1
 NIL
@@ -2037,9 +2027,9 @@ NIL
 
 SLIDER
 195
-384
+418
 368
-417
+451
 std_dev_development_performance
 std_dev_development_performance
 0
@@ -2091,9 +2081,9 @@ non_economical_entities?
 
 SLIDER
 196
-289
+323
 368
-322
+356
 integration_boost
 integration_boost
 0
@@ -2303,9 +2293,9 @@ General Agent Parameters
 
 TEXTBOX
 230
-274
+308
 380
-292
+326
 Integrator's parameter
 11
 0.0
@@ -2313,9 +2303,9 @@ Integrator's parameter
 
 TEXTBOX
 215
-331
 365
-349
+365
+383
 Generation and development
 11
 0.0
@@ -2601,6 +2591,21 @@ startups?
 1
 1
 -1000
+
+SLIDER
+194
+233
+369
+266
+trust_in_known_partners
+trust_in_known_partners
+0
+0.2
+0.2
+0.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
