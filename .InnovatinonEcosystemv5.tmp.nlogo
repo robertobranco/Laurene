@@ -199,7 +199,7 @@ to setup
 
       set-entity-parameters
       set color orange
-      ]
+    ]
 
     create-entities number_of_integrators [
 
@@ -870,10 +870,7 @@ to-report choose-partner
         [
           set pick pick - ((resources / total-resources) + (fitness / total-fitness))
         ]
-        ]
-
-
-
+      ]
     ]
   ]
 
@@ -1013,7 +1010,7 @@ to interact
       ]
 
       ;; inserts a memory of this interaction in the receiver's memory
-      table:put interaction-memory [who] of partner 0.1
+      table:put interaction-memory [who] of partner 0.
       ;; inserts a memory of this interaction in the emitter's (partner) memory
       table:put [interaction-memory] of partner who 0.1
 
@@ -1786,9 +1783,9 @@ HORIZONTAL
 
 SLIDER
 194
-232
+266
 369
-265
+299
 mutation_rate
 mutation_rate
 0
@@ -1978,9 +1975,9 @@ HORIZONTAL
 
 SLIDER
 195
-352
+386
 368
-385
+419
 development_performance
 development_performance
 0
@@ -1993,9 +1990,9 @@ HORIZONTAL
 
 SLIDER
 195
-428
+462
 368
-461
+495
 creation_performance
 creation_performance
 0
@@ -2008,14 +2005,14 @@ HORIZONTAL
 
 SLIDER
 195
-461
+495
 368
-494
+528
 std_dev_creation_performance
 std_dev_creation_performance
 0
 .5
-0.2
+0.5
 .05
 1
 NIL
@@ -2040,9 +2037,9 @@ NIL
 
 SLIDER
 195
-384
+418
 368
-417
+451
 std_dev_development_performance
 std_dev_development_performance
 0
@@ -2094,9 +2091,9 @@ non_economical_entities?
 
 SLIDER
 196
-289
+323
 368
-322
+356
 integration_boost
 integration_boost
 0
@@ -2306,9 +2303,9 @@ General Agent Parameters
 
 TEXTBOX
 230
-274
+308
 380
-292
+326
 Integrator's parameter
 11
 0.0
@@ -2316,9 +2313,9 @@ Integrator's parameter
 
 TEXTBOX
 215
-331
 365
-349
+365
+383
 Generation and development
 11
 0.0
@@ -2604,6 +2601,21 @@ startups?
 1
 1
 -1000
+
+SLIDER
+194
+233
+369
+266
+trust_in_known_partners
+trust_in_known_partners
+0
+0.2
+0.1
+0.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
