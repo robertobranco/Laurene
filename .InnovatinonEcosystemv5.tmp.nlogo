@@ -682,8 +682,15 @@ to create-knowledge-DNA
 
 end
 
-;; evaluates the hamming distance between the niche's demand and the consumers tech-knowledge
+;; reports the hamming distance between two strings
+to-report hamming-distance [bits1 bits2]
+  let h-distance 0
+  set h-distance length remove true (map [ [ a b ] -> a = b ] bits1 bits2 )
+  report h-distance
+end
 
+
+;; evaluates the complement of the hamming distance between the niche's demand and the consumers tech-knowledge
 to test-fitness
 
   set fitness 0
@@ -693,14 +700,6 @@ to test-fitness
   set fitness1 length remove false ( map [ [ a b ] -> a = b ]  tech-knowledge niche-demand-now )
   set fitness2 length remove false ( map [ [ a b ] -> a = b ]  science-knowledge niche-demand-now )
   set fitness max (list fitness1 fitness2)
-
-  ;; alternate code for the hamming distance
-  ;;  let counter 0
-  ;;  foreach tech-knowledge [
-  ;;      if item (counter) tech-knowledge = item (counter) niche-demand-now
-  ;;      [set fitness fitness + 1]
-  ;;       if counter < knowledge [set counter counter + 1]
-  ;;      ]
 
   ;; sets the color of the entities based on its absolute fitness
   select-fitness-color
@@ -825,6 +824,7 @@ end
 
 to-report choose-partner
 
+  let possible-partners nobody
   ;; creates an agentset with entities possessing knowledge similar to the knowledge of the choosing entity
   ifelse science? and technology? [
     set possible-partners other entities with [science? or technology?]
@@ -874,20 +874,7 @@ to-report choose-partner
     ]
   ]
 
-;;  old non normalized code
-;;  let pick random-float (sum [fitness] of possible-partners  + sum [resources] of possible-partners)
-;;  let partner nobody
-;;  ask possible-partners [
-    ;; if there's no winner yet...
-;;    if partner = nobody [
-;;      ifelse (resources + (fitness)) > pick [
-;;        set partner self
-;;      ]
-;;      [
-;;       set pick pick - (resources + (fitness))
-;;      ]
-;;    ]
-;;  ]
+
 
   report partner
 
@@ -1010,9 +997,9 @@ to interact
       ]
 
       ;; inserts a memory of this interaction in the receiver's memory
-      table:put interaction-memory [who] of partner 0.
+      table:put interaction-memory [who] of partner trust_in_known_partners
       ;; inserts a memory of this interaction in the emitter's (partner) memory
-      table:put [interaction-memory] of partner who 0.1
+      table:put [interaction-memory] of partner who trust_in_known_partners
 
     ][;; the crossover failed the test of the willingness-to-share-actual or the search for a partner
       ;; in either case the integration, if occurred, failed
@@ -1028,7 +1015,6 @@ end
 ;; The integrator facilitates interaction
 ;; The integrator finds an entity asks it to find a partner.
 ;; It then boosts the willingness to share an motivation to learn of both of them, facilitating the transaction
-
 to integrate
 
   let partner1 one-of other entities with [science? or technology?]
@@ -1195,11 +1181,17 @@ to update-link-appearance [bits1 bits2 color-link]
   ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the bits changed. If not, it
   ;; colors the link red
 
-  ;let counter-change 0
-  ;foreach ( map [ [a b] -> a = b ] new-tech-knowledge tech-knowledge ) [[a] -> if not a [ set counter-change counter-change + 1]]
-
   let counter-change length remove true ( map [ [ a b ] -> a = b ]  bits1 bits2 )
-  ifelse counter-change > 0 [ ask my-links [set color color-link set thickness counter-change / 100]] [ask my-links [set color red]]
+  ifelse counter-change > 0 [
+    ask my-links [
+      set color color-link
+      set thickness counter-change / (knowledge / 2)
+    ]
+  ][
+    ask my-links [
+      set color red
+    ]
+  ]
 
 end
 
@@ -1440,7 +1432,7 @@ Knowledge
 Knowledge
 2
 200
-100.0
+200.0
 2
 1
 NIL
@@ -1746,7 +1738,7 @@ INPUTBOX
 364
 70
 stop_trigger
-2000.0
+600.0
 1
 0
 Number
@@ -2611,7 +2603,7 @@ trust_in_known_partners
 trust_in_known_partners
 0
 0.2
-0.1
+0.2
 0.01
 1
 NIL
