@@ -79,8 +79,6 @@ globals [
 
   ;; holds counter value for which instruction is being displayed
   current-instruction
-  ;; stores the niche-demand DNA for comparison
-  niche-demand-now
   ;; seed used to generate random-numbers
   my-seed
 
@@ -347,11 +345,49 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; entities' procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-to evaluate-crossover
+to evaluate-crossover-fitness [old-knowledge new-knowledge]
+
+  let evaluation 0
+  let niche-demand-now [niche-demand] of one-of niches
+
+  ;; compares the absolute fitness prior to the crossover, and after the crossover
+  let fitness1 0
+  let fitness2 0
+  ;; assesses the complement of the hamming distance between the niche-demand and the knowledges
+  ;; the higher the better
+  set fitness1 (knowledge / 2) - (hamming-distance old-knowledge niche-demand-now)
+  set fitness2 (knowledge / 2) - (hamming-distance new-knowledge niche-demand-now)
+  print fitness1
+  print fitness2
+  ifelse fitness2 > fitness1 [
+    if motivation-to-learn < 1 [
+      set evaluation 0.05
+    ]
+  ][
+    if motivation-to-learn > 0 [
+      set evaluation -0.05
+    ]
+  ]
+
+  set motivation-to-learn motivation-to-learn + evaluation
 
 end
 
+to evaluate-crossover-learning [old-knowledge new-knowledge]
 
+  let evaluation 0
+  let niche-demand-now [niche-demand] of one-of niches
+
+  ;; compares the absolute fitness prior to the crossover, and after the crossover
+  ifelse (hamming-distance old-knowledge new-knowledge) = 0 [
+    set evaluation -0.05
+  ][
+    set evaluation 0.05
+  ]
+
+  set motivation-to-learn motivation-to-learn + evaluation
+
+end
 
 
 
@@ -656,15 +692,24 @@ to select-role
 
 end
 
+to-report flip-of-a-coin [probability]
+  ifelse random-float 1 < probability [
+    report 1
+  ][
+    report 0
+  ]
+end
+
 to create-knowledge-DNA
   ;; randomly creates the scientific knowledge string
   ;; if the entity does not possess this kind of knowledge, the string is all 0's
   ;; it also initializes the new-science-knowledge
   ifelse science? [
-  set science-knowledge n-values (knowledge / 2)  [random 2]
-  set new-science-knowledge science-knowledge
-  ]
-  [ set science-knowledge n-values (knowledge / 2) [0]
+    ;; set science-knowledge n-values (knowledge / 2) [random 2]
+    set science-knowledge n-values (knowledge / 2)  [ flip-of-a-coin initial_fitness_probability ]
+    set new-science-knowledge science-knowledge
+  ][
+    set science-knowledge n-values (knowledge / 2) [0]
     set new-science-knowledge science-knowledge
   ]
 
@@ -672,10 +717,11 @@ to create-knowledge-DNA
   ;; if the entity does not possess this kind of knowledge, the string is all 0's
   ;; it also initializes the new-tech-knowledge
   ifelse technology? [
-  set tech-knowledge n-values (knowledge / 2) [random 2]
-  set new-tech-knowledge tech-knowledge
-  ]
-  [ set tech-knowledge n-values (knowledge / 2) [0]
+    ;; set tech-knowledge n-values (knowledge / 2) [random 2]
+    set tech-knowledge n-values (knowledge / 2) [ flip-of-a-coin initial_fitness_probability ]
+    set new-tech-knowledge tech-knowledge
+  ][
+    set tech-knowledge n-values (knowledge / 2) [0]
     set new-tech-knowledge tech-knowledge
   ]
 
@@ -693,7 +739,7 @@ end
 to test-fitness
 
   set fitness 0
-  set niche-demand-now [niche-demand] of one-of niches
+  let niche-demand-now [niche-demand] of one-of niches
   let fitness1 0
   let fitness2 0
   set fitness1 (knowledge / 2) - (hamming-distance tech-knowledge niche-demand-now)
@@ -963,6 +1009,9 @@ to interact
         set new-tech-knowledge crossover bits1 bits2
         update-link-appearance new-tech-knowledge tech-knowledge yellow
 
+        evaluate-crossover-fitness tech-knowledge new-tech-knowledge
+        evaluate-crossover-fitness science-knowledge new-science-knowledge
+
         ;;**** i can create a string with both knowledge for the update link, and it will sum the differences in both knowledges
 
       ][;; if both the entity (receiver) and the partner (emitter) possess only scientific knowledge
@@ -978,7 +1027,8 @@ to interact
           ;; let new-science-knowledge1 new-science-knowledge *** used to assess whether the mutation is working
           set new-science-knowledge mutate new-science-knowledge
           update-link-appearance new-science-knowledge science-knowledge green
-          ;; if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"] *** used to assess whether the mutation is working
+
+          evaluate-crossover-fitness science-knowledge new-science-knowledge
 
         ][;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
           ;; the code ignores those who don't have any knowledge, but these have been ignored already by the choose-partner procedure
@@ -990,6 +1040,9 @@ to interact
             let bits2 [tech-knowledge] of partner
             set new-tech-knowledge crossover bits1 bits2
             update-link-appearance new-tech-knowledge tech-knowledge blue
+
+            evaluate-crossover-fitness tech-knowledge new-tech-knowledge
+
           ]
         ]
       ]
@@ -998,6 +1051,9 @@ to interact
       table:put interaction-memory [who] of partner trust_in_known_partners
       ;; inserts a memory of this interaction in the emitter's (partner) memory
       table:put [interaction-memory] of partner who trust_in_known_partners
+
+      evaluate-crossover-fitness tech-knowledge new-tech-knowledge
+      evaluate-crossover-fitness science-knowledge new-science-knowledge
 
     ][;; the crossover failed the test of the willingness-to-share-actual or the search for a partner
       ;; in either case the integration, if occurred, failed
@@ -1544,7 +1600,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1000
-601.0
+501.0
 100
 1
 NIL
@@ -1736,7 +1792,7 @@ INPUTBOX
 364
 70
 stop_trigger
-600.0
+2000.0
 1
 0
 Number
@@ -1765,7 +1821,7 @@ willingness_to_share
 willingness_to_share
 0
 1
-0.45
+0.5
 0.05
 1
 NIL
@@ -1780,7 +1836,7 @@ mutation_rate
 mutation_rate
 0
 0.1
-0.0
+0.1
 0.01
 1
 NIL
@@ -1795,7 +1851,7 @@ std_dev_motivation
 std_dev_motivation
 0
 0.5
-0.2
+0.1
 0.05
 1
 NIL
@@ -1810,7 +1866,7 @@ std_dev_willingness
 std_dev_willingness
 0
 0.5
-0.2
+0.4
 0.05
 1
 NIL
@@ -1972,7 +2028,7 @@ development_performance
 development_performance
 0
 1
-0.5
+1.0
 0.05
 1
 NIL
@@ -1987,7 +2043,7 @@ creation_performance
 creation_performance
 0
 1
-0.0
+1.0
 0.05
 1
 NIL
@@ -2047,7 +2103,7 @@ SWITCH
 564
 super_share?
 super_share?
-0
+1
 1
 -1000
 
@@ -2088,7 +2144,7 @@ integration_boost
 integration_boost
 0
 1
-0.2
+0.7
 0.05
 1
 NIL
@@ -2601,8 +2657,23 @@ trust_in_known_partners
 trust_in_known_partners
 0
 0.2
-0.2
+0.05
 0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+619
+462
+805
+495
+initial_fitness_probability
+initial_fitness_probability
+0
+1
+0.1
+0.1
 1
 NIL
 HORIZONTAL
