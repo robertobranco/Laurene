@@ -390,13 +390,14 @@ to evaluate-crossover-learning [old-knowledge new-knowledge]
 end
 
 
-
+;; creates startups. All of the startups are pure consumers with a DNA composed
+;; by a crossover of the DNAs of existing entities
 to spawn-startup [number-of-startups]
 
   repeat number-of-startups[
     create-entities 1 [
 
-      set generator? false
+      set generator? one-of [true false]
       ;; set generator? one-of [true false] ;; if a chance of creating a generator consumer is desired
       set consumer? true
       set diffuser? false
@@ -1471,7 +1472,7 @@ number_of_entities
 number_of_entities
 1
 600
-200.0
+248.0
 1
 1
 NIL
@@ -1486,7 +1487,7 @@ Knowledge
 Knowledge
 2
 200
-200.0
+50.0
 2
 1
 NIL
@@ -1866,7 +1867,7 @@ std_dev_willingness
 std_dev_willingness
 0
 0.5
-0.4
+0.1
 0.05
 1
 NIL
@@ -2028,7 +2029,7 @@ development_performance
 development_performance
 0
 1
-1.0
+0.55
 0.05
 1
 NIL
@@ -2043,7 +2044,7 @@ creation_performance
 creation_performance
 0
 1
-1.0
+0.5
 0.05
 1
 NIL
@@ -2058,7 +2059,7 @@ std_dev_creation_performance
 std_dev_creation_performance
 0
 .5
-0.0
+0.1
 .05
 1
 NIL
@@ -2090,7 +2091,7 @@ std_dev_development_performance
 std_dev_development_performance
 0
 0.5
-0.2
+0.1
 0.05
 1
 NIL
@@ -2144,7 +2145,7 @@ integration_boost
 integration_boost
 0
 1
-0.7
+0.5
 0.05
 1
 NIL
@@ -2396,7 +2397,7 @@ number_of_generators
 number_of_generators
 0
 100
-0.0
+6.0
 1
 1
 NIL
@@ -2426,7 +2427,7 @@ number_of_integrators
 number_of_integrators
 0
 100
-50.0
+5.0
 1
 1
 NIL
@@ -2441,7 +2442,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-50.0
+6.0
 1
 1
 NIL
@@ -2456,7 +2457,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-0.0
+100.0
 1
 1
 NIL
@@ -2491,7 +2492,7 @@ number_of_gen_dif
 number_of_gen_dif
 0
 100
-0.0
+31.0
 1
 1
 NIL
@@ -2504,7 +2505,7 @@ SWITCH
 580
 random_ent_creation?
 random_ent_creation?
-0
+1
 1
 -1000
 
@@ -2657,7 +2658,7 @@ trust_in_known_partners
 trust_in_known_partners
 0
 0.2
-0.05
+0.0
 0.01
 1
 NIL

@@ -165,6 +165,7 @@ to setup
     ]
   ][
     ;; creates the selected amount of each kind of entity and assigns them resources, a knowledge DNA and others
+    ;; creates pure generators
     create-entities number_of_generators [
 
       set generator? true
@@ -175,7 +176,7 @@ to setup
       set-entity-parameters
       set color orange
     ]
-
+    ;; creates pure consumers
     create-entities number_of_consumers [
 
       set generator? false
@@ -186,7 +187,7 @@ to setup
       set-entity-parameters
       set color orange
     ]
-
+    creates pure diffusers
     create-entities number_of_diffusers [
 
       set generator? false
@@ -197,7 +198,7 @@ to setup
       set-entity-parameters
       set color orange
     ]
-
+    ;; creates pure integrators
     create-entities number_of_integrators [
 
       set generator? false
@@ -226,7 +227,6 @@ to setup
       set consumer? false
       set diffuser? true
       set integrator? false
-
 
       set-entity-parameters
       set color orange
@@ -390,14 +390,13 @@ to evaluate-crossover-learning [old-knowledge new-knowledge]
 end
 
 
-;; creates startups. All of the startups are pure consumers with a DNA composed
-;; by a crossover of the DNAs of existing entities
+
 to spawn-startup [number-of-startups]
 
   repeat number-of-startups[
     create-entities 1 [
 
-      set generator? one-of [true false]
+      set generator? false
       ;; set generator? one-of [true false] ;; if a chance of creating a generator consumer is desired
       set consumer? true
       set diffuser? false
@@ -1472,7 +1471,7 @@ number_of_entities
 number_of_entities
 1
 600
-248.0
+200.0
 1
 1
 NIL
@@ -2029,7 +2028,7 @@ development_performance
 development_performance
 0
 1
-0.55
+1.0
 0.05
 1
 NIL
@@ -2044,7 +2043,7 @@ creation_performance
 creation_performance
 0
 1
-0.5
+1.0
 0.05
 1
 NIL
@@ -2059,7 +2058,7 @@ std_dev_creation_performance
 std_dev_creation_performance
 0
 .5
-0.1
+0.0
 .05
 1
 NIL
@@ -2091,7 +2090,7 @@ std_dev_development_performance
 std_dev_development_performance
 0
 0.5
-0.1
+0.2
 0.05
 1
 NIL
@@ -2158,7 +2157,7 @@ SWITCH
 121
 set_input_seed?
 set_input_seed?
-1
+0
 1
 -1000
 
@@ -2179,7 +2178,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
--1.392489156E9
+12323.0
 1
 0
 Number
@@ -2397,7 +2396,7 @@ number_of_generators
 number_of_generators
 0
 100
-6.0
+0.0
 1
 1
 NIL
@@ -2427,7 +2426,7 @@ number_of_integrators
 number_of_integrators
 0
 100
-5.0
+50.0
 1
 1
 NIL
@@ -2442,7 +2441,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-6.0
+50.0
 1
 1
 NIL
@@ -2457,7 +2456,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-100.0
+0.0
 1
 1
 NIL
@@ -2492,7 +2491,7 @@ number_of_gen_dif
 number_of_gen_dif
 0
 100
-31.0
+0.0
 1
 1
 NIL
@@ -2505,7 +2504,7 @@ SWITCH
 580
 random_ent_creation?
 random_ent_creation?
-1
+0
 1
 -1000
 
@@ -2645,7 +2644,7 @@ SWITCH
 596
 startups?
 startups?
-1
+0
 1
 -1000
 

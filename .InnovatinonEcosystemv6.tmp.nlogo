@@ -165,6 +165,7 @@ to setup
     ]
   ][
     ;; creates the selected amount of each kind of entity and assigns them resources, a knowledge DNA and others
+    ;; creates pure generators
     create-entities number_of_generators [
 
       set generator? true
@@ -175,7 +176,7 @@ to setup
       set-entity-parameters
       set color orange
     ]
-
+    ;; creates pure consumers
     create-entities number_of_consumers [
 
       set generator? false
@@ -186,7 +187,7 @@ to setup
       set-entity-parameters
       set color orange
     ]
-
+    ;; creates pure diffusers
     create-entities number_of_diffusers [
 
       set generator? false
@@ -197,7 +198,7 @@ to setup
       set-entity-parameters
       set color orange
     ]
-
+    ;; creates pure integrators
     create-entities number_of_integrators [
 
       set generator? false
@@ -208,7 +209,7 @@ to setup
       set-entity-parameters
       set color orange
     ]
-
+    ;; creates consumers-generators
     create-entities number_of_cons_gen [
 
       set generator? true
@@ -219,7 +220,7 @@ to setup
       set-entity-parameters
       set color orange
     ]
-
+    ;; creates generators-diffusers
     create-entities number_of_gen_dif [
 
       set generator? true
@@ -227,12 +228,12 @@ to setup
       set diffuser? true
       set integrator? false
 
-
       set-entity-parameters
       set color orange
 
     ]
-
+  ;; sets the total number of entities as the sum of the types created. It will allow the model to replace the numbers with randomly created startups
+  ;; if startups? is set on
   set number_of_entities (number_of_generators + number_of_consumers + number_of_integrators + number_of_diffusers + number_of_cons_gen + number_of_gen_dif)
 
   ]
@@ -261,7 +262,7 @@ to go
   ask entities [calculate-resource]
 
   ;; replaces dead entities with new startups, keeping the competition high
-  ;; has to be called after calculate-resources, to avoid choosing dead parents
+  ;; has to be called after calculate-resources, to avoid choosing parents that would die during the iteration
   if (count entities) !=  number_of_entities and startups? [
     spawn-startup (number_of_entities - (count entities))
   ]
@@ -283,11 +284,14 @@ to go
 
   ;; *** to do list
   ;; ask entities to update its own parameters (adapt)
-  ;; the impact of environment in relations
+  ;; the impact of environment in relations - done by a risk bias and also by the mechanisms used in the ecosystem
+  ;; such as the entities evaluating well or not if another successfuly absorbs their knowledge
+  ;; and all entities being exposed to the market or not
+  ;; ***
 
   ;; knowledge activities inside the entities
 
-  ;; ask generators to perform research, in other words, mutate knowledge
+  ;; asks generators to perform research, in other words, mutate knowledge
   ;; *** has to be called before the call to interact, as it may alter newly developed science
   ask entities with [generator?] [
 
@@ -316,8 +320,8 @@ to go
   ;; *** has to be called after the call for development, to prevent the destruction of newly developed knowledge, unless
   ;; it is the intention to allow entities to perform more than one activity per iteration - in that case some of the learning may be overwritten
   ;; the crossover? flag is set by the interact procedure after both entities have agreed to interact
-  ;; since integrated entities also perform interact, it is possible that an entity has already performed crossover when the code gets to this point
   ask entities with [science? or technology?] [
+
     if resources > cost_of_crossover and not development? and not mutation? and not crossover? [
 
       interact
@@ -327,8 +331,10 @@ to go
 
   ;; ask entities to update their knowledge given the actions performed on the iteration
   ask entities [
+
     set science-knowledge new-science-knowledge
     set tech-knowledge new-tech-knowledge
+
   ]
 
   tick
@@ -348,18 +354,19 @@ end
 to evaluate-crossover-fitness [old-knowledge new-knowledge]
 
   let evaluation 0
+  ;; the model currently has only one niche. If more than one niche is implemented, it will pick
+  ;; one of the niches for the evaluation.
   let niche-demand-now [niche-demand] of one-of niches
-
   ;; compares the absolute fitness prior to the crossover, and after the crossover
-  let fitness1 0
-  let fitness2 0
+  let fitness-old 0
+  let fitness-new 0
+
   ;; assesses the complement of the hamming distance between the niche-demand and the knowledges
   ;; the higher the better
-  set fitness1 (knowledge / 2) - (hamming-distance old-knowledge niche-demand-now)
-  set fitness2 (knowledge / 2) - (hamming-distance new-knowledge niche-demand-now)
-  print fitness1
-  print fitness2
-  ifelse fitness2 > fitness1 [
+  set fitness-old (knowledge / 2) - (hamming-distance old-knowledge niche-demand-now)
+  set fitness-new (knowledge / 2) - (hamming-distance new-knowledge niche-demand-now)
+
+  ifelse fitness-new > fitness-old [
     if motivation-to-learn < 1 [
       set evaluation 0.05
     ]
@@ -389,37 +396,15 @@ to evaluate-crossover-learning [old-knowledge new-knowledge]
 
 end
 
-
-;; creates startups. All of the startups are pure consumers with a DNA composed
-;; by a crossover of the DNAs of existing entities
+;; creates startups (all pure consumers)
 to spawn-startup [number-of-startups]
 
   repeat number-of-startups[
     create-entities 1 [
 
-      set generator? one-of [true false]
-      ;; set generator? one-of [true false] ;; if a chance of creating a generator consumer is desired
-      set consumer? true
-      set diffuser? false
-      set integrator? false
 
-      ;; assigns all other variables, as well as a random tech-knowledge and science-knowledge DNA
-      set-entity-parameters
-      set color cyan
-      set shape "turtle"
-      print "called set entity parameters"
-
-      ;; chooses one of the other entities to be a parent of the new startup
-      let parent1 choose-partner
-
-      ;; chooses the second parent with replacement
-      let parent2 choose-partner
-      show parent1
-      show parent2
 
       if parent1 != nobody and parent2 != nobody [
-
-        print "Parents 1 and 2 successfuly selected"
 
         ;; the code ignores the cases where the chosen parents do not have matching knowledge
         ;; that is only a possibility when the startup is a generator-consumer, if one parent has only science?  and the other has only technology?
@@ -693,6 +678,7 @@ to select-role
 
 end
 
+;; flips a coin with the given probability of showing 1
 to-report flip-of-a-coin [probability]
   ifelse random-float 1 < probability [
     report 1
@@ -1472,7 +1458,7 @@ number_of_entities
 number_of_entities
 1
 600
-248.0
+200.0
 1
 1
 NIL
@@ -1487,7 +1473,7 @@ Knowledge
 Knowledge
 2
 200
-50.0
+100.0
 2
 1
 NIL
@@ -1586,7 +1572,7 @@ niche_resources
 niche_resources
 0
 20000
-12000.0
+0.0
 1000
 1
 NIL
@@ -2029,7 +2015,7 @@ development_performance
 development_performance
 0
 1
-0.55
+1.0
 0.05
 1
 NIL
@@ -2044,7 +2030,7 @@ creation_performance
 creation_performance
 0
 1
-0.5
+1.0
 0.05
 1
 NIL
@@ -2059,7 +2045,7 @@ std_dev_creation_performance
 std_dev_creation_performance
 0
 .5
-0.1
+0.5
 .05
 1
 NIL
@@ -2091,7 +2077,7 @@ std_dev_development_performance
 std_dev_development_performance
 0
 0.5
-0.1
+0.2
 0.05
 1
 NIL
@@ -2104,7 +2090,7 @@ SWITCH
 564
 super_share?
 super_share?
-1
+0
 1
 -1000
 
@@ -2158,7 +2144,7 @@ SWITCH
 121
 set_input_seed?
 set_input_seed?
-1
+0
 1
 -1000
 
@@ -2179,7 +2165,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
--1.392489156E9
+12323.0
 1
 0
 Number
@@ -2397,7 +2383,7 @@ number_of_generators
 number_of_generators
 0
 100
-6.0
+0.0
 1
 1
 NIL
@@ -2427,7 +2413,7 @@ number_of_integrators
 number_of_integrators
 0
 100
-5.0
+50.0
 1
 1
 NIL
@@ -2442,7 +2428,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-6.0
+50.0
 1
 1
 NIL
@@ -2457,7 +2443,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-100.0
+0.0
 1
 1
 NIL
@@ -2492,7 +2478,7 @@ number_of_gen_dif
 number_of_gen_dif
 0
 100
-31.0
+0.0
 1
 1
 NIL
@@ -2505,7 +2491,7 @@ SWITCH
 580
 random_ent_creation?
 random_ent_creation?
-1
+0
 1
 -1000
 
@@ -2645,7 +2631,7 @@ SWITCH
 596
 startups?
 startups?
-1
+0
 1
 -1000
 
