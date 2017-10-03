@@ -404,7 +404,6 @@ to spawn-startup [number-of-startups]
       ;; assigns all other variables, as well as a random tech-knowledge and science-knowledge DNA
       set-entity-parameters
 
-
       ;; chooses one of the other entities to be a parent of the new startup
       let parent1 choose-partner
 
@@ -413,69 +412,88 @@ to spawn-startup [number-of-startups]
       show parent1
       show parent2
 
+      ;; the knowledge code will work only if there are two suitable parents available
       if parent1 != nobody and parent2 != nobody [
 
-        ;; the code ignores the cases where the chosen parents do not have matching knowledge
-        ;; that is only a possibility when the startup is a generator-consumer, if one parent has only science?  and the other has only technology?
-        ;; in that case, the startup will remain with the set-entity-parameters randomly assigned knowledge
-        ;; if none gets executed (both parent1 and parent2 = nobody) then the startup uses the knowledge DNA assigned by
-        ;; the set-entity-parameters procedure.
-        ;; *** code can be writen so that the startup would fetch the scientific knowledge from one and the tech knowledge from the other
-
-        ;; if the new startup has both kinds of knowledge, and so do the chosen parents
-        ifelse science? and technology? and [science? and technology?] of parent1 and [science? and technology?] of parent2 [
+        ;; if the startup and both parents have scientific knowledge
+        ;; if the startup has scientific knowledge and none of the parents has scientific
+        ;; knowledge, the scientific knowledge randomly set by set-entity-parameters will be kept
+        ifelse science? and [science?] of parent1 and [science?] of parent2 [
 
           ;; bits1 is the science-knowledge of the parent 1
           let bits1 [science-knowledge] of parent1
           ;; bits2 is the science-knowledge of the parent 2
           let bits2 [science-knowledge] of parent2
           set new-science-knowledge crossover bits1 bits2
-
-          ;; also performs a mutation in science knowledge to create the startup
+          ;; also performs a mutation in science knowledge
           set new-science-knowledge mutate new-science-knowledge
 
-          ;; bits1 is the tech-knowledge of the parent 1
-          set bits1 [tech-knowledge] of parent1
-          ;; bits2 is the tech-knowledge of the parent 2
-          set bits2 [tech-knowledge] of parent2
-          set new-tech-knowledge crossover bits1 bits2
+        ][
+          ;; if the startup and only parent 1 have scientific knowledge
+          ifelse science? and [science?] of parent1 [
 
-          ;; also performs a mutation in technological knowledge to create the startup
-          set new-tech-knowledge mutate new-tech-knowledge
-
-        ][;; if the startup and both parents have only scientific knowledge in commmon
-
-          ifelse science? and [science?] of parent1 and [science?] of parent2 [
-            ;; bits1 is the science-knowledge of the parent 1
-            let bits1 [science-knowledge] of parent1
-            ;; bits2 is the science-knowledge of the parent 2
-            let bits2 [science-knowledge] of parent2
-            set new-science-knowledge crossover bits1 bits2
-
+            ;; the knowledge of the suitable parent is copied
+            set new-science-knowledge [science-knowledge] of parent1
             ;; also performs a mutation in science knowledge
             set new-science-knowledge mutate new-science-knowledge
 
-          ][;; if the startup and both parents have only technological knowledge in commmon
+          ][
+            ;; if the startup and only parent 2 have scientific knowledge
+            if science? and [science?] of parent2 [
 
-            if technology? and [technology?] of parent1 and [technology?] of parent2 [
-              ;; bits1 is the tech-knowledge of the parent 1
-              let bits1 [tech-knowledge] of parent1
-              ;; bits2 is the tech-knowledge of the emitter
-              let bits2 [tech-knowledge] of parent2
-              set new-tech-knowledge crossover bits1 bits2
+              ;; the knowledge of the suitable parent is copied
+              set new-science-knowledge [science-knowledge] of parent2
+              ;; also performs a mutation in science knowledge
+              set new-science-knowledge mutate new-science-knowledge
 
-              ;; also performs a mutation in technological knowledge
+            ]
+          ]
+        ]
+
+        ;; deals with the technologic knowledge of startups
+        ifelse technology? and [technology?] of parent1 and [technology?] of parent2 [
+
+          ;; bits1 is the tech-knowledge of the parent 1
+          let bits1 [tech-knowledge] of parent1
+          ;; bits2 is the tech-knowledge of the emitter
+          let bits2 [tech-knowledge] of parent2
+          set new-tech-knowledge crossover bits1 bits2
+
+          ;; also performs a mutation in technological knowledge
+          set new-tech-knowledge mutate new-tech-knowledge
+
+        ][
+          ;; if the startup and only parent 1 have scientific knowledge
+          ifelse technology? and [technology?] of parent1 [
+
+            ;; the knowledge of the suitable parent is copied
+            set new-tech-knowledge [tech-knowledge] of parent1
+            ;; also performs a mutation in science knowledge
+            set new-tech-knowledge mutate new-tech-knowledge
+
+          ][
+            ;; if the startup and only parent 2 have scientific knowledge
+            if technology? and [technology?] of parent2 [
+
+              ;; the knowledge of the suitable parent is copied
+              set new-tech-knowledge [tech-knowledge] of parent2
+              ;; also performs a mutation in science knowledge
               set new-tech-knowledge mutate new-tech-knowledge
 
             ]
           ]
         ]
+
+
+        ]
+
       ]
 
       ;; finishes by making both new-knowledge and knowledge variables equal, as the entity is starting its life and has not yet learned
       set science-knowledge new-science-knowledge
       set tech-knowledge new-tech-knowledge
       test-fitness
+      set color cyan
 
     ]
   ]
@@ -1435,8 +1453,8 @@ GRAPHICS-WINDOW
 16
 -16
 16
-1
-1
+0
+0
 1
 ticks
 30.0
@@ -1497,7 +1515,7 @@ initial_resources
 initial_resources
 1
 1000
-501.0
+1000.0
 1
 1
 NIL
@@ -1596,7 +1614,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1000
-801.0
+501.0
 100
 1
 NIL
