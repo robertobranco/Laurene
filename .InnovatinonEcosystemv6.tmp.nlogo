@@ -395,7 +395,7 @@ to spawn-startup [number-of-startups]
   repeat number-of-startups[
     create-entities 1 [
 
-      set generator? false
+      set generator? one-of [true false]
       ;; set generator? one-of [true false] ;; if a chance of creating a generator consumer is desired
       set consumer? true
       set diffuser? false
@@ -405,7 +405,6 @@ to spawn-startup [number-of-startups]
       set-entity-parameters
       set color cyan
 
-
       ;; chooses one of the other entities to be a parent of the new startup
       let parent1 choose-partner
 
@@ -413,7 +412,6 @@ to spawn-startup [number-of-startups]
       let parent2 choose-partner
       show parent1
       show parent2
-
 
       if parent1 != nobody and parent2 != nobody [
 
@@ -524,8 +522,7 @@ to set-entity-parameters
   if generator? [set science? true]
   if consumer? [set technology? true]
   if diffuser? [
-    if not science? [set science? one-of [true false]]
-    if not technology? [set technology? one-of [true false]]
+
 
     ;; If, by any chance, the diffuser has no knowledge assignment, repeat the random assignment
     while [ not science? and not technology?] [
@@ -2042,7 +2039,7 @@ creation_performance
 creation_performance
 0
 1
-0.15
+0.0
 0.05
 1
 NIL
@@ -2057,7 +2054,7 @@ std_dev_creation_performance
 std_dev_creation_performance
 0
 .5
-0.5
+0.35
 .05
 1
 NIL
@@ -2643,7 +2640,7 @@ SWITCH
 596
 startups?
 startups?
-1
+0
 1
 -1000
 

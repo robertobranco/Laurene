@@ -282,13 +282,6 @@ to go
     stop
   ]
 
-  ;; *** to do list
-  ;; ask entities to update its own parameters (adapt)
-  ;; the impact of environment in relations - done by a risk bias and also by the mechanisms used in the ecosystem
-  ;; such as the entities evaluating well or not if another successfuly absorbs their knowledge
-  ;; and all entities being exposed to the market or not
-  ;; ***
-
   ;; knowledge activities inside the entities
 
   ;; asks generators to perform research, in other words, mutate knowledge
@@ -402,7 +395,7 @@ to spawn-startup [number-of-startups]
   repeat number-of-startups[
     create-entities 1 [
 
-      set generator? false
+      set generator? one-of [true false]
       ;; set generator? one-of [true false] ;; if a chance of creating a generator consumer is desired
       set consumer? true
       set diffuser? false
@@ -411,8 +404,6 @@ to spawn-startup [number-of-startups]
       ;; assigns all other variables, as well as a random tech-knowledge and science-knowledge DNA
       set-entity-parameters
       set color cyan
-      set shape "turtle"
-      print "called set entity parameters"
 
       ;; chooses one of the other entities to be a parent of the new startup
       let parent1 choose-partner
@@ -421,7 +412,6 @@ to spawn-startup [number-of-startups]
       let parent2 choose-partner
       show parent1
       show parent2
-
 
       if parent1 != nobody and parent2 != nobody [
 
@@ -532,10 +522,7 @@ to set-entity-parameters
   if generator? [set science? true]
   if consumer? [set technology? true]
   if diffuser? [
-    if not science? [set science? one-of [true false]]
-    if not technology? [set technology? one-of [true false]]
-
-    ;; If, by any chance, the diffuser has no knowledge assignment, repeat the random assignment
+    ;; flips the coin untill the diffuser has some kind of knowledge, science, tech or both
     while [ not science? and not technology?] [
       if not science? [set science? one-of [true false]]
       if not technology? [set technology? one-of [true false]]
@@ -2050,7 +2037,7 @@ creation_performance
 creation_performance
 0
 1
-0.15
+0.0
 0.05
 1
 NIL
@@ -2065,7 +2052,7 @@ std_dev_creation_performance
 std_dev_creation_performance
 0
 .5
-0.5
+0.35
 .05
 1
 NIL
@@ -2651,7 +2638,7 @@ SWITCH
 596
 startups?
 startups?
-1
+0
 1
 -1000
 
