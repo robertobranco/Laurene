@@ -92,151 +92,14 @@ globals [
 to setup
 
   clear-all
-
-  ;; Makes the seed that will create the random numbers in the model known, making it repeatable
-  ;; The seed may be choosen by the user, or randomly chosen by the model
-  ;; The seed being used will be displayed in the interface in the my-seed-repeat input.
-  ifelse repeat_simulation? [
-
-    ;; Takes the seed stored in the my-seed-repeat from the last simulation / user intervention during simulation
-    random-seed my-seed-repeat
-
-  ][
-    ifelse set_input_seed? [
-
-      ;; Use a seed entered by the user
-      let suitable-seed? false
-      while [not suitable-seed?] [
-
-        set my-seed user-input "Enter a random seed (an integer):"
-
-        ;; Tries to set my-seed from the input. If it is not possible, does nothing
-        carefully [ set my-seed read-from-string my-seed ] [ ]
-
-        ;; Tests the value from my-seed. If it is suitable (number and integer), sets the random-seed
-        ;; If not, asks for a new one
-        ifelse is-number? my-seed and round my-seed = my-seed [
-          random-seed my-seed ;; use the new seed
-          output-print word "User-entered seed: " my-seed  ;; print it out
-          set my-seed-repeat my-seed
-          set suitable-seed? true
-        ][
-          user-message "Please enter an integer."
-        ]
-      ]
-
-    ][
-      ;; Use a seed created by the NEW-SEED reporter
-      set my-seed new-seed            ;; generate a new seed
-      output-print word "Generated seed: " my-seed  ;; print it out
-      random-seed my-seed             ;; use the new seed
-      ;; Displays the new seed in the my-seed-repeat input
-      set my-seed-repeat my-seed
-    ]
-  ]
-
+  define-seed
   ask patches [set pcolor black];
   set-default-shape entities "circle";
 
   ;; creates the niches where entities will compete and assigns them a demand DNA
   ;; has to be created before the entities, so they can assess their fitness from the start
-
-  create-niches 1 [
-
-    ;; set the niche demand randomly
-    ;; set niche-demand n-values (knowledge / 2) [random 2]
-
-    ;; sets the niche demand as a full specification of what would be desirable, or all ones
-    set niche-demand n-values (knowledge / 2) [1]
-    hide-turtle
-    show niche-demand
-  ]
-
-  ifelse random_ent_creation? [
-
-    ;; creates random amounts of each kind of entity and assigns them resources, a knowledge DNA and others
-    create-entities number_of_entities [
-
-      ;; asks turtles to select their roles
-      select-role
-      set-entity-parameters
-      set color blue
-
-    ]
-  ][
-    ;; creates the selected amount of each kind of entity and assigns them resources, a knowledge DNA and others
-    ;; creates pure generators
-    create-entities number_of_generators [
-
-      set generator? true
-      set consumer? false
-      set diffuser? false
-      set integrator? false
-
-      set-entity-parameters
-      set color orange
-    ]
-    ;; creates pure consumers
-    create-entities number_of_consumers [
-
-      set generator? false
-      set consumer? true
-      set diffuser? false
-      set integrator? false
-
-      set-entity-parameters
-      set color orange
-    ]
-    ;; creates pure diffusers
-    create-entities number_of_diffusers [
-
-      set generator? false
-      set consumer? false
-      set diffuser? true
-      set integrator? false
-
-      set-entity-parameters
-      set color orange
-    ]
-    ;; creates pure integrators
-    create-entities number_of_integrators [
-
-      set generator? false
-      set consumer? false
-      set diffuser? false
-      set integrator? true
-
-      set-entity-parameters
-      set color orange
-    ]
-    ;; creates consumers-generators
-    create-entities number_of_cons_gen [
-
-      set generator? true
-      set consumer? true
-      set diffuser? false
-      set integrator? false
-
-      set-entity-parameters
-      set color orange
-    ]
-    ;; creates generators-diffusers
-    create-entities number_of_gen_dif [
-
-      set generator? true
-      set consumer? false
-      set diffuser? true
-      set integrator? false
-
-      set-entity-parameters
-      set color orange
-
-    ]
-  ;; sets the total number of entities as the sum of the types created. It will allow the model to replace the numbers with randomly created startups
-  ;; if startups? is set on
-  set number_of_entities (number_of_generators + number_of_consumers + number_of_integrators + number_of_diffusers + number_of_cons_gen + number_of_gen_dif)
-
-  ]
+  create-market
+  populate-ecosystem
 
   ;; resets the tick clock
   reset-ticks
@@ -344,6 +207,98 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; entities' procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to populate-ecosystem
+
+  ifelse random_ent_creation? [
+
+    ;; creates random amounts of each kind of entity and assigns them resources, a knowledge DNA and others
+    create-entities number_of_entities [
+
+      ;; asks turtles to select their roles
+      select-role
+      set-entity-parameters
+      set color blue
+
+    ]
+  ][
+    ;; creates the selected amount of each kind of entity and assigns them resources, a knowledge DNA and others
+    ;; creates pure generators
+    create-entities number_of_generators [
+
+      set generator? true
+      set consumer? false
+      set diffuser? false
+      set integrator? false
+
+      set-entity-parameters
+      set color orange
+    ]
+    ;; creates pure consumers
+    create-entities number_of_consumers [
+
+      set generator? false
+      set consumer? true
+      set diffuser? false
+      set integrator? false
+
+      set-entity-parameters
+      set color orange
+    ]
+    ;; creates pure diffusers
+    create-entities number_of_diffusers [
+
+      set generator? false
+      set consumer? false
+      set diffuser? true
+      set integrator? false
+
+      set-entity-parameters
+      set color orange
+    ]
+    ;; creates pure integrators
+    create-entities number_of_integrators [
+
+      set generator? false
+      set consumer? false
+      set diffuser? false
+      set integrator? true
+
+      set-entity-parameters
+      set color orange
+    ]
+    ;; creates consumers-generators
+    create-entities number_of_cons_gen [
+
+      set generator? true
+      set consumer? true
+      set diffuser? false
+      set integrator? false
+
+      set-entity-parameters
+      set color orange
+    ]
+    ;; creates generators-diffusers
+    create-entities number_of_gen_dif [
+
+      set generator? true
+      set consumer? false
+      set diffuser? true
+      set integrator? false
+
+      set-entity-parameters
+      set color orange
+
+    ]
+  ;; sets the total number of entities as the sum of the types created. It will allow the model to replace the numbers with randomly created startups
+  ;; if startups? is set on
+  set number_of_entities (number_of_generators + number_of_consumers + number_of_integrators + number_of_diffusers + number_of_cons_gen + number_of_gen_dif)
+
+  ]
+
+end
+
+
+
 to evaluate-crossover-fitness [old-knowledge new-knowledge]
 
   let evaluation 0
@@ -528,7 +483,7 @@ to develop
   if resources > cost_of_development [
       if random-float 1 < development-performance [
 
-        ;;using new-tech-knowledge instead of tech-knowledge allows several knowledge activities to be performed without loosing the notion of paralelism
+        ;; using new-tech-knowledge instead of tech-knowledge allows several knowledge activities to be performed without loosing the notion of paralelism
         ;; although some of the learning of the previous activity may be altered
         set new-tech-knowledge crossover new-tech-knowledge new-science-knowledge
         ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
@@ -1169,6 +1124,19 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; niche's procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to create-market
+  create-niches 1 [
+
+    ;; set the niche demand randomly
+    ;; set niche-demand n-values (knowledge / 2) [random 2]
+
+    ;; sets the niche demand as a full specification of what would be desirable, or all ones
+    set niche-demand n-values (knowledge / 2) [1]
+    hide-turtle
+    show niche-demand
+  ]
+end
+
 
 to mutate-market
   ask niches [
@@ -1280,6 +1248,56 @@ to update-link-appearance [bits1 bits2 color-link]
   ][
     ask my-links [
       set color red
+    ]
+  ]
+
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;; other procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to define-seed
+
+  ;; Makes the seed that will create the random numbers in the model known, making it repeatable
+  ;; The seed may be choosen by the user, or randomly chosen by the model
+  ;; The seed being used will be displayed in the interface in the my-seed-repeat input.
+  ifelse repeat_simulation? [
+
+    ;; Takes the seed stored in the my-seed-repeat from the last simulation / user intervention during simulation
+    random-seed my-seed-repeat
+
+  ][
+    ifelse set_input_seed? [
+
+      ;; Use a seed entered by the user
+      let suitable-seed? false
+      while [not suitable-seed?] [
+
+        set my-seed user-input "Enter a random seed (an integer):"
+
+        ;; Tries to set my-seed from the input. If it is not possible, does nothing
+        carefully [ set my-seed read-from-string my-seed ] [ ]
+
+        ;; Tests the value from my-seed. If it is suitable (number and integer), sets the random-seed
+        ;; If not, asks for a new one
+        ifelse is-number? my-seed and round my-seed = my-seed [
+          random-seed my-seed ;; use the new seed
+          output-print word "User-entered seed: " my-seed  ;; print it out
+          set my-seed-repeat my-seed
+          set suitable-seed? true
+        ][
+          user-message "Please enter an integer."
+        ]
+      ]
+
+    ][
+      ;; Use a seed created by the NEW-SEED reporter
+      set my-seed new-seed            ;; generate a new seed
+      output-print word "Generated seed: " my-seed  ;; print it out
+      random-seed my-seed             ;; use the new seed
+      ;; Displays the new seed in the my-seed-repeat input
+      set my-seed-repeat my-seed
     ]
   ]
 
