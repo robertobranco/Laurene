@@ -282,13 +282,6 @@ to go
     stop
   ]
 
-  ;; *** to do list
-  ;; ask entities to update its own parameters (adapt)
-  ;; the impact of environment in relations - done by a risk bias and also by the mechanisms used in the ecosystem
-  ;; such as the entities evaluating well or not if another successfuly absorbs their knowledge
-  ;; and all entities being exposed to the market or not
-  ;; ***
-
   ;; knowledge activities inside the entities
 
   ;; asks generators to perform research, in other words, mutate knowledge
@@ -396,12 +389,30 @@ to evaluate-crossover-learning [old-knowledge new-knowledge]
 
 end
 
-;; creates startups (all pure consumers)
+;; creates startups (all pure consumers or generators-consumers)
 to spawn-startup [number-of-startups]
 
   repeat number-of-startups[
     create-entities 1 [
 
+      set generator? false
+      ;; set generator? one-of [true false] ;; if a chance of creating a generator consumer is desired
+      set consumer? true
+      set diffuser? false
+      set integrator? false
+
+      ;; assigns all other variables, as well as a random tech-knowledge and science-knowledge DNA
+      set-entity-parameters
+      set color cyan
+
+
+      ;; chooses one of the other entities to be a parent of the new startup
+      let parent1 choose-partner
+
+      ;; chooses the second parent with replacement
+      let parent2 choose-partner
+      show parent1
+      show parent2
 
 
       if parent1 != nobody and parent2 != nobody [
@@ -471,7 +482,7 @@ to spawn-startup [number-of-startups]
 
 end
 
-
+;; transforms scientific knowledge into technological knowledge
 to develop
 
   if resources > cost_of_development [
@@ -487,10 +498,11 @@ to develop
 
 end
 
+;; creates new knowledge through mutation
 to generate
 
-  if random-float 1 < creation-performance [
-      if resources > cost_of_mutation [
+  if resources > cost_of_mutation [
+      if random-float 1 < creation-performance [
         set mutation? true
         let new-science-knowledge1 new-science-knowledge
         set new-science-knowledge mutate new-science-knowledge
@@ -1572,7 +1584,7 @@ niche_resources
 niche_resources
 0
 20000
-0.0
+20000.0
 1000
 1
 NIL
@@ -1587,7 +1599,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1000
-501.0
+801.0
 100
 1
 NIL
@@ -1970,7 +1982,7 @@ cost_of_crossover
 cost_of_crossover
 0
 1000
-0.0
+500.0
 100
 1
 NIL
@@ -1985,7 +1997,7 @@ cost_of_mutation
 cost_of_mutation
 0
 1000
-0.0
+500.0
 100
 1
 NIL
@@ -2000,7 +2012,7 @@ cost_of_development
 cost_of_development
 0
 1000
-0.0
+500.0
 100
 1
 NIL
@@ -2015,7 +2027,7 @@ development_performance
 development_performance
 0
 1
-1.0
+0.0
 0.05
 1
 NIL
@@ -2030,7 +2042,7 @@ creation_performance
 creation_performance
 0
 1
-1.0
+0.15
 0.05
 1
 NIL
@@ -2090,7 +2102,7 @@ SWITCH
 564
 super_share?
 super_share?
-0
+1
 1
 -1000
 
@@ -2131,7 +2143,7 @@ integration_boost
 integration_boost
 0
 1
-0.5
+0.0
 0.05
 1
 NIL
@@ -2165,7 +2177,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
-12323.0
+8.7658765E7
 1
 0
 Number
@@ -2631,7 +2643,7 @@ SWITCH
 596
 startups?
 startups?
-0
+1
 1
 -1000
 

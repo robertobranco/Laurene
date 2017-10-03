@@ -187,7 +187,7 @@ to setup
       set-entity-parameters
       set color orange
     ]
-    creates pure diffusers
+    ;; creates pure diffusers
     create-entities number_of_diffusers [
 
       set generator? false
@@ -209,7 +209,7 @@ to setup
       set-entity-parameters
       set color orange
     ]
-
+    ;; creates consumers-generators
     create-entities number_of_cons_gen [
 
       set generator? true
@@ -220,7 +220,7 @@ to setup
       set-entity-parameters
       set color orange
     ]
-
+    ;; creates generators-diffusers
     create-entities number_of_gen_dif [
 
       set generator? true
@@ -232,7 +232,8 @@ to setup
       set color orange
 
     ]
-
+  ;; sets the total number of entities as the sum of the types created. It will allow the model to replace the numbers with randomly created startups
+  ;; if startups? is set on
   set number_of_entities (number_of_generators + number_of_consumers + number_of_integrators + number_of_diffusers + number_of_cons_gen + number_of_gen_dif)
 
   ]
@@ -261,7 +262,7 @@ to go
   ask entities [calculate-resource]
 
   ;; replaces dead entities with new startups, keeping the competition high
-  ;; has to be called after calculate-resources, to avoid choosing dead parents
+  ;; has to be called after calculate-resources, to avoid choosing parents that would die during the iteration
   if (count entities) !=  number_of_entities and startups? [
     spawn-startup (number_of_entities - (count entities))
   ]
@@ -283,11 +284,14 @@ to go
 
   ;; *** to do list
   ;; ask entities to update its own parameters (adapt)
-  ;; the impact of environment in relations
+  ;; the impact of environment in relations - done by a risk bias and also by the mechanisms used in the ecosystem
+  ;; such as the entities evaluating well or not if another successfuly absorbs their knowledge
+  ;; and all entities being exposed to the market or not
+  ;; ***
 
   ;; knowledge activities inside the entities
 
-  ;; ask generators to perform research, in other words, mutate knowledge
+  ;; asks generators to perform research, in other words, mutate knowledge
   ;; *** has to be called before the call to interact, as it may alter newly developed science
   ask entities with [generator?] [
 
@@ -316,8 +320,8 @@ to go
   ;; *** has to be called after the call for development, to prevent the destruction of newly developed knowledge, unless
   ;; it is the intention to allow entities to perform more than one activity per iteration - in that case some of the learning may be overwritten
   ;; the crossover? flag is set by the interact procedure after both entities have agreed to interact
-  ;; since integrated entities also perform interact, it is possible that an entity has already performed crossover when the code gets to this point
   ask entities with [science? or technology?] [
+
     if resources > cost_of_crossover and not development? and not mutation? and not crossover? [
 
       interact
@@ -327,8 +331,10 @@ to go
 
   ;; ask entities to update their knowledge given the actions performed on the iteration
   ask entities [
+
     set science-knowledge new-science-knowledge
     set tech-knowledge new-tech-knowledge
+
   ]
 
   tick
@@ -348,18 +354,19 @@ end
 to evaluate-crossover-fitness [old-knowledge new-knowledge]
 
   let evaluation 0
+  ;; the model currently has only one niche. If more than one niche is implemented, it will pick
+  ;; one of the niches for the evaluation.
   let niche-demand-now [niche-demand] of one-of niches
-
   ;; compares the absolute fitness prior to the crossover, and after the crossover
-  let fitness1 0
-  let fitness2 0
+  let fitness-old 0
+  let fitness-new 0
+
   ;; assesses the complement of the hamming distance between the niche-demand and the knowledges
   ;; the higher the better
-  set fitness1 (knowledge / 2) - (hamming-distance old-knowledge niche-demand-now)
-  set fitness2 (knowledge / 2) - (hamming-distance new-knowledge niche-demand-now)
-  print fitness1
-  print fitness2
-  ifelse fitness2 > fitness1 [
+  set fitness-old (knowledge / 2) - (hamming-distance old-knowledge niche-demand-now)
+  set fitness-new (knowledge / 2) - (hamming-distance new-knowledge niche-demand-now)
+
+  ifelse fitness-new > fitness-old [
     if motivation-to-learn < 1 [
       set evaluation 0.05
     ]
@@ -389,8 +396,7 @@ to evaluate-crossover-learning [old-knowledge new-knowledge]
 
 end
 
-
-
+;; creates startups (all pure consumers or generators-consumers)
 to spawn-startup [number-of-startups]
 
   repeat number-of-startups[
@@ -416,9 +422,8 @@ to spawn-startup [number-of-startups]
       show parent1
       show parent2
 
-      if parent1 != nobody and parent2 != nobody [
 
-        print "Parents 1 and 2 successfuly selected"
+      if parent1 != nobody and parent2 != nobody [
 
         ;; the code ignores the cases where the chosen parents do not have matching knowledge
         ;; that is only a possibility when the startup is a generator-consumer, if one parent has only science?  and the other has only technology?
@@ -485,7 +490,7 @@ to spawn-startup [number-of-startups]
 
 end
 
-
+;; transforms scientific knowledge into technological knowledge
 to develop
 
   if resources > cost_of_development [
@@ -501,10 +506,11 @@ to develop
 
 end
 
+;; creates new knowledge through mutation
 to generate
 
-  if random-float 1 < creation-performance [
-      if resources > cost_of_mutation [
+  if resources > cost_of_mutation [
+      if random-float 1 < creation-performance [
         set mutation? true
         let new-science-knowledge1 new-science-knowledge
         set new-science-knowledge mutate new-science-knowledge
@@ -692,6 +698,7 @@ to select-role
 
 end
 
+;; flips a coin with the given probability of showing 1
 to-report flip-of-a-coin [probability]
   ifelse random-float 1 < probability [
     report 1
@@ -1486,7 +1493,7 @@ Knowledge
 Knowledge
 2
 200
-50.0
+100.0
 2
 1
 NIL
@@ -1585,7 +1592,7 @@ niche_resources
 niche_resources
 0
 20000
-12000.0
+20000.0
 1000
 1
 NIL
@@ -1600,7 +1607,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1000
-501.0
+801.0
 100
 1
 NIL
@@ -1983,7 +1990,7 @@ cost_of_crossover
 cost_of_crossover
 0
 1000
-0.0
+500.0
 100
 1
 NIL
@@ -1998,7 +2005,7 @@ cost_of_mutation
 cost_of_mutation
 0
 1000
-0.0
+500.0
 100
 1
 NIL
@@ -2013,7 +2020,7 @@ cost_of_development
 cost_of_development
 0
 1000
-0.0
+500.0
 100
 1
 NIL
@@ -2028,7 +2035,7 @@ development_performance
 development_performance
 0
 1
-1.0
+0.0
 0.05
 1
 NIL
@@ -2043,7 +2050,7 @@ creation_performance
 creation_performance
 0
 1
-1.0
+0.15
 0.05
 1
 NIL
@@ -2058,7 +2065,7 @@ std_dev_creation_performance
 std_dev_creation_performance
 0
 .5
-0.0
+0.5
 .05
 1
 NIL
@@ -2144,7 +2151,7 @@ integration_boost
 integration_boost
 0
 1
-0.5
+0.0
 0.05
 1
 NIL
@@ -2178,7 +2185,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
-12323.0
+8.7658765E7
 1
 0
 Number
@@ -2644,7 +2651,7 @@ SWITCH
 596
 startups?
 startups?
-0
+1
 1
 -1000
 
