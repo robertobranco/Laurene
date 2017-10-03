@@ -484,14 +484,36 @@ to spawn-startup [number-of-startups]
           ]
         ]
 
-
+        ;; picks the knowledge activities parameters of one of the parents
+        ifelse random-float 1 < 0.5 [
+          set willingness-to-share [willingness-to-share] of parent1
+        ][
+          set willingness-to-share [willingness-to-share] of parent2
         ]
 
+        ifelse random-float 1 < 0.5 [
+          set motivation-to-learn [motivation-to-learn] of parent1
+        ][
+          set motivation-to-learn [motivation-to-learn] of parent2
+        ]
+
+        ifelse random-float 1 < 0.5 [
+          set creation-performance [creation-performance] of parent1
+        ][
+          set creation-performance [creation-performance] of parent2
+        ]
+
+        ifelse random-float 1 < 0.5 [
+          set development-performance [development-performance] of parent1
+        ][
+          set development-performance [development-performance] of parent2
+        ]
       ]
 
       ;; finishes by making both new-knowledge and knowledge variables equal, as the entity is starting its life and has not yet learned
       set science-knowledge new-science-knowledge
       set tech-knowledge new-tech-knowledge
+
       test-fitness
       set color cyan
 
@@ -1515,7 +1537,7 @@ initial_resources
 initial_resources
 1
 1000
-1000.0
+513.0
 1
 1
 NIL
@@ -1737,7 +1759,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-0
+2
 
 MONITOR
 812
@@ -1997,7 +2019,7 @@ cost_of_crossover
 cost_of_crossover
 0
 1000
-500.0
+0.0
 100
 1
 NIL
@@ -2012,7 +2034,7 @@ cost_of_mutation
 cost_of_mutation
 0
 1000
-500.0
+0.0
 100
 1
 NIL
@@ -2027,7 +2049,7 @@ cost_of_development
 cost_of_development
 0
 1000
-500.0
+0.0
 100
 1
 NIL
