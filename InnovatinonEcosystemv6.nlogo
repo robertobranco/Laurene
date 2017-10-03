@@ -403,7 +403,6 @@ to spawn-startup [number-of-startups]
 
       ;; assigns all other variables, as well as a random tech-knowledge and science-knowledge DNA
       set-entity-parameters
-      set color cyan
 
       ;; chooses one of the other entities to be a parent of the new startup
       let parent1 choose-partner
@@ -475,6 +474,9 @@ to spawn-startup [number-of-startups]
       ;; finishes by making both new-knowledge and knowledge variables equal, as the entity is starting its life and has not yet learned
       set science-knowledge new-science-knowledge
       set tech-knowledge new-tech-knowledge
+      test-fitness
+      set color cyan
+
     ]
   ]
 
@@ -1495,7 +1497,7 @@ initial_resources
 initial_resources
 1
 1000
-501.0
+1000.0
 1
 1
 NIL
@@ -1594,7 +1596,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1000
-801.0
+501.0
 100
 1
 NIL

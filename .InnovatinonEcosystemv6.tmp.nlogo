@@ -403,7 +403,7 @@ to spawn-startup [number-of-startups]
 
       ;; assigns all other variables, as well as a random tech-knowledge and science-knowledge DNA
       set-entity-parameters
-      set color cyan
+
 
       ;; chooses one of the other entities to be a parent of the new startup
       let parent1 choose-partner
@@ -475,6 +475,8 @@ to spawn-startup [number-of-startups]
       ;; finishes by making both new-knowledge and knowledge variables equal, as the entity is starting its life and has not yet learned
       set science-knowledge new-science-knowledge
       set tech-knowledge new-tech-knowledge
+      test-fitness
+
     ]
   ]
 
@@ -522,9 +524,7 @@ to set-entity-parameters
   if generator? [set science? true]
   if consumer? [set technology? true]
   if diffuser? [
-
-
-    ;; If, by any chance, the diffuser has no knowledge assignment, repeat the random assignment
+    ;; flips the coin untill the diffuser has some kind of knowledge, science, tech or both
     while [ not science? and not technology?] [
       if not science? [set science? one-of [true false]]
       if not technology? [set technology? one-of [true false]]
@@ -1435,8 +1435,8 @@ GRAPHICS-WINDOW
 16
 -16
 16
-0
-0
+1
+1
 1
 ticks
 30.0
