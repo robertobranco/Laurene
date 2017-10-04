@@ -1000,10 +1000,14 @@ to interact
         set new-tech-knowledge crossover bits1 bits2
         update-link-appearance new-tech-knowledge tech-knowledge yellow
 
-        evaluate-crossover-fitness tech-knowledge new-tech-knowledge
-        evaluate-crossover-fitness science-knowledge new-science-knowledge
-        evaluate-crossover-learning tech-knowledge new-tech-knowledge
-        evaluate-crossover-learning science-knowledge new-science-knowledge
+        if evaluate_for_fitness? [
+          evaluate-crossover-fitness tech-knowledge new-tech-knowledge
+          evaluate-crossover-fitness science-knowledge new-science-knowledge
+        ]
+        if evaluate_for_learning? [
+          evaluate-crossover-learning tech-knowledge new-tech-knowledge
+          evaluate-crossover-learning science-knowledge new-science-knowledge
+        ]
 
         ;;**** i can create a string with both knowledge for the update link, and it will sum the differences in both knowledges
 
@@ -1021,8 +1025,12 @@ to interact
           set new-science-knowledge mutate new-science-knowledge
           update-link-appearance new-science-knowledge science-knowledge green
 
-          evaluate-crossover-fitness science-knowledge new-science-knowledge
-          evauate-crossover-lear
+          if evaluate_for_fitness? [
+            evaluate-crossover-fitness science-knowledge new-science-knowledge
+          ]
+          if evaluate_for_learning? [
+            evaluate-crossover-learning science-knowledge new-science-knowledge
+          ]
 
         ][;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
           ;; the code ignores those who don't have any knowledge, but these have been ignored already by the choose-partner procedure
@@ -1035,7 +1043,12 @@ to interact
             set new-tech-knowledge crossover bits1 bits2
             update-link-appearance new-tech-knowledge tech-knowledge blue
 
-            evaluate-crossover-fitness tech-knowledge new-tech-knowledge
+            if evaluate_for_fitness? [
+              evaluate-crossover-fitness tech-knowledge new-tech-knowledge
+            ]
+            if evaluate_for_learning? [
+              evaluate-crossover-learning tech-knowledge new-tech-knowledge
+            ]
 
           ]
         ]
@@ -1046,8 +1059,7 @@ to interact
       ;; inserts a memory of this interaction in the emitter's (partner) memory
       table:put [interaction-memory] of partner who trust_in_known_partners
 
-      evaluate-crossover-fitness tech-knowledge new-tech-knowledge
-      evaluate-crossover-fitness science-knowledge new-science-knowledge
+
 
     ][;; the crossover failed the test of the willingness-to-share-actual or the search for a partner
       ;; in either case the integration, if occurred, failed
@@ -1528,7 +1540,7 @@ number_of_entities
 number_of_entities
 1
 600
-200.0
+194.0
 1
 1
 NIL
@@ -2100,7 +2112,7 @@ creation_performance
 creation_performance
 0
 1
-0.0
+0.1
 0.05
 1
 NIL
@@ -2147,7 +2159,7 @@ std_dev_development_performance
 std_dev_development_performance
 0
 0.5
-0.2
+0.3
 0.05
 1
 NIL
@@ -2201,7 +2213,7 @@ integration_boost
 integration_boost
 0
 1
-0.0
+0.45
 0.05
 1
 NIL
@@ -2701,7 +2713,7 @@ SWITCH
 596
 startups?
 startups?
-0
+1
 1
 -1000
 
@@ -2714,7 +2726,7 @@ trust_in_known_partners
 trust_in_known_partners
 0
 0.2
-0.0
+0.03
 0.01
 1
 NIL
@@ -2734,6 +2746,28 @@ initial_fitness_probability
 1
 NIL
 HORIZONTAL
+
+SWITCH
+196
+533
+369
+566
+evaluate_for_fitness?
+evaluate_for_fitness?
+1
+1
+-1000
+
+SWITCH
+196
+571
+369
+604
+evaluate_for_learning?
+evaluate_for_learning?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
