@@ -99,10 +99,8 @@ to setup
   ;; creates the niches where entities will compete and assigns them a demand DNA
   ;; has to be created before the entities, so they can assess their fitness from the start
   create-market
+  ;; creates the entities according to the inputs in the User Interface
   populate-ecosystem
-
-
-
   ;; resets the tick clock
   reset-ticks
 
@@ -1004,6 +1002,8 @@ to interact
 
         evaluate-crossover-fitness tech-knowledge new-tech-knowledge
         evaluate-crossover-fitness science-knowledge new-science-knowledge
+        evaluate-crossover-learning tech-knowledge new-tech-knowledge
+        evaluate-crossover-learning science-knowledge new-science-knowledge
 
         ;;**** i can create a string with both knowledge for the update link, and it will sum the differences in both knowledges
 
@@ -1022,6 +1022,7 @@ to interact
           update-link-appearance new-science-knowledge science-knowledge green
 
           evaluate-crossover-fitness science-knowledge new-science-knowledge
+          evauate-crossover-lear
 
         ][;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
           ;; the code ignores those who don't have any knowledge, but these have been ignored already by the choose-partner procedure
@@ -1126,6 +1127,18 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; niche's procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to create-market
+  create-niches 1 [
+
+    ;; set the niche demand randomly
+    ;; set niche-demand n-values (knowledge / 2) [random 2]
+
+    ;; sets the niche demand as a full specification of what would be desirable, or all ones
+    set niche-demand n-values (knowledge / 2) [1]
+    hide-turtle
+    show niche-demand
+  ]
+end
 
 
 to mutate-market
@@ -1530,7 +1543,7 @@ Knowledge
 Knowledge
 2
 200
-100.0
+90.0
 2
 1
 NIL
@@ -2201,7 +2214,7 @@ SWITCH
 121
 set_input_seed?
 set_input_seed?
-0
+1
 1
 -1000
 
@@ -2222,7 +2235,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
-8.7658765E7
+-5.1978908E7
 1
 0
 Number

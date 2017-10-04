@@ -99,8 +99,8 @@ to setup
   ;; creates the niches where entities will compete and assigns them a demand DNA
   ;; has to be created before the entities, so they can assess their fitness from the start
   create-market
+  ;; creates the entities according to the inputs in the User Interface
   populate-ecosystem
-
   ;; resets the tick clock
   reset-ticks
 
@@ -1002,6 +1002,8 @@ to interact
 
         evaluate-crossover-fitness tech-knowledge new-tech-knowledge
         evaluate-crossover-fitness science-knowledge new-science-knowledge
+        evaluate-crossover-learning tech-knowledge new-tech-knowledge
+        evaluate-crossover-learning science-knowledge new-science-knowledge
 
         ;;**** i can create a string with both knowledge for the update link, and it will sum the differences in both knowledges
 
@@ -1020,6 +1022,7 @@ to interact
           update-link-appearance new-science-knowledge science-knowledge green
 
           evaluate-crossover-fitness science-knowledge new-science-knowledge
+          evaluate-crossover-learning science-knowledge new-science-knowledge
 
         ][;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
           ;; the code ignores those who don't have any knowledge, but these have been ignored already by the choose-partner procedure
@@ -1033,6 +1036,7 @@ to interact
             update-link-appearance new-tech-knowledge tech-knowledge blue
 
             evaluate-crossover-fitness tech-knowledge new-tech-knowledge
+            evaluate-crossover-learning tech-knowledge new-tech-knowledge
 
           ]
         ]
@@ -1525,7 +1529,7 @@ number_of_entities
 number_of_entities
 1
 600
-200.0
+194.0
 1
 1
 NIL
@@ -1540,7 +1544,7 @@ Knowledge
 Knowledge
 2
 200
-100.0
+90.0
 2
 1
 NIL
@@ -2097,7 +2101,7 @@ creation_performance
 creation_performance
 0
 1
-0.0
+0.1
 0.05
 1
 NIL
@@ -2144,7 +2148,7 @@ std_dev_development_performance
 std_dev_development_performance
 0
 0.5
-0.2
+0.3
 0.05
 1
 NIL
@@ -2198,7 +2202,7 @@ integration_boost
 integration_boost
 0
 1
-0.0
+0.45
 0.05
 1
 NIL
@@ -2211,7 +2215,7 @@ SWITCH
 121
 set_input_seed?
 set_input_seed?
-0
+1
 1
 -1000
 
@@ -2232,7 +2236,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
-8.7658765E7
+-5.1978908E7
 1
 0
 Number
@@ -2698,7 +2702,7 @@ SWITCH
 596
 startups?
 startups?
-0
+1
 1
 -1000
 
@@ -2711,7 +2715,7 @@ trust_in_known_partners
 trust_in_known_partners
 0
 0.2
-0.0
+0.03
 0.01
 1
 NIL
