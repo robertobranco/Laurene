@@ -335,7 +335,8 @@ to evaluate-crossover-learning [old-knowledge new-knowledge]
 
   ;; compares the absolute fitness prior to the crossover, and after the crossover
   ifelse (hamming-distance old-knowledge new-knowledge) = 0 [
-    set evaluation -0.05
+
+set evaluation -0.05
   ][
     set evaluation 0.05
   ]
@@ -1058,7 +1059,6 @@ to interact
       table:put interaction-memory [who] of partner trust_in_known_partners
       ;; inserts a memory of this interaction in the emitter's (partner) memory
       table:put [interaction-memory] of partner who trust_in_known_partners
-
 
 
     ][;; the crossover failed the test of the willingness-to-share-actual or the search for a partner
@@ -2213,7 +2213,7 @@ integration_boost
 integration_boost
 0
 1
-0.45
+0.0
 0.05
 1
 NIL
@@ -2754,7 +2754,7 @@ SWITCH
 566
 evaluate_for_fitness?
 evaluate_for_fitness?
-1
+0
 1
 -1000
 
@@ -2765,7 +2765,7 @@ SWITCH
 604
 evaluate_for_learning?
 evaluate_for_learning?
-0
+1
 1
 -1000
 

@@ -335,9 +335,13 @@ to evaluate-crossover-learning [old-knowledge new-knowledge]
 
   ;; compares the absolute fitness prior to the crossover, and after the crossover
   ifelse (hamming-distance old-knowledge new-knowledge) = 0 [
-    set evaluation -0.05
+    if motivation-to-learn > 0 [
+      set evaluation -0.05
+    ]
   ][
-    set evaluation 0.05
+    if motivation-to-learn < 1 [
+      set evaluation 0.05
+    ]
   ]
 
   set motivation-to-learn motivation-to-learn + evaluation
@@ -2212,7 +2216,7 @@ integration_boost
 integration_boost
 0
 1
-0.45
+0.0
 0.05
 1
 NIL
@@ -2753,7 +2757,7 @@ SWITCH
 566
 evaluate_for_fitness?
 evaluate_for_fitness?
-1
+0
 1
 -1000
 
@@ -2764,7 +2768,7 @@ SWITCH
 604
 evaluate_for_learning?
 evaluate_for_learning?
-0
+1
 1
 -1000
 
