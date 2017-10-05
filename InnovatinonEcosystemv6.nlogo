@@ -23,6 +23,8 @@ entities-own [
   ;; lets the  model know which entities have active technological knowledge
   technology?
   ;; stores the Hamming distance of the entity (currently just from one niche)
+  sci-fitness
+  tech-fitness
   fitness
   ;; stores the amount of resources kept by the entity
   resources
@@ -738,12 +740,14 @@ end
 to test-fitness
 
   set fitness 0
+  set sci-fitness 0
+  set tech-fitness 0
   let niche-demand-now [niche-demand] of one-of niches
   let fitness1 0
   let fitness2 0
-  set fitness1 (knowledge / 2) - (hamming-distance tech-knowledge niche-demand-now)
-  set fitness2 (knowledge / 2) - (hamming-distance science-knowledge niche-demand-now )
-  set fitness max (list fitness1 fitness2)
+  set tech-fitness (knowledge / 2) - (hamming-distance tech-knowledge niche-demand-now)
+  set sci-fitness (knowledge / 2) - (hamming-distance science-knowledge niche-demand-now )
+  set fitness max (list tech-fitness sci-fitness)
 
   ;; sets the color of the entities based on its absolute fitness
   select-fitness-color
@@ -758,14 +762,16 @@ to calculate-resource
 
   ;; Awards the entities resources based on their actions / fitness
 
-  ;; gives CONSUMER entities a share of the niche's resources proportional to its market share (relative fitness)
-  ;; the relative fitness is calculated of the fitness of entities who compete for market share (CONSUMERS of knowledge)
+  ;; gives CONSUMER entities a share of the niche's resources proportional to its market share (relative tech-fitness)
+  ;; the relative fitness is calculated of the tech-fitness of entities who compete for market share (CONSUMERS of knowledge)
   if consumer? [
-    set resources resources + (niche_resources * (fitness / (sum [fitness] of entities with [consumer?])))
-    if emitted? [
+    set resources resources + (niche_resources * (tech-fitness / (sum [tech-fitness] of entities with [consumer?])))
+  ]
+
+  ;; pays emitters for their knowledge
+  if emitted? [
       set resources resources + (cost_of_crossover / 2)
       set emitted? false
-    ]
   ]
 
   ;;******************* new function for resources of non market entities
@@ -774,53 +780,14 @@ to calculate-resource
   ;; The entities will receive extra resources if they suceed in sharing resources, generating new knowledge
   if not consumer? [
 
-    if emitted? [
-      set resources resources + (cost_of_crossover / 2)
-      set emitted? false
-    ]
-
    ;; if the mutation is well suceeded, the generator has the budget renewed.
    ;; admits that a research facility receives, besides the cost of research, operational and capital funds.
+   ;; consumers mutate to increase their own competitivity
     if mutated? [
-      set resources resources + (100 * cost_of_mutation)
+      set resources resources + (10 * cost_of_mutation)
       set mutated? false
     ]
   ]
-
-
-  ;;*******************************old code for resources of non market entities
-
-
-  ;; gives GENERATORs a fixed budget every iteration, as well if they shared information
-  ;; if generator? and not consumer? [
-  ;;   set resources resources + (minimum_resources_to_live)
-  ;;   if emitted? [
-  ;;     set resources resources + (cost_of_crossover / 2)
-  ;;     set emitted? false
-  ;;   ]
-  ;;
-  ;;   if the mutation is well suceeded, the generator has the budget renewed.
-  ;;   if mutated? [
-  ;;     set resources resources + (2 * cost_of_mutation)
-  ;;     set mutated? false
-  ;;    ]
-  ;; ]
-
-  ;; gives DIFFUSERs a fixed budget every iteration, as well if they shared information
-  ;; this assumes publicly funded diffusers
-  ;; if diffuser? and not consumer? [
-  ;;   set resources resources + initial_resources
-  ;;   if emitted? [
-  ;;     set resources resources + (cost_of_crossover / 2)
-  ;;     set emitted? false
-  ;;   ]
-  ;; ]
-
-  ;; gives pure INTEGRATORs a fixed budget every iteration
-  ;; if integrator? and not consumer? [
-  ;; set resources resources + minimum_resources_to_live
-  ;; ]
-  ;;********************************************************************************************
 
   ;; takes resources from the entity proportionally to its total amount of resources, respecting the minimum amount to stay alive
   ;; the amount necessary grows with the amount of resources the entity amasses (which is the growth of the entity)
@@ -1566,7 +1533,7 @@ number_of_entities
 number_of_entities
 1
 600
-342.0
+242.0
 1
 1
 NIL
@@ -1581,7 +1548,7 @@ Knowledge
 Knowledge
 2
 200
-90.0
+100.0
 2
 1
 NIL
@@ -1695,7 +1662,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1000
-101.0
+901.0
 100
 1
 NIL
@@ -1757,7 +1724,7 @@ PLOT
 160
 1013
 310
-Average fitness of generators (%)
+(%) Average fitness of generators
 Ticks
 Average Fitness
 0.0
@@ -2078,7 +2045,7 @@ cost_of_crossover
 cost_of_crossover
 0
 1000
-100.0
+0.0
 100
 1
 NIL
@@ -2093,7 +2060,7 @@ cost_of_mutation
 cost_of_mutation
 0
 1000
-100.0
+0.0
 100
 1
 NIL
@@ -2108,7 +2075,7 @@ cost_of_development
 cost_of_development
 0
 1000
-100.0
+0.0
 100
 1
 NIL
@@ -2185,7 +2152,7 @@ std_dev_development_performance
 std_dev_development_performance
 0
 0.5
-0.25
+0.05
 0.05
 1
 NIL
@@ -2239,7 +2206,7 @@ integration_boost
 integration_boost
 0
 1
-0.0
+0.5
 0.05
 1
 NIL
@@ -2273,7 +2240,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
--9.59431002E8
+1.463994401E9
 1
 0
 Number
@@ -2551,7 +2518,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-100.0
+0.0
 1
 1
 NIL
@@ -2719,7 +2686,7 @@ PLOT
 731
 1014
 881
-Average fitness of consumers (%)
+(%) Average tech-fitness of consumers
 NIL
 NIL
 0.0
@@ -2730,7 +2697,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot ((mean [fitness] of entities with [consumer?]) /(Knowledge / 2)) * 100"
+"default" 1.0 0 -16777216 true "" "plot ((mean [tech-fitness] of entities with [consumer?]) /(Knowledge / 2)) * 100"
 
 SWITCH
 13
@@ -2752,7 +2719,7 @@ trust_in_known_partners
 trust_in_known_partners
 0
 0.2
-0.0
+0.05
 0.01
 1
 NIL
@@ -2791,7 +2758,7 @@ SWITCH
 621
 evaluate_for_learning?
 evaluate_for_learning?
-1
+0
 1
 -1000
 
@@ -2834,9 +2801,9 @@ SLIDER
 696
 market_mutation_period
 market_mutation_period
-1
+0
 100
-1.0
+0.0
 1
 1
 NIL
