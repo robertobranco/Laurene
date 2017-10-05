@@ -82,6 +82,8 @@ globals [
   ;; seed used to generate random-numbers
   my-seed
 
+  market-mutation-countdown
+
 ]
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -192,6 +194,8 @@ to go
     set tech-knowledge new-tech-knowledge
 
   ]
+
+  market-mutation
 
   tick
 
@@ -335,10 +339,13 @@ to evaluate-crossover-learning [old-knowledge new-knowledge]
 
   ;; compares the absolute fitness prior to the crossover, and after the crossover
   ifelse (hamming-distance old-knowledge new-knowledge) = 0 [
-
-set evaluation -0.05
+    if motivation-to-learn > 0 [
+      set evaluation -0.05
+    ]
   ][
-    set evaluation 0.05
+    if motivation-to-learn < 1 [
+      set evaluation 0.05
+    ]
   ]
 
   set motivation-to-learn motivation-to-learn + evaluation
@@ -683,7 +690,7 @@ to select-role
 
 end
 
-;; flips a coin with the given probability of showing 1
+;; flips a biased coin with the given probability of showing 1
 to-report flip-of-a-coin [probability]
   ifelse random-float 1 < probability [
     report 1
@@ -773,8 +780,9 @@ to calculate-resource
     ]
 
    ;; if the mutation is well suceeded, the generator has the budget renewed.
+   ;; admits that a research facility receives, besides the cost of research, operational and capital funds.
     if mutated? [
-      set resources resources + (2 * cost_of_mutation)
+      set resources resources + (100 * cost_of_mutation)
       set mutated? false
     ]
   ]
@@ -814,12 +822,16 @@ to calculate-resource
   ;; ]
   ;;********************************************************************************************
 
-    ;; takes resources from the entity proportionally to its total amount of resources, respecting the minimum amount to stay alive
-    ;; the amount necessary grows with the amount of resources the entity amasses (which is the growth of the entity)
-    ;; the rate of the expense growth is given by the expense to live growth slider
+  ;; takes resources from the entity proportionally to its total amount of resources, respecting the minimum amount to stay alive
+  ;; the amount necessary grows with the amount of resources the entity amasses (which is the growth of the entity)
+  ;; the rate of the expense growth is given by the expense to live growth slider
 
-  if consumer? [
+  ifelse not non_economical_entities? [
     set resources resources - (minimum_resources_to_live + (resources * expense_to_live_growth))
+  ][
+    if consumer? [
+      set resources resources - (minimum_resources_to_live + (resources * expense_to_live_growth))
+    ]
   ]
 
   ;; Collects resources for the attempts of action
@@ -1140,6 +1152,8 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;; niche's procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 to create-market
+  set market-mutation-countdown 0
+
   create-niches 1 [
 
     ;; set the niche demand randomly
@@ -1159,6 +1173,18 @@ to mutate-market
     show niche-demand
   ]
 end
+
+to market-mutation
+
+  set market-mutation-countdown market-mutation-countdown + 1
+
+  if market-mutation-countdown = market_mutation_period [
+    mutate-market
+    set market-mutation-countdown 0
+  ]
+
+end
+
 
 ;; mutation
 ;; makes the niche call the mutation procedure
@@ -1540,7 +1566,7 @@ number_of_entities
 number_of_entities
 1
 600
-194.0
+342.0
 1
 1
 NIL
@@ -1570,7 +1596,7 @@ initial_resources
 initial_resources
 1
 1000
-513.0
+1000.0
 1
 1
 NIL
@@ -1669,7 +1695,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1000
-501.0
+101.0
 100
 1
 NIL
@@ -1684,7 +1710,7 @@ expense_to_live_growth
 expense_to_live_growth
 0
 1
-0.1
+0.2
 0.05
 1
 NIL
@@ -2052,7 +2078,7 @@ cost_of_crossover
 cost_of_crossover
 0
 1000
-0.0
+100.0
 100
 1
 NIL
@@ -2067,7 +2093,7 @@ cost_of_mutation
 cost_of_mutation
 0
 1000
-0.0
+100.0
 100
 1
 NIL
@@ -2082,7 +2108,7 @@ cost_of_development
 cost_of_development
 0
 1000
-0.0
+100.0
 100
 1
 NIL
@@ -2097,7 +2123,7 @@ development_performance
 development_performance
 0
 1
-0.0
+1.0
 0.05
 1
 NIL
@@ -2112,7 +2138,7 @@ creation_performance
 creation_performance
 0
 1
-0.1
+0.5
 0.05
 1
 NIL
@@ -2127,7 +2153,7 @@ std_dev_creation_performance
 std_dev_creation_performance
 0
 .5
-0.35
+0.25
 .05
 1
 NIL
@@ -2159,7 +2185,7 @@ std_dev_development_performance
 std_dev_development_performance
 0
 0.5
-0.3
+0.25
 0.05
 1
 NIL
@@ -2237,7 +2263,7 @@ SWITCH
 82
 repeat_simulation?
 repeat_simulation?
-0
+1
 1
 -1000
 
@@ -2247,7 +2273,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
--5.1978908E7
+-9.39739503E8
 1
 0
 Number
@@ -2465,7 +2491,7 @@ number_of_generators
 number_of_generators
 0
 100
-0.0
+20.0
 1
 1
 NIL
@@ -2495,7 +2521,7 @@ number_of_integrators
 number_of_integrators
 0
 100
-50.0
+2.0
 1
 1
 NIL
@@ -2510,7 +2536,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-50.0
+20.0
 1
 1
 NIL
@@ -2525,7 +2551,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-0.0
+100.0
 1
 1
 NIL
@@ -2560,7 +2586,7 @@ number_of_gen_dif
 number_of_gen_dif
 0
 100
-0.0
+100.0
 1
 1
 NIL
@@ -2573,7 +2599,7 @@ SWITCH
 580
 random_ent_creation?
 random_ent_creation?
-0
+1
 1
 -1000
 
@@ -2726,7 +2752,7 @@ trust_in_known_partners
 trust_in_known_partners
 0
 0.2
-0.03
+0.0
 0.01
 1
 NIL
@@ -2748,10 +2774,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-196
-533
-369
-566
+195
+550
+368
+583
 evaluate_for_fitness?
 evaluate_for_fitness?
 0
@@ -2759,15 +2785,62 @@ evaluate_for_fitness?
 -1000
 
 SWITCH
-196
-571
-369
-604
+195
+588
+368
+621
 evaluate_for_learning?
 evaluate_for_learning?
 1
 1
 -1000
+
+TEXTBOX
+238
+534
+388
+552
+Motivation to learn
+11
+0.0
+1
+
+MONITOR
+1015
+732
+1211
+777
+Avg fitness generator consumers
+((mean [fitness] of entities with [consumer? and generator?]) /(Knowledge / 2)) * 100
+17
+1
+11
+
+MONITOR
+1016
+778
+1211
+823
+Avg fitness of consumers
+((mean [fitness] of entities with [consumer?]) /(Knowledge / 2)) * 100
+17
+1
+11
+
+SLIDER
+14
+663
+220
+696
+market_mutation_period
+market_mutation_period
+0
+100
+3.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -3151,6 +3224,128 @@ NetLogo 6.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="teste-inicial" repetitions="100" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="20"/>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="willingness_to_share">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_mutation">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="integration_boost">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_willingness">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="non_economical_entities?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_gen_dif">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="color_update_rule">
+      <value value="&quot;market survivability&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="minimum_resources_to_live">
+      <value value="501"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_creation_performance">
+      <value value="0.35"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation_rate">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="creation_performance">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="motivation_to_learn">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_development">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Knowledge">
+      <value value="90"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_fitness_probability">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="random_ent_creation?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="development_performance">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_crossover">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="set_input_seed?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_development_performance">
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="super_share?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_entities">
+      <value value="194"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="my-seed-repeat">
+      <value value="-51978908"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_diffusers">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="niche_resources">
+      <value value="20000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_generators">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="repeat_simulation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="expense_to_live_growth">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="trust_in_known_partners">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_cons_gen">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_resources">
+      <value value="513"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_motivation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stop_trigger">
+      <value value="2000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_consumers">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_integrators">
+      <value value="50"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
