@@ -117,7 +117,11 @@ end
 to go
 
   ;; implements the stop trigger
-  if ticks >= stop_trigger [ stop ]
+  if ticks >= stop_trigger [
+    ;;export-view "teste.png"
+    export-all-plots "graficos.csv"
+    stop
+  ]
 
   ;; clears the links from previous iteration to keep a clean interface
   ask links [die]
@@ -360,7 +364,11 @@ to spawn-startup [number-of-startups]
   repeat number-of-startups[
     create-entities 1 [
 
-      set generator? one-of [true false]
+      Ifelse startup_generator_consumer? [
+        set generator? one-of [true false]
+      ][
+        set generator? false
+      ]
       ;; set generator? one-of [true false] ;; if a chance of creating a generator consumer is desired
       set consumer? true
       set diffuser? false
@@ -764,8 +772,13 @@ to calculate-resource
 
   ;; gives CONSUMER entities a share of the niche's resources proportional to its market share (relative tech-fitness)
   ;; the relative fitness is calculated of the tech-fitness of entities who compete for market share (CONSUMERS of knowledge)
+  ;;if consumer? [
+  ;;  set resources resources + (niche_resources * (tech-fitness / (sum [tech-fitness] of entities with [consumer?])))
+  ;;]
+
+  ;;*** equation that allows consumers to compete against a standard, and not against each other. Meet the minimum and you are alive.
   if consumer? [
-    set resources resources + (niche_resources * (tech-fitness / (sum [tech-fitness] of entities with [consumer?])))
+    set resources resources + (niche_resources * tech-fitness / ( Knowledge / 2 ))
   ]
 
   ;; pays emitters for their knowledge
@@ -788,11 +801,6 @@ to calculate-resource
       set mutated? false
     ]
   ]
-
-
-  ;;*******************************old code for resources of non market entities
-
-  ;;********************************************************************************************
 
   ;; takes resources from the entity proportionally to its total amount of resources, respecting the minimum amount to stay alive
   ;; the amount necessary grows with the amount of resources the entity amasses (which is the growth of the entity)
@@ -1512,6 +1520,21 @@ GRAPHICS-WINDOW
 ticks
 30.0
 
+SLIDER
+0
+0
+0
+0
+NIL
+NIL
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
 BUTTON
 14
 10
@@ -1538,7 +1561,7 @@ number_of_entities
 number_of_entities
 1
 600
-242.0
+100.0
 1
 1
 NIL
@@ -1553,7 +1576,7 @@ Knowledge
 Knowledge
 2
 200
-100.0
+200.0
 2
 1
 NIL
@@ -1592,17 +1615,17 @@ NIL
 1
 
 OUTPUT
-16
-734
-359
-917
+14
+804
+357
+987
 12
 
 BUTTON
-15
-700
-193
-733
+13
+770
+191
+803
 Previous Instruction
 previous-instruction
 NIL
@@ -1616,10 +1639,10 @@ NIL
 1
 
 BUTTON
-194
-700
-358
-733
+192
+770
+356
+803
 Next Instruction
 next-instruction
 NIL
@@ -1633,10 +1656,10 @@ NIL
 1
 
 MONITOR
-272
-652
-358
-697
+270
+724
+356
+769
 Instruction #
 current-instruction-label
 17
@@ -1652,7 +1675,7 @@ niche_resources
 niche_resources
 0
 20000
-20000.0
+3000.0
 1000
 1
 NIL
@@ -1666,8 +1689,8 @@ SLIDER
 minimum_resources_to_live
 minimum_resources_to_live
 1
-1000
-901.0
+1001
+1001.0
 100
 1
 NIL
@@ -1682,7 +1705,7 @@ expense_to_live_growth
 expense_to_live_growth
 0
 1
-0.2
+0.1
 0.05
 1
 NIL
@@ -1743,10 +1766,10 @@ PENS
 "Average fitness" 1.0 0 -2674135 true "" "plot ((mean [fitness] of entities with [generator?])/(Knowledge / 2)) * 100 "
 
 PLOT
-1013
-161
-1213
-311
+2225
+44
+2425
+194
 Average resources
 Ticks
 Average resources
@@ -1772,10 +1795,10 @@ max [fitness] of entities
 11
 
 MONITOR
-1014
-356
-1213
-401
+2229
+240
+2428
+285
 Maximum resources accumulated
 max [resources] of entities
 2
@@ -1790,7 +1813,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-2
+0
 
 MONITOR
 812
@@ -1804,10 +1827,10 @@ standard-deviation [fitness] of entities
 11
 
 MONITOR
-1013
-310
-1213
-355
+2227
+195
+2427
+240
 Std deviation of resources
 standard-deviation [resources] of entities
 2
@@ -1843,10 +1866,10 @@ min [fitness] of entities
 11
 
 MONITOR
-1014
-401
-1212
-446
+2229
+285
+2427
+330
 NIL
 min [resources] of entities
 2
@@ -1940,10 +1963,10 @@ NIL
 HORIZONTAL
 
 PLOT
-813
-446
-1013
-596
+1704
+654
+1904
+804
 Average motivation to learn
 NIL
 NIL
@@ -1958,10 +1981,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot (sum [motivation-to-learn] of entities) / (count entities)"
 
 PLOT
-1013
-447
-1213
-597
+1904
+655
+2104
+805
 Average willingness to share
 NIL
 NIL
@@ -1976,10 +1999,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot (sum [willingness-to-share] of entities) / (count entities)"
 
 MONITOR
-813
-596
-1012
-641
+1707
+805
+1906
+850
 Maximum motivation to learn
 max [motivation-to-learn] of entities
 2
@@ -1987,10 +2010,10 @@ max [motivation-to-learn] of entities
 11
 
 MONITOR
-1012
-597
-1212
-642
+1907
+807
+2107
+852
 Maximum willingness to share
 max [willingness-to-share] of entities
 2
@@ -1998,10 +2021,10 @@ max [willingness-to-share] of entities
 11
 
 MONITOR
-813
-640
-1012
-685
+1707
+849
+1906
+894
 Minimum motivation to learn
 min [motivation-to-learn] of entities
 2
@@ -2009,10 +2032,10 @@ min [motivation-to-learn] of entities
 11
 
 MONITOR
-1012
-640
-1212
-685
+1907
+849
+2107
+894
 Minimum willingness to share
 min [willingness-to-share] of entities
 2
@@ -2020,10 +2043,10 @@ min [willingness-to-share] of entities
 11
 
 MONITOR
-814
-686
-1012
-731
+1709
+895
+1907
+940
 Std deviation motivation to learn
 standard-deviation [motivation-to-learn] of entities
 2
@@ -2031,10 +2054,10 @@ standard-deviation [motivation-to-learn] of entities
 11
 
 MONITOR
-1014
-686
-1210
-731
+1909
+895
+2105
+940
 Std deviation willingness to share
 standard-deviation [willingness-to-share] of entities
 2
@@ -2095,7 +2118,7 @@ development_performance
 development_performance
 0
 1
-1.0
+0.5
 0.05
 1
 NIL
@@ -2125,7 +2148,7 @@ std_dev_creation_performance
 std_dev_creation_performance
 0
 .5
-0.25
+0.1
 .05
 1
 NIL
@@ -2136,7 +2159,7 @@ BUTTON
 432
 187
 465
-NIL
+create-super-professor
 create-super-competitor
 NIL
 1
@@ -2157,7 +2180,7 @@ std_dev_development_performance
 std_dev_development_performance
 0
 0.5
-0.05
+0.1
 0.05
 1
 NIL
@@ -2176,10 +2199,10 @@ super_share?
 
 BUTTON
 14
-596
-187
-629
-NIL
+632
+185
+665
+mutate-university-demand
 mutate-market
 NIL
 1
@@ -2193,12 +2216,12 @@ NIL
 
 SWITCH
 14
-629
+665
 187
-662
+698
 non_economical_entities?
 non_economical_entities?
-0
+1
 1
 -1000
 
@@ -2211,7 +2234,7 @@ integration_boost
 integration_boost
 0
 1
-0.5
+0.1
 0.05
 1
 NIL
@@ -2235,7 +2258,7 @@ SWITCH
 82
 repeat_simulation?
 repeat_simulation?
-1
+0
 1
 -1000
 
@@ -2245,16 +2268,16 @@ INPUTBOX
 277
 70
 my-seed-repeat
-1.463994401E9
+2.032754467E9
 1
 0
 Number
 
 PLOT
-1274
-51
-1528
-201
+1707
+42
+1961
+192
 Entities that shared knowledge
 NIL
 NIL
@@ -2269,10 +2292,10 @@ PENS
 "default" 1.0 0 -13840069 true "" "plot count entities with [emitted?]"
 
 PLOT
-1533
-51
-1789
-201
+1965
+42
+2221
+192
 Entities that attempted to learn
 NIL
 NIL
@@ -2287,10 +2310,10 @@ PENS
 "default" 1.0 0 -5825686 true "" "plot count entities with [crossover?]"
 
 PLOT
-1274
-204
-1529
-354
+1707
+195
+1962
+345
 Entities that attempted mutation
 NIL
 NIL
@@ -2305,10 +2328,10 @@ PENS
 "default" 1.0 0 -13345367 true "" "plot count entities with [mutation?]"
 
 PLOT
-1533
-204
-1789
-354
+1965
+195
+2221
+345
 Entities that integrated partners
 NIL
 NIL
@@ -2323,10 +2346,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count entities with [integrated?]"
 
 PLOT
-1274
-357
-1530
-507
+1707
+349
+1963
+499
 Consumers that attempted crossover
 NIL
 NIL
@@ -2341,10 +2364,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count entities with [consumer? and crossover?]"
 
 PLOT
-1534
-357
-1790
-507
+1967
+349
+2223
+499
 Generators that attempted mutation
 NIL
 NIL
@@ -2359,10 +2382,10 @@ PENS
 "default" 1.0 0 -10899396 true "" "plot count entities with [generator? and mutation?]"
 
 PLOT
-1274
-510
-1530
-660
+1707
+500
+1963
+650
 Entities that attempted development
 NIL
 NIL
@@ -2377,10 +2400,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count entities with [development?]"
 
 PLOT
-1534
-509
-1790
-659
+1967
+500
+2223
+650
 Entities alive
 NIL
 NIL
@@ -2463,7 +2486,7 @@ number_of_generators
 number_of_generators
 0
 100
-20.0
+0.0
 1
 1
 NIL
@@ -2493,7 +2516,7 @@ number_of_integrators
 number_of_integrators
 0
 100
-2.0
+0.0
 1
 1
 NIL
@@ -2508,7 +2531,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-20.0
+0.0
 1
 1
 NIL
@@ -2558,7 +2581,7 @@ number_of_gen_dif
 number_of_gen_dif
 0
 100
-100.0
+0.0
 1
 1
 NIL
@@ -2657,7 +2680,7 @@ BUTTON
 465
 187
 498
-NIL
+create-super-researcher
 create-super-generator
 NIL
 1
@@ -2687,10 +2710,10 @@ NIL
 1
 
 PLOT
-814
-731
-1014
-881
+1013
+161
+1213
+311
 (%) Average tech-fitness of consumers
 NIL
 NIL
@@ -2711,7 +2734,7 @@ SWITCH
 596
 startups?
 startups?
-1
+0
 1
 -1000
 
@@ -2739,7 +2762,7 @@ initial_fitness_probability
 initial_fitness_probability
 0
 1
-0.1
+0.2
 0.1
 1
 NIL
@@ -2778,10 +2801,10 @@ Motivation to learn
 1
 
 MONITOR
-1015
-732
-1211
-777
+1014
+311
+1213
+356
 Avg fitness generator consumers
 ((mean [fitness] of entities with [consumer? and generator?]) /(Knowledge / 2)) * 100
 17
@@ -2789,10 +2812,10 @@ Avg fitness generator consumers
 11
 
 MONITOR
-1016
-778
-1211
-823
+1015
+357
+1213
+402
 Avg fitness of consumers
 ((mean [fitness] of entities with [consumer?]) /(Knowledge / 2)) * 100
 17
@@ -2801,9 +2824,9 @@ Avg fitness of consumers
 
 SLIDER
 14
-663
-220
-696
+698
+188
+731
 market_mutation_period
 market_mutation_period
 0
@@ -2813,6 +2836,74 @@ market_mutation_period
 1
 NIL
 HORIZONTAL
+
+PLOT
+815
+444
+1015
+594
+Average motivation science 
+NIL
+NIL
+0.0
+10.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -13840069 true "" "plot (sum [motivation-to-learn] of entities with [science?]) / (count entities with [science?])"
+
+PLOT
+1015
+445
+1215
+595
+Average motivation technology
+NIL
+NIL
+0.0
+10.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -2674135 true "" "plot (sum [motivation-to-learn] of entities with [technology?]) / (count entities with [technology?])"
+
+MONITOR
+1015
+402
+1212
+447
+Avg fitness of generators
+(sum [science-fitness] of entities with [science?]) / (count entities with [science?])
+17
+1
+11
+
+SWITCH
+11
+599
+186
+632
+startup_generator_consumer?
+startup_generator_consumer?
+0
+1
+-1000
+
+TEXTBOX
+222
+627
+372
+645
+Development performance
+11
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -3196,128 +3287,6 @@ NetLogo 6.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
-<experiments>
-  <experiment name="teste-inicial" repetitions="100" runMetricsEveryStep="true">
-    <setup>setup</setup>
-    <go>go</go>
-    <timeLimit steps="20"/>
-    <metric>count turtles</metric>
-    <enumeratedValueSet variable="willingness_to_share">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cost_of_mutation">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="integration_boost">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="evaluate_for_learning?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="std_dev_willingness">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="non_economical_entities?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_gen_dif">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="color_update_rule">
-      <value value="&quot;market survivability&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="minimum_resources_to_live">
-      <value value="501"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="std_dev_creation_performance">
-      <value value="0.35"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="mutation_rate">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="creation_performance">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="motivation_to_learn">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cost_of_development">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="Knowledge">
-      <value value="90"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="initial_fitness_probability">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="evaluate_for_fitness?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="random_ent_creation?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="development_performance">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cost_of_crossover">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="startups?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="set_input_seed?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="std_dev_development_performance">
-      <value value="0.3"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="super_share?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_entities">
-      <value value="194"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="my-seed-repeat">
-      <value value="-51978908"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_diffusers">
-      <value value="50"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="niche_resources">
-      <value value="20000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_generators">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="repeat_simulation?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="expense_to_live_growth">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="trust_in_known_partners">
-      <value value="0.03"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_cons_gen">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="initial_resources">
-      <value value="513"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="std_dev_motivation">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="stop_trigger">
-      <value value="2000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_consumers">
-      <value value="100"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_integrators">
-      <value value="50"/>
-    </enumeratedValueSet>
-  </experiment>
-</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
