@@ -309,52 +309,108 @@ end
 
 
 
-to evaluate-crossover-fitness [old-knowledge new-knowledge]
+to evaluate-crossover [old-knowledge new-knowledge]
 
   let evaluation 0
   ;; the model currently has only one niche. If more than one niche is implemented, it will pick
   ;; one of the niches for the evaluation.
-  let niche-demand-now [niche-demand] of one-of niches
+
+  ;; if there is an increase in fitness, the experience will be well evaluated (+ 0.10)
+  ;; if there is no increase in fitness (remains the same or drops), it will be poorly evaluated (- 0.05)
+
+  if evaluate_for_fitness? and not evaluate_for_learning? [
+    let niche-demand-now [niche-demand] of one-of niches
+
   ;; compares the absolute fitness prior to the crossover, and after the crossover
-  let fitness-old 0
-  let fitness-new 0
+    let fitness-old 0
+    let fitness-new 0
 
-  ;; assesses the complement of the hamming distance between the niche-demand and the knowledges
-  ;; the higher the better
-  set fitness-old (knowledge / 2) - (hamming-distance old-knowledge niche-demand-now)
-  set fitness-new (knowledge / 2) - (hamming-distance new-knowledge niche-demand-now)
+    ;; assesses the complement of the hamming distance between the niche-demand and the knowledges
+    ;; the higher the better
+    set fitness-old (knowledge / 2) - (hamming-distance old-knowledge niche-demand-now)
+    set fitness-new (knowledge / 2) - (hamming-distance new-knowledge niche-demand-now)
 
-  ifelse fitness-new > fitness-old [
-    if motivation-to-learn < 1 [
-      set evaluation 0.05
-    ]
-  ][
-    if motivation-to-learn > 0 [
-      set evaluation -0.05
+    ifelse fitness-new > fitness-old [
+      ;; the case where there is an increase in fitness
+      if motivation-to-learn < 1 [
+        set evaluation 0.1
+      ]
+    ][
+      ;; the case where there is no increase in fitness
+      if motivation-to-learn > 0 [
+        set evaluation -0.05
+      ]
     ]
   ]
 
-  set motivation-to-learn motivation-to-learn + evaluation
-
-end
-
-to evaluate-crossover-learning [old-knowledge new-knowledge]
-
-  let evaluation 0
-  let niche-demand-now [niche-demand] of one-of niches
-
-  ;; compares the absolute fitness prior to the crossover, and after the crossover
-  ifelse (hamming-distance old-knowledge new-knowledge) = 0 [
-    if motivation-to-learn > 0 [
-      set evaluation -0.05
-    ]
-  ][
-    if motivation-to-learn < 1 [
-      set evaluation 0.05
+  if evaluate_for_learning? and not evaluate_for_fitness? [
+    ;; compares the absolute fitness prior to the crossover, and after the crossover
+    ;; to assess if there was any learning
+    ifelse (hamming-distance old-knowledge new-knowledge) = 0 [
+      if motivation-to-learn > 0 [
+        set evaluation -0.05
+      ]
+    ][
+      if motivation-to-learn < 1 [
+        set evaluation 0.05
+      ]
     ]
   ]
 
+  if evaluate_for_fitness? and evaluate_for_learning? [
+
+    ;; if there is no learning, the experience will be poorly evaluated (-0.05 in motivation)
+    ;; if there is learning and there is an increase in fitness, it will be well evaluated (+ 0.05)
+    ;; if there is learning but there is no increase in fitness, it will be indifferent (no changes in motivation)
+    ;; if there is learning but there is decrease in fitness, it will be poorly evaluated (- 0.05)
+
+    ifelse (hamming-distance old-knowledge new-knowledge) = 0 [
+      ;; the case with no learning
+      if motivation-to-learn > 0 [
+        set evaluation evaluation - 0.05
+      ]
+    ][
+      ;; the case with learning
+      if motivation-to-learn < 1 [
+        let niche-demand-now [niche-demand] of one-of niches
+
+        ;; compares the absolute fitness prior to the crossover, and after the crossover
+        let fitness-old 0
+        let fitness-new 0
+
+        ;; assesses the complement of the hamming distance between the niche-demand and the knowledges
+        ;; the higher the better
+        set fitness-old (knowledge / 2) - (hamming-distance old-knowledge niche-demand-now)
+        set fitness-new (knowledge / 2) - (hamming-distance new-knowledge niche-demand-now)
+
+        ifelse fitness-new > fitness-old [
+          ;; the case with learning and increase in fitness
+          if motivation-to-learn < 1 [
+            set evaluation evaluation + 0.05
+          ]
+        ][
+          ;; the case of learning with decrease in fitness
+          if motivation-to-learn > 0 [
+            set evaluation evaluation - 0.05
+          ]
+
+        ]
+      ]
+    ]
+  ]
+
+  ;; incorporates the evaluation into the motivation-to-learn
   set motivation-to-learn motivation-to-learn + evaluation
+
+  ;; limits motivation-to-learn within the bounds of 0 an 1
+  ifelse motivation-to-learn > 1 [
+    set motivation-to-learn 1
+  ][
+    if motivation-to-learn < 0 [
+      set motivation-to-learn 0
+    ]
+  ]
+
 
 end
 
@@ -499,7 +555,11 @@ to develop
 
         ;; using new-tech-knowledge instead of tech-knowledge allows several knowledge activities to be performed without loosing the notion of paralelism
         ;; although some of the learning of the previous activity may be altered
-        set new-tech-knowledge crossover new-tech-knowledge new-science-knowledge
+
+        if evaluate_for_fitness? and evaluate_for_learning? [
+          set new-tech-knowledge crossover new-tech-knowledge new-science-knowledge
+        ]
+
         ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
         set development? true
       ]
@@ -989,14 +1049,10 @@ to interact
         set new-tech-knowledge crossover bits1 bits2
         update-link-appearance new-tech-knowledge tech-knowledge yellow
 
-        if evaluate_for_fitness? [
-          evaluate-crossover-fitness tech-knowledge new-tech-knowledge
-          evaluate-crossover-fitness science-knowledge new-science-knowledge
-        ]
-        if evaluate_for_learning? [
-          evaluate-crossover-learning tech-knowledge new-tech-knowledge
-          evaluate-crossover-learning science-knowledge new-science-knowledge
-        ]
+
+        evaluate-crossover tech-knowledge new-tech-knowledge
+        evaluate-crossover science-knowledge new-science-knowledge
+
 
         ;;**** i can create a string with both knowledge for the update link, and it will sum the differences in both knowledges
 
@@ -1014,12 +1070,7 @@ to interact
           set new-science-knowledge mutate new-science-knowledge
           update-link-appearance new-science-knowledge science-knowledge green
 
-          if evaluate_for_fitness? [
-            evaluate-crossover-fitness science-knowledge new-science-knowledge
-          ]
-          if evaluate_for_learning? [
-            evaluate-crossover-learning science-knowledge new-science-knowledge
-          ]
+          evaluate-crossover science-knowledge new-science-knowledge
 
         ][;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
           ;; the code ignores those who don't have any knowledge, but these have been ignored already by the choose-partner procedure
@@ -1032,12 +1083,7 @@ to interact
             set new-tech-knowledge crossover bits1 bits2
             update-link-appearance new-tech-knowledge tech-knowledge blue
 
-            if evaluate_for_fitness? [
-              evaluate-crossover-fitness tech-knowledge new-tech-knowledge
-            ]
-            if evaluate_for_learning? [
-              evaluate-crossover-learning tech-knowledge new-tech-knowledge
-            ]
+            evaluate-crossover tech-knowledge new-tech-knowledge
 
           ]
         ]
@@ -1542,7 +1588,7 @@ number_of_entities
 number_of_entities
 1
 600
-100.0
+200.0
 1
 1
 NIL
@@ -1557,7 +1603,7 @@ Knowledge
 Knowledge
 2
 200
-200.0
+196.0
 2
 1
 NIL
@@ -1744,7 +1790,7 @@ true
 false
 "" ""
 PENS
-"Average fitness" 1.0 0 -2674135 true "" "plot ((mean [fitness] of entities with [generator?])/(Knowledge / 2)) * 100 "
+"Average fitness" 1.0 0 -2674135 true "" "plot ((mean [sci-fitness] of entities with [generator?])/(Knowledge / 2)) * 100 "
 
 PLOT
 2225
@@ -1863,7 +1909,7 @@ INPUTBOX
 364
 70
 stop_trigger
-2000.0
+10000.0
 1
 0
 Number
@@ -2239,7 +2285,7 @@ SWITCH
 82
 repeat_simulation?
 repeat_simulation?
-1
+0
 1
 -1000
 
@@ -2249,7 +2295,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
--1.45165086E8
+-1.352656359E9
 1
 0
 Number
@@ -2527,7 +2573,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-0.0
+100.0
 1
 1
 NIL
@@ -2715,7 +2761,7 @@ SWITCH
 596
 startups?
 startups?
-1
+0
 1
 -1000
 
@@ -2743,7 +2789,7 @@ initial_fitness_probability
 initial_fitness_probability
 0
 1
-0.5
+0.2
 0.1
 1
 NIL
@@ -2812,7 +2858,7 @@ market_mutation_period
 market_mutation_period
 0
 100
-0.0
+10.0
 1
 1
 NIL

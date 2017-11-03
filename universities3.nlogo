@@ -309,7 +309,7 @@ end
 
 
 
-to evaluate-crossover-fitness [old-knowledge new-knowledge]
+to evaluate-crossover [old-knowledge new-knowledge]
 
   let evaluation 0
   ;; the model currently has only one niche. If more than one niche is implemented, it will pick
@@ -318,6 +318,7 @@ to evaluate-crossover-fitness [old-knowledge new-knowledge]
   ;; compares the absolute fitness prior to the crossover, and after the crossover
   let fitness-old 0
   let fitness-new 0
+
 
   ;; assesses the complement of the hamming distance between the niche-demand and the knowledges
   ;; the higher the better
@@ -334,16 +335,8 @@ to evaluate-crossover-fitness [old-knowledge new-knowledge]
     ]
   ]
 
-  set motivation-to-learn motivation-to-learn + evaluation
-
-end
-
-to evaluate-crossover-learning [old-knowledge new-knowledge]
-
-  let evaluation 0
-  let niche-demand-now [niche-demand] of one-of niches
-
   ;; compares the absolute fitness prior to the crossover, and after the crossover
+  ;; to assess if there was any learning
   ifelse (hamming-distance old-knowledge new-knowledge) = 0 [
     if motivation-to-learn > 0 [
       set evaluation -0.05
@@ -989,14 +982,10 @@ to interact
         set new-tech-knowledge crossover bits1 bits2
         update-link-appearance new-tech-knowledge tech-knowledge yellow
 
-        if evaluate_for_fitness? [
-          evaluate-crossover-fitness tech-knowledge new-tech-knowledge
-          evaluate-crossover-fitness science-knowledge new-science-knowledge
-        ]
-        if evaluate_for_learning? [
-          evaluate-crossover-learning tech-knowledge new-tech-knowledge
-          evaluate-crossover-learning science-knowledge new-science-knowledge
-        ]
+
+        evaluate-crossover tech-knowledge new-tech-knowledge
+        evaluate-crossover science-knowledge new-science-knowledge
+
 
         ;;**** i can create a string with both knowledge for the update link, and it will sum the differences in both knowledges
 
@@ -1014,12 +1003,7 @@ to interact
           set new-science-knowledge mutate new-science-knowledge
           update-link-appearance new-science-knowledge science-knowledge green
 
-          if evaluate_for_fitness? [
-            evaluate-crossover-fitness science-knowledge new-science-knowledge
-          ]
-          if evaluate_for_learning? [
-            evaluate-crossover-learning science-knowledge new-science-knowledge
-          ]
+          evaluate-crossover science-knowledge new-science-knowledge
 
         ][;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
           ;; the code ignores those who don't have any knowledge, but these have been ignored already by the choose-partner procedure
@@ -1032,12 +1016,7 @@ to interact
             set new-tech-knowledge crossover bits1 bits2
             update-link-appearance new-tech-knowledge tech-knowledge blue
 
-            if evaluate_for_fitness? [
-              evaluate-crossover-fitness tech-knowledge new-tech-knowledge
-            ]
-            if evaluate_for_learning? [
-              evaluate-crossover-learning tech-knowledge new-tech-knowledge
-            ]
+            evaluate-crossover tech-knowledge new-tech-knowledge
 
           ]
         ]
@@ -1542,7 +1521,7 @@ number_of_entities
 number_of_entities
 1
 600
-100.0
+200.0
 1
 1
 NIL
@@ -1744,7 +1723,7 @@ true
 false
 "" ""
 PENS
-"Average fitness" 1.0 0 -2674135 true "" "plot ((mean [fitness] of entities with [generator?])/(Knowledge / 2)) * 100 "
+"Average fitness" 1.0 0 -2674135 true "" "plot ((mean [sci-fitness] of entities with [generator?])/(Knowledge / 2)) * 100 "
 
 PLOT
 2225
@@ -1863,7 +1842,7 @@ INPUTBOX
 364
 70
 stop_trigger
-2000.0
+10000.0
 1
 0
 Number
@@ -2239,7 +2218,7 @@ SWITCH
 82
 repeat_simulation?
 repeat_simulation?
-1
+0
 1
 -1000
 
@@ -2249,7 +2228,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
--1.45165086E8
+-1.352656359E9
 1
 0
 Number
@@ -2527,7 +2506,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-0.0
+100.0
 1
 1
 NIL
@@ -2715,7 +2694,7 @@ SWITCH
 596
 startups?
 startups?
-1
+0
 1
 -1000
 
@@ -2743,7 +2722,7 @@ initial_fitness_probability
 initial_fitness_probability
 0
 1
-0.5
+0.2
 0.1
 1
 NIL

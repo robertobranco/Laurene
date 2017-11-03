@@ -307,7 +307,34 @@ to populate-ecosystem
 
 end
 
+to evaluate-development-fitness [old-knowledge new-knowledge]
 
+  let evaluation 0
+  ;; the model currently has only one niche. If more than one niche is implemented, it will pick
+  ;; one of the niches for the evaluation.
+  let niche-demand-now [niche-demand] of one-of niches
+  ;; compares the absolute fitness prior to the crossover, and after the crossover
+  let fitness-old 0
+  let fitness-new 0
+
+  ;; assesses the complement of the hamming distance between the niche-demand and the knowledges
+  ;; the higher the better
+  set fitness-old (knowledge / 2) - (hamming-distance old-knowledge niche-demand-now)
+  set fitness-new (knowledge / 2) - (hamming-distance new-knowledge niche-demand-now)
+
+  ifelse fitness-new > fitness-old [
+    if development-performance < 1 [
+      set evaluation 0.05
+    ]
+  ][
+    if development-performance > 0 [
+      set evaluation -0.05
+    ]
+  ]
+
+  set development-performance development-performance + evaluation
+
+end
 
 to evaluate-crossover-fitness [old-knowledge new-knowledge]
 
@@ -364,7 +391,11 @@ to spawn-startup [number-of-startups]
   repeat number-of-startups[
     create-entities 1 [
 
-      set generator? one-of [true false]
+      Ifelse startup_generator_consumer? [
+        set generator? one-of [true false]
+      ][
+        set generator? false
+      ]
       ;; set generator? one-of [true false] ;; if a chance of creating a generator consumer is desired
       set consumer? true
       set diffuser? false
@@ -501,6 +532,11 @@ to develop
         ;; although some of the learning of the previous activity may be altered
         set new-tech-knowledge crossover new-tech-knowledge new-science-knowledge
         ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
+
+        if evaluate_dev_for_fitness? [
+          evaluate-development-fitness tech-knowledge new-tech-knowledge
+        ]
+
         set development? true
       ]
     ]
@@ -1542,7 +1578,7 @@ number_of_entities
 number_of_entities
 1
 600
-100.0
+152.0
 1
 1
 NIL
@@ -1596,17 +1632,17 @@ NIL
 1
 
 OUTPUT
-16
-734
-359
-917
+14
+804
+357
+987
 12
 
 BUTTON
-15
-700
-193
-733
+13
+770
+191
+803
 Previous Instruction
 previous-instruction
 NIL
@@ -1620,10 +1656,10 @@ NIL
 1
 
 BUTTON
-194
-700
-358
-733
+192
+770
+356
+803
 Next Instruction
 next-instruction
 NIL
@@ -1637,10 +1673,10 @@ NIL
 1
 
 MONITOR
-272
-652
-358
-697
+270
+724
+356
+769
 Instruction #
 current-instruction-label
 17
@@ -1744,13 +1780,13 @@ true
 false
 "" ""
 PENS
-"Average fitness" 1.0 0 -2674135 true "" "plot ((mean [fitness] of entities with [generator?])/(Knowledge / 2)) * 100 "
+"Average fitness" 1.0 0 -2674135 true "" "plot ((mean [sci-fitness] of entities with [generator?])/(Knowledge / 2)) * 100 "
 
 PLOT
-2225
-44
-2425
-194
+1805
+16
+2005
+166
 Average resources
 Ticks
 Average resources
@@ -1776,10 +1812,10 @@ max [fitness] of entities
 11
 
 MONITOR
-2229
-240
-2428
-285
+1808
+212
+2007
+257
 Maximum resources accumulated
 max [resources] of entities
 2
@@ -1808,10 +1844,10 @@ standard-deviation [fitness] of entities
 11
 
 MONITOR
-2227
-195
-2427
-240
+1806
+168
+2006
+213
 Std deviation of resources
 standard-deviation [resources] of entities
 2
@@ -1847,10 +1883,10 @@ min [fitness] of entities
 11
 
 MONITOR
-2229
-285
-2427
-330
+1808
+258
+2006
+303
 NIL
 min [resources] of entities
 2
@@ -1944,10 +1980,10 @@ NIL
 HORIZONTAL
 
 PLOT
-1704
-654
-1904
-804
+1283
+626
+1483
+776
 Average motivation to learn
 NIL
 NIL
@@ -1962,10 +1998,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot (sum [motivation-to-learn] of entities) / (count entities)"
 
 PLOT
-1904
-655
-2104
-805
+1483
+628
+1683
+778
 Average willingness to share
 NIL
 NIL
@@ -1980,10 +2016,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot (sum [willingness-to-share] of entities) / (count entities)"
 
 MONITOR
-1707
-805
-1906
-850
+1286
+778
+1485
+823
 Maximum motivation to learn
 max [motivation-to-learn] of entities
 2
@@ -1991,10 +2027,10 @@ max [motivation-to-learn] of entities
 11
 
 MONITOR
-1907
-807
-2107
-852
+1486
+779
+1686
+824
 Maximum willingness to share
 max [willingness-to-share] of entities
 2
@@ -2002,10 +2038,10 @@ max [willingness-to-share] of entities
 11
 
 MONITOR
-1707
-849
-1906
-894
+1286
+820
+1485
+865
 Minimum motivation to learn
 min [motivation-to-learn] of entities
 2
@@ -2013,10 +2049,10 @@ min [motivation-to-learn] of entities
 11
 
 MONITOR
-1907
-849
-2107
-894
+1486
+820
+1686
+865
 Minimum willingness to share
 min [willingness-to-share] of entities
 2
@@ -2024,10 +2060,10 @@ min [willingness-to-share] of entities
 11
 
 MONITOR
-1709
-895
-1907
-940
+1288
+868
+1486
+913
 Std deviation motivation to learn
 standard-deviation [motivation-to-learn] of entities
 2
@@ -2035,10 +2071,10 @@ standard-deviation [motivation-to-learn] of entities
 11
 
 MONITOR
-1909
-895
-2105
-940
+1488
+868
+1684
+913
 Std deviation willingness to share
 standard-deviation [willingness-to-share] of entities
 2
@@ -2180,9 +2216,9 @@ super_share?
 
 BUTTON
 14
-596
+632
 185
-629
+665
 mutate-university-demand
 mutate-market
 NIL
@@ -2197,9 +2233,9 @@ NIL
 
 SWITCH
 14
-629
+665
 187
-662
+698
 non_economical_entities?
 non_economical_entities?
 1
@@ -2215,7 +2251,7 @@ integration_boost
 integration_boost
 0
 1
-0.2
+0.1
 0.05
 1
 NIL
@@ -2239,7 +2275,7 @@ SWITCH
 82
 repeat_simulation?
 repeat_simulation?
-1
+0
 1
 -1000
 
@@ -2249,16 +2285,16 @@ INPUTBOX
 277
 70
 my-seed-repeat
--1.45165086E8
+-1.798759928E9
 1
 0
 Number
 
 PLOT
-1707
-42
-1961
-192
+1286
+15
+1540
+165
 Entities that shared knowledge
 NIL
 NIL
@@ -2273,10 +2309,10 @@ PENS
 "default" 1.0 0 -13840069 true "" "plot count entities with [emitted?]"
 
 PLOT
-1965
-42
-2221
-192
+1545
+15
+1801
+165
 Entities that attempted to learn
 NIL
 NIL
@@ -2291,10 +2327,10 @@ PENS
 "default" 1.0 0 -5825686 true "" "plot count entities with [crossover?]"
 
 PLOT
-1707
-195
-1962
-345
+1286
+168
+1541
+318
 Entities that attempted mutation
 NIL
 NIL
@@ -2309,10 +2345,10 @@ PENS
 "default" 1.0 0 -13345367 true "" "plot count entities with [mutation?]"
 
 PLOT
-1965
-195
-2221
-345
+1545
+168
+1801
+318
 Entities that integrated partners
 NIL
 NIL
@@ -2327,10 +2363,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count entities with [integrated?]"
 
 PLOT
-1707
-349
-1963
-499
+1286
+320
+1542
+470
 Consumers that attempted crossover
 NIL
 NIL
@@ -2345,10 +2381,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count entities with [consumer? and crossover?]"
 
 PLOT
-1967
-349
-2223
-499
+1546
+320
+1802
+470
 Generators that attempted mutation
 NIL
 NIL
@@ -2363,10 +2399,10 @@ PENS
 "default" 1.0 0 -10899396 true "" "plot count entities with [generator? and mutation?]"
 
 PLOT
-1707
-500
-1963
-650
+1286
+472
+1542
+622
 Entities that attempted development
 NIL
 NIL
@@ -2381,10 +2417,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count entities with [development?]"
 
 PLOT
-1967
-500
-2223
-650
+1546
+472
+1802
+622
 Entities alive
 NIL
 NIL
@@ -2527,7 +2563,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-0.0
+52.0
 1
 1
 NIL
@@ -2715,7 +2751,7 @@ SWITCH
 596
 startups?
 startups?
-1
+0
 1
 -1000
 
@@ -2743,7 +2779,7 @@ initial_fitness_probability
 initial_fitness_probability
 0
 1
-0.5
+0.2
 0.1
 1
 NIL
@@ -2805,9 +2841,9 @@ Avg fitness of consumers
 
 SLIDER
 14
-663
+698
 188
-696
+731
 market_mutation_period
 market_mutation_period
 0
@@ -2864,6 +2900,74 @@ Avg fitness of generators
 17
 1
 11
+
+SWITCH
+11
+599
+186
+632
+startup_generator_consumer?
+startup_generator_consumer?
+0
+1
+-1000
+
+TEXTBOX
+222
+627
+372
+645
+Development performance
+11
+0.0
+1
+
+SWITCH
+196
+648
+370
+681
+evaluate_dev_for_fitness?
+evaluate_dev_for_fitness?
+0
+1
+-1000
+
+PLOT
+815
+592
+1015
+742
+Avg development performance
+NIL
+NIL
+0.0
+10.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -5825686 true "" "plot (sum [development-performance] of entities with [science? and technology?]) / (count entities with [science? and technology?])"
+
+PLOT
+1020
+594
+1220
+744
+Avg creation performance
+NIL
+NIL
+0.0
+10.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -8630108 true "" "plot (sum [creation-performance] of entities with [science?]) / (count entities with [science?])"
 
 @#$#@#$#@
 ## WHAT IS IT?
