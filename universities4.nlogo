@@ -768,10 +768,18 @@ to create-knowledge-DNA
   ;; randomly creates the scientific knowledge string
   ;; if the entity does not possess this kind of knowledge, the string is all 0's
   ;; it also initializes the new-science-knowledge
+  ;; if the ordered_DNA? option is selected, it sorts the entities DNA, leaving a blank area in the DNA for
+  ;; knowledge not yet learned/existing in the ecossistem
+  ;; although very similar, the entities will still have slight differences between each other
+
   ifelse science? [
     ;; set science-knowledge n-values (knowledge / 2) [random 2]
     set science-knowledge n-values (knowledge / 2)  [ flip-of-a-coin initial_fitness_probability ]
+    if ordered_DNA? [
+      set science-knowledge sort science-knowledge
+    ]
     set new-science-knowledge science-knowledge
+
   ][
     set science-knowledge n-values (knowledge / 2) [0]
     set new-science-knowledge science-knowledge
@@ -780,9 +788,16 @@ to create-knowledge-DNA
   ;; randomly creates the technological knowledge string
   ;; if the entity does not possess this kind of knowledge, the string is all 0's
   ;; it also initializes the new-tech-knowledge
+  ;; if the ordered_DNA? option is selected, it sorts the entities DNA, leaving a blank area in the DNA for
+  ;; knowledge not yet learned/existing in the ecossistem
+  ;; although very similar, the entities will still have slight differences between each other
+
   ifelse technology? [
     ;; set tech-knowledge n-values (knowledge / 2) [random 2]
     set tech-knowledge n-values (knowledge / 2) [ flip-of-a-coin initial_fitness_probability ]
+    if ordered_DNA? [
+      set tech-knowledge sort tech-knowledge
+    ]
     set new-tech-knowledge tech-knowledge
   ][
     set tech-knowledge n-values (knowledge / 2) [0]
@@ -1182,10 +1197,21 @@ to create-market
     ;; set niche-demand n-values (knowledge / 2) [random 2]
 
     ;; sets the niche demand as a full specification of what would be desirable, or all ones
-    set niche-demand n-values (knowledge / 2) [1]
+    ;;set niche-demand n-values (knowledge / 2) [1]
+    let dna-size (knowledge / 2)
+    set niche-demand n-values dna-size [ x -> dna-proportion x (dna-size / 2) ]
+
     hide-turtle
     show niche-demand
   ]
+end
+
+to-report dna-proportion [ i string-size]
+ ifelse i < string-size [
+  report 0
+ ][
+  report 1
+ ]
 end
 
 
@@ -1595,10 +1621,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-16
-147
-191
-180
+17
+176
+192
+209
 Knowledge
 Knowledge
 2
@@ -1610,10 +1636,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-16
-179
-191
-212
+17
+208
+192
+241
 initial_resources
 initial_resources
 1
@@ -1642,17 +1668,17 @@ NIL
 1
 
 OUTPUT
-16
-734
-359
-917
+17
+763
+360
+946
 12
 
 BUTTON
-15
-700
-193
-733
+16
+729
+194
+762
 Previous Instruction
 previous-instruction
 NIL
@@ -1666,10 +1692,10 @@ NIL
 1
 
 BUTTON
-194
-700
-358
-733
+196
+729
+360
+762
 Next Instruction
 next-instruction
 NIL
@@ -1694,10 +1720,10 @@ current-instruction-label
 11
 
 SLIDER
-16
-212
-191
-245
+17
+241
+192
+274
 niche_resources
 niche_resources
 0
@@ -1709,10 +1735,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-16
-245
-191
-278
+17
+274
+192
+307
 minimum_resources_to_live
 minimum_resources_to_live
 1
@@ -1724,10 +1750,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-16
-278
-191
-311
+17
+307
+192
+340
 expense_to_live_growth
 expense_to_live_growth
 0
@@ -2092,25 +2118,25 @@ standard-deviation [willingness-to-share] of entities
 11
 
 SLIDER
-16
-312
+17
+341
+191
+374
+cost_of_crossover
+cost_of_crossover
+0
+1000
+0.0
+100
+1
+NIL
+HORIZONTAL
+
+SLIDER
+17
+406
 190
-345
-cost_of_crossover
-cost_of_crossover
-0
-1000
-0.0
-100
-1
-NIL
-HORIZONTAL
-
-SLIDER
-16
-377
-189
-410
+439
 cost_of_mutation
 cost_of_mutation
 0
@@ -2122,10 +2148,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-16
-344
-189
-377
+17
+373
+190
+406
 cost_of_development
 cost_of_development
 0
@@ -2182,10 +2208,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-12
-432
-187
-465
+13
+461
+188
+494
 create-super-professor
 create-super-competitor
 NIL
@@ -2214,10 +2240,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-13
-531
-187
-564
+14
+560
+188
+593
 super_share?
 super_share?
 1
@@ -2225,10 +2251,10 @@ super_share?
 -1000
 
 BUTTON
-14
-596
-185
-629
+15
+625
+186
+658
 mutate-university-demand
 mutate-market
 NIL
@@ -2242,10 +2268,10 @@ NIL
 1
 
 SWITCH
-14
-629
-187
-662
+15
+658
+188
+691
 non_economical_entities?
 non_economical_entities?
 1
@@ -2274,7 +2300,7 @@ SWITCH
 121
 set_input_seed?
 set_input_seed?
-1
+0
 1
 -1000
 
@@ -2445,9 +2471,9 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count entities"
 
 TEXTBOX
-54
+59
 127
-204
+209
 145
 World parameters
 11
@@ -2485,20 +2511,20 @@ Generation and development
 1
 
 TEXTBOX
-20
-580
-170
-598
+21
+609
+171
+627
 Instructions and seed origin
 11
 0.0
 1
 
 TEXTBOX
-55
-416
-205
-434
+56
+445
+206
+463
 Special functions
 11
 0.0
@@ -2703,10 +2729,10 @@ count entities with [generator? and not consumer? and diffuser? and not integrat
 11
 
 BUTTON
-12
-465
-187
-498
+13
+494
+188
+527
 create-super-researcher
 create-super-generator
 NIL
@@ -2720,10 +2746,10 @@ NIL
 1
 
 BUTTON
-12
-498
-187
-531
+13
+527
+188
+560
 NIL
 create-super-diffuser
 NIL
@@ -2755,10 +2781,10 @@ PENS
 "default" 1.0 0 -13345367 true "" "plot ((mean [tech-fitness] of entities with [consumer?]) /(Knowledge / 2)) * 100"
 
 SWITCH
-13
-563
-187
-596
+14
+592
+188
+625
 startups?
 startups?
 0
@@ -2789,7 +2815,7 @@ initial_fitness_probability
 initial_fitness_probability
 0
 1
-0.2
+0.4
 0.1
 1
 NIL
@@ -2850,15 +2876,15 @@ Avg fitness of consumers
 11
 
 SLIDER
-14
-663
-188
-696
+15
+692
+189
+725
 market_mutation_period
 market_mutation_period
 0
 100
-0.0
+100.0
 1
 1
 NIL
@@ -2910,6 +2936,17 @@ Avg fitness of generators
 17
 1
 11
+
+SWITCH
+17
+145
+192
+178
+ordered_DNA?
+ordered_DNA?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?

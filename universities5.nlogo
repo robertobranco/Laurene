@@ -327,8 +327,8 @@ to evaluate-crossover [old-knowledge new-knowledge]
 
     ;; assesses the complement of the hamming distance between the niche-demand and the knowledges
     ;; the higher the better
-    set fitness-old (knowledge / 2) - (hamming-distance old-knowledge niche-demand-now)
-    set fitness-new (knowledge / 2) - (hamming-distance new-knowledge niche-demand-now)
+    set fitness-old knowledge - (hamming-distance old-knowledge niche-demand-now)
+    set fitness-new knowledge - (hamming-distance new-knowledge niche-demand-now)
 
     ifelse fitness-new > fitness-old [
       ;; the case where there is an increase in fitness
@@ -380,8 +380,8 @@ to evaluate-crossover [old-knowledge new-knowledge]
 
         ;; assesses the complement of the hamming distance between the niche-demand and the knowledges
         ;; the higher the better
-        set fitness-old (knowledge / 2) - (hamming-distance old-knowledge niche-demand-now)
-        set fitness-new (knowledge / 2) - (hamming-distance new-knowledge niche-demand-now)
+        set fitness-old knowledge - (hamming-distance old-knowledge niche-demand-now)
+        set fitness-new knowledge - (hamming-distance new-knowledge niche-demand-now)
 
         ifelse fitness-new > fitness-old [
           ;; the case with learning and increase in fitness
@@ -572,9 +572,9 @@ to generate
   if resources > cost_of_mutation [
       if random-float 1 < creation-performance [
         set mutation? true
-        let new-science-knowledge1 new-science-knowledge
+        let new-science-knowledge-mut new-science-knowledge
         set new-science-knowledge mutate new-science-knowledge
-        if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [
+        if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge-mut new-science-knowledge )  ) > 0 [
           set mutated? true
         ]
       ]
@@ -768,24 +768,39 @@ to create-knowledge-DNA
   ;; randomly creates the scientific knowledge string
   ;; if the entity does not possess this kind of knowledge, the string is all 0's
   ;; it also initializes the new-science-knowledge
+  ;; if the ordered_DNA? option is selected, it sorts the entities DNA, leaving a blank area in the DNA for
+  ;; knowledge not yet learned/existing in the ecossistem
+  ;; although very similar, the entities will still have slight differences between each other
+
   ifelse science? [
-    ;; set science-knowledge n-values (knowledge / 2) [random 2]
-    set science-knowledge n-values (knowledge / 2)  [ flip-of-a-coin initial_fitness_probability ]
+    ;; set science-knowledge n-values knowledge [random 2]
+    set science-knowledge n-values knowledge  [ flip-of-a-coin initial_fitness_probability ]
+    if ordered_DNA? [
+      set science-knowledge sort science-knowledge
+    ]
     set new-science-knowledge science-knowledge
+
   ][
-    set science-knowledge n-values (knowledge / 2) [0]
+    set science-knowledge n-values knowledge [0]
     set new-science-knowledge science-knowledge
   ]
 
   ;; randomly creates the technological knowledge string
   ;; if the entity does not possess this kind of knowledge, the string is all 0's
   ;; it also initializes the new-tech-knowledge
+  ;; if the ordered_DNA? option is selected, it sorts the entities DNA, leaving a blank area in the DNA for
+  ;; knowledge not yet learned/existing in the ecossistem
+  ;; although very similar, the entities will still have slight differences between each other
+
   ifelse technology? [
-    ;; set tech-knowledge n-values (knowledge / 2) [random 2]
-    set tech-knowledge n-values (knowledge / 2) [ flip-of-a-coin initial_fitness_probability ]
+    ;; set tech-knowledge n-values knowledge [random 2]
+    set tech-knowledge n-values knowledge [ flip-of-a-coin initial_fitness_probability ]
+    if ordered_DNA? [
+      set tech-knowledge sort tech-knowledge
+    ]
     set new-tech-knowledge tech-knowledge
   ][
-    set tech-knowledge n-values (knowledge / 2) [0]
+    set tech-knowledge n-values knowledge [0]
     set new-tech-knowledge tech-knowledge
   ]
 
@@ -808,8 +823,8 @@ to test-fitness
   let niche-demand-now [niche-demand] of one-of niches
   let fitness1 0
   let fitness2 0
-  set tech-fitness (knowledge / 2) - (hamming-distance tech-knowledge niche-demand-now)
-  set sci-fitness (knowledge / 2) - (hamming-distance science-knowledge niche-demand-now )
+  set tech-fitness knowledge - (hamming-distance tech-knowledge niche-demand-now)
+  set sci-fitness knowledge - (hamming-distance science-knowledge niche-demand-now )
   set fitness max (list tech-fitness sci-fitness)
 
   ;; sets the color of the entities based on its absolute fitness
@@ -833,7 +848,7 @@ to calculate-resource
 
   ;;*** equation that allows consumers to compete against a standard, and not against each other. Meet the minimum and you are alive.
   if consumer? [
-    set resources resources + (niche_resources * tech-fitness / ( Knowledge / 2 ))
+    set resources resources + (niche_resources * tech-fitness / knowledge)
   ]
 
   ;; pays emitters for their knowledge
@@ -1038,18 +1053,18 @@ if partner != nobody and not ( [fitness] of partner < fitness) [
         set new-science-knowledge crossover bits1 bits2
 
         ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
-        ;;let new-science-knowledge1 new-science-knowledge ;;*** used to assess whether the mutation is working
         set new-science-knowledge mutate new-science-knowledge
-        ;;if length ( remove true ( map [ [a b] -> a = b ] new-science-knowledge1 new-science-knowledge )  ) > 0 [print "mutou"]  ;;*** used to assess whether mutation is working
 
         ;; bits1 is the tech-knowledge of the receiver
         set bits1 tech-knowledge
         ;; bits2 is the tech-knowledge of the emitter
         set bits2 [tech-knowledge] of partner
         set new-tech-knowledge crossover bits1 bits2
+
+        ;;*** repensar os efeitos deste trecho do código. E se não houver transf de tech, mas sim de sci?
         update-link-appearance new-tech-knowledge tech-knowledge yellow
 
-
+        ;;*** quais são os efeitos de avaliar duas vezes?
         evaluate-crossover tech-knowledge new-tech-knowledge
         evaluate-crossover science-knowledge new-science-knowledge
 
@@ -1066,7 +1081,6 @@ if partner != nobody and not ( [fitness] of partner < fitness) [
           set new-science-knowledge crossover bits1 bits2
 
           ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
-          ;; let new-science-knowledge1 new-science-knowledge *** used to assess whether the mutation is working
           set new-science-knowledge mutate new-science-knowledge
           update-link-appearance new-science-knowledge science-knowledge green
 
@@ -1179,19 +1193,28 @@ to create-market
   create-niches 1 [
 
     ;; set the niche demand randomly
-    ;; set niche-demand n-values (knowledge / 2) [random 2]
+    ;; set niche-demand n-values knowledge [random 2]
 
     ;; sets the niche demand as a full specification of what would be desirable, or all ones
-    set niche-demand n-values (knowledge / 2) [1]
+    set niche-demand n-values knowledge [1]
+
     hide-turtle
     show niche-demand
   ]
 end
 
+to-report dna-proportion [ i string-size]
+ ifelse i < string-size [
+  report 0
+ ][
+  report 1
+ ]
+end
+
 
 to mutate-market
   ask niches [
-    set niche-demand n-values (Knowledge / 2) [random 2]
+    set niche-demand n-values knowledge [random 2]
     show niche-demand
   ]
 end
@@ -1242,11 +1265,11 @@ to select-fitness-color
 
   if color_update_rule = "fitness" [
     ;; implements the color updating by absolute fitness
-    ifelse (fitness / (knowledge / 2 )) > 0.67 [
+    ifelse (fitness / knowledge) > 0.67 [
       set color green
     ]
     [
-      ifelse (fitness / (knowledge / 2 )) > 0.33 [
+      ifelse (fitness / knowledge) > 0.33 [
         set color yellow
       ]
       [
@@ -1306,7 +1329,7 @@ to update-link-appearance [bits1 bits2 color-link]
   ifelse counter-change > 0 [
     ask my-links [
       set color color-link
-      set thickness counter-change / (knowledge / 2)
+      set thickness counter-change / knowledge
     ]
   ][
     ask my-links [
@@ -1595,25 +1618,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-16
-147
-191
-180
-Knowledge
-Knowledge
+17
+176
+192
+209
+knowledge
+knowledge
 2
 200
-200.0
+100.0
 2
 1
 NIL
 HORIZONTAL
 
 SLIDER
-16
-179
-191
-212
+17
+208
+192
+241
 initial_resources
 initial_resources
 1
@@ -1642,17 +1665,17 @@ NIL
 1
 
 OUTPUT
-16
-734
-359
-917
+17
+763
+360
+946
 12
 
 BUTTON
-15
-700
-193
-733
+16
+729
+194
+762
 Previous Instruction
 previous-instruction
 NIL
@@ -1666,10 +1689,10 @@ NIL
 1
 
 BUTTON
-194
-700
-358
-733
+196
+729
+360
+762
 Next Instruction
 next-instruction
 NIL
@@ -1694,10 +1717,10 @@ current-instruction-label
 11
 
 SLIDER
-16
-212
-191
-245
+17
+241
+192
+274
 niche_resources
 niche_resources
 0
@@ -1709,10 +1732,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-16
-245
-191
-278
+17
+274
+192
+307
 minimum_resources_to_live
 minimum_resources_to_live
 1
@@ -1724,10 +1747,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-16
-278
-191
-311
+17
+307
+192
+340
 expense_to_live_growth
 expense_to_live_growth
 0
@@ -2092,25 +2115,25 @@ standard-deviation [willingness-to-share] of entities
 11
 
 SLIDER
-16
-312
+17
+341
+191
+374
+cost_of_crossover
+cost_of_crossover
+0
+1000
+0.0
+100
+1
+NIL
+HORIZONTAL
+
+SLIDER
+17
+406
 190
-345
-cost_of_crossover
-cost_of_crossover
-0
-1000
-0.0
-100
-1
-NIL
-HORIZONTAL
-
-SLIDER
-16
-377
-189
-410
+439
 cost_of_mutation
 cost_of_mutation
 0
@@ -2122,10 +2145,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-16
-344
-189
-377
+17
+373
+190
+406
 cost_of_development
 cost_of_development
 0
@@ -2182,10 +2205,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-12
-432
-187
-465
+13
+461
+188
+494
 create-super-professor
 create-super-competitor
 NIL
@@ -2214,10 +2237,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-13
-531
-187
-564
+14
+560
+188
+593
 super_share?
 super_share?
 1
@@ -2225,10 +2248,10 @@ super_share?
 -1000
 
 BUTTON
-14
-596
-185
-629
+15
+625
+186
+658
 mutate-university-demand
 mutate-market
 NIL
@@ -2242,10 +2265,10 @@ NIL
 1
 
 SWITCH
-14
-629
-187
-662
+15
+658
+188
+691
 non_economical_entities?
 non_economical_entities?
 1
@@ -2274,7 +2297,7 @@ SWITCH
 121
 set_input_seed?
 set_input_seed?
-1
+0
 1
 -1000
 
@@ -2445,9 +2468,9 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count entities"
 
 TEXTBOX
-54
+59
 127
-204
+209
 145
 World parameters
 11
@@ -2485,20 +2508,20 @@ Generation and development
 1
 
 TEXTBOX
-20
-580
-170
-598
+21
+609
+171
+627
 Instructions and seed origin
 11
 0.0
 1
 
 TEXTBOX
-55
-416
-205
-434
+56
+445
+206
+463
 Special functions
 11
 0.0
@@ -2703,10 +2726,10 @@ count entities with [generator? and not consumer? and diffuser? and not integrat
 11
 
 BUTTON
-12
-465
-187
-498
+13
+494
+188
+527
 create-super-researcher
 create-super-generator
 NIL
@@ -2720,10 +2743,10 @@ NIL
 1
 
 BUTTON
-12
-498
-187
-531
+13
+527
+188
+560
 NIL
 create-super-diffuser
 NIL
@@ -2755,10 +2778,10 @@ PENS
 "default" 1.0 0 -13345367 true "" "plot ((mean [tech-fitness] of entities with [consumer?]) /(Knowledge / 2)) * 100"
 
 SWITCH
-13
-563
-187
-596
+14
+592
+188
+625
 startups?
 startups?
 0
@@ -2789,7 +2812,7 @@ initial_fitness_probability
 initial_fitness_probability
 0
 1
-0.2
+0.4
 0.1
 1
 NIL
@@ -2850,15 +2873,15 @@ Avg fitness of consumers
 11
 
 SLIDER
-14
-663
-188
-696
+15
+692
+189
+725
 market_mutation_period
 market_mutation_period
 0
 100
-0.0
+100.0
 1
 1
 NIL
@@ -2910,6 +2933,17 @@ Avg fitness of generators
 17
 1
 11
+
+SWITCH
+17
+145
+192
+178
+ordered_DNA?
+ordered_DNA?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
