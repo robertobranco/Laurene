@@ -502,7 +502,13 @@ to evaluate-crossover-dual [older-tech-knowledge newer-tech-knowledge older-scie
         let fitness-old 0
         let fitness-new 0
 
-
+        ;; assesses the complement of the hamming distance between the niche-demand and the knowledges
+        ;; the higher the better
+        set fitness-old knowledge - (hamming-distance older-tech-knowledge niche-demand-now)
+        set fitness-new knowledge - (hamming-distance newer-tech-knowledge niche-demand-now)
+        ;; assessing a global fitness which includes the fitness of both knowledges
+        set fitness-old fitness-old + (knowledge - (hamming-distance older-science-knowledge niche-demand-now))
+        set fitness-new fitness-new + (knowledge - (hamming-distance newer-science-knowledge niche-demand-now))
 
         ifelse fitness-new > fitness-old [
           ;; the case with learning and increase in fitness
@@ -1183,10 +1189,10 @@ if partner != nobody and not ( [fitness] of partner < fitness) [
         set new-tech-knowledge crossover bits1 bits2
 
         ;;*** repensar os efeitos deste trecho do código. E se não houver transf de tech, mas sim de sci?
-;; existem 4 possibilidades para a imagem deste link: os dois aprenderam, apenas sci aprendeu, apenas tech aprendeu, ninguém aprendeu
-;; pode-se usar também 4 tipos de links, um sólido, um pontilhado, um tracejado e um vermelho
-;; talvez eu tenha que pensar num update-link appearance para o caso dual, assim como o evaluate crossover.
-        update-link-appearance new-tech-knowledge tech-knowledge yellow
+        ;; existem 4 possibilidades para a imagem deste link: os dois aprenderam, apenas sci aprendeu, apenas tech aprendeu, ninguém aprendeu
+        ;; pode-se usar também 4 tipos de links, um sólido, um pontilhado, um tracejado e um vermelho
+        ;; talvez eu tenha que pensar num update-link appearance para o caso dual, assim como o evaluate crossover.
+        update-link-appearance-dual new-tech-knowledge tech-knowledge new-science-knowledge science-knowledge yellow
 
         ;;**** i can create a string with both knowledge for the update link, and it will sum the differences in both knowledges
         ;; what are the effects on the crossover fitness - first come the bits of tech-knowledge, and then science-knowledge
@@ -1473,6 +1479,30 @@ to update-link-appearance [bits1 bits2 color-link]
     ask my-links [
       set color color-link
       set thickness counter-change / knowledge
+    ]
+  ][
+    ask my-links [
+      set color red
+    ]
+  ]
+
+end
+
+to update-link-appearance-dual [newer-tech-knowledge older-tech-knowledge newer-science-knowledge older-science-knowledge color-link]
+  ;; Evaluates whether the crossover and the mutation actually changed bits through a hamming distance
+  ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the number of bits changed.
+  ;; If not, it colors the link red
+
+  let new-knowledge newer-tech-knowledge
+  let old-knowledge older-tech-knowledge
+  foreach newer-science-knowledge [ [ i ] -> set new-knowledge lput i new-knowledge]
+  foreach older-science-knowledge [ [ i ] -> set old-knowledge lput i old-knowledge]
+
+  let counter-change hamming-distance new-knowledge old-knowledge
+  ifelse counter-change > 0 [
+    ask my-links [
+      set color color-link
+      set thickness counter-change / 2knowledge
     ]
   ][
     ask my-links [
@@ -1769,7 +1799,7 @@ knowledge
 knowledge
 2
 200
-10.0
+50.0
 2
 1
 NIL
@@ -3024,7 +3054,7 @@ market_mutation_period
 market_mutation_period
 0
 100
-100.0
+0.0
 1
 1
 NIL
