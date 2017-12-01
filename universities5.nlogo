@@ -83,7 +83,7 @@ globals [
   current-instruction
   ;; seed used to generate random-numbers
   my-seed
-
+  ;; used to count the period of market stability between market mutations
   market-mutation-countdown
 
 ]
@@ -118,8 +118,6 @@ to go
 
   ;; implements the stop trigger
   if ticks >= stop_trigger [
-    ;;export-view "teste.png"
-    export-all-plots "graficos.csv"
     stop
   ]
 
@@ -139,17 +137,19 @@ to go
   ]
 
   ;; stops the simulation if all the entities have died after calculating the resources
-  if not any? entities [
-    print "There are no entities left"
-    stop
-  ]
-  if count entities = 1 [
-    print "There is only one entity left"
-    stop
-  ]
+  ;;if not any? entities [
+  ;;  print "There are no entities left"
+  ;;  stop
+  ;;]
 
-  if count entities with [science? or technology?] = 0 [
-    print "There are no knowledge entities left"
+  ;; stops the simulation if there is only one entity left
+  ;;if count entities = 1 [
+  ;;  print "There is only one entity left"
+  ;;  stop
+  ;;]
+
+  if count entities with [science? or technology?] < 2 [
+    print "There are not enough knowledge entities left for interactions"
     stop
   ]
 
@@ -1506,6 +1506,7 @@ to update-link-appearance-dual [newer-tech-knowledge older-tech-knowledge newer-
       set thickness counter-change / ( 2 * knowledge )
     ]
   ][
+    ;; if there is no learning, the link is colored red
     ask my-links [
       set color red
     ]
@@ -2106,7 +2107,7 @@ INPUTBOX
 364
 70
 stop_trigger
-3000.0
+200.0
 1
 0
 Number
@@ -2342,7 +2343,7 @@ development_performance
 development_performance
 0
 1
-0.0
+0.5
 0.05
 1
 NIL
@@ -2404,7 +2405,7 @@ std_dev_development_performance
 std_dev_development_performance
 0
 0.5
-0.0
+0.1
 0.05
 1
 NIL
@@ -2958,7 +2959,7 @@ SWITCH
 625
 startups?
 startups?
-0
+1
 1
 -1000
 
@@ -2999,7 +3000,7 @@ SWITCH
 583
 evaluate_for_fitness?
 evaluate_for_fitness?
-0
+1
 1
 -1000
 

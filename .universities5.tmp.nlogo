@@ -83,7 +83,7 @@ globals [
   current-instruction
   ;; seed used to generate random-numbers
   my-seed
-
+  ;; used to count the period of market stability between market mutations
   market-mutation-countdown
 
 ]
@@ -118,8 +118,6 @@ to go
 
   ;; implements the stop trigger
   if ticks >= stop_trigger [
-    ;;export-view "teste.png"
-    export-all-plots "graficos.csv"
     stop
   ]
 
@@ -143,12 +141,14 @@ to go
     print "There are no entities left"
     stop
   ]
+
+  ;; stops the simulation if there is only one entity left
   if count entities = 1 [
     print "There is only one entity left"
     stop
   ]
 
-  if count entities with [science? or technology?] = 0 [
+  if count entities with [science? or technology?]  0 [
     print "There are no knowledge entities left"
     stop
   ]
@@ -1502,9 +1502,11 @@ to update-link-appearance-dual [newer-tech-knowledge older-tech-knowledge newer-
   ifelse counter-change > 0 [
     ask my-links [
       set color color-link
-      set thickness counter-change / 2knowledge
+      ;; knowledge is multiplied by two to compensate the longer string, which includes both science and tech DNAs
+      set thickness counter-change / ( 2 * knowledge )
     ]
   ][
+    ;; if there is no learning, the link is colored red
     ask my-links [
       set color red
     ]
@@ -2105,7 +2107,7 @@ INPUTBOX
 364
 70
 stop_trigger
-3000.0
+200.0
 1
 0
 Number
@@ -2998,7 +3000,7 @@ SWITCH
 583
 evaluate_for_fitness?
 evaluate_for_fitness?
-0
+1
 1
 -1000
 
