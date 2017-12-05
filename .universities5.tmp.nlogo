@@ -136,27 +136,16 @@ to go
     spawn-startup (number_of_entities - (count entities))
   ]
 
-  ;; stops the simulation if all the entities have died after calculating the resources
-  if not any? entities [
-    print "There are no entities left"
+  ;; stops the simulation if there is fewer than two entities with any kind of knowledge
+  if count entities with [science? or technology?] < 2 [
+    print "There are not enough knowledge entities left for interactions"
     stop
   ]
 
-  ;; stops the simulation if there is only one entity left
-  if count entities = 1 [
-    print "There is only one entity left"
-    stop
-  ]
-
-  if count entities with [science? or technology?]  0 [
-    print "There are no knowledge entities left"
-    stop
-  ]
-
-  ;; knowledge activities inside the entities
+  ;; KNOWLEDGE ACTIVITIES
 
   ;; asks generators to perform research, in other words, mutate knowledge
-  ;; *** has to be called before the call to interact, as it may alter newly developed science
+  ;; must be called before the interact procedure to avoid loss of new knowledge
   ask entities with [generator?] [
 
     generate
@@ -164,26 +153,26 @@ to go
   ]
 
   ;; asks entities with scientific and technological knowledge to develop science into technology
-  ;; *** has to be called before interact to prevent the altering of newly developed knowledge
+  ;; must be called before the interact procedure to avoid loss of new knowledge
   ask entities with [science? and technology?] [
 
     develop
 
   ]
 
-  ;; knowledge activities with other entities
+  ;; KNOWLEDGE INTERACTION ACTIVITIES
 
   ;; asks integrators to facilitate the interaction and crossover between two entities
+  ;; must be called before the interact procedure to avoid loss of new knowledge
   ask entities with [integrator?] [
 
     integrate
 
   ]
 
-  ;; ask entities with some kind of knowledge  to look for partners and possibly, to crossover
-  ;; *** has to be called after the call for development, to prevent the destruction of newly developed knowledge, unless
-  ;; it is the intention to allow entities to perform more than one activity per iteration - in that case some of the learning may be overwritten
-  ;; the crossover? flag is set by the interact procedure after both entities have agreed to interact
+  ;; ask entities with some kind of knowledge  to look for similar partners and possibly, to crossover
+  ;; it prevents entities who performed mutation, crossover or development to receive knowledge to protect
+  ;; the results of these operations
   ask entities with [science? or technology?] [
 
     if resources > cost_of_crossover and not development? and not mutation? and not crossover? [
@@ -193,7 +182,7 @@ to go
     ]
   ]
 
-  ;; ask entities to update their knowledge given the actions performed on the iteration
+  ;; ask entities to update their knowledge given the actions performed during the iteration
   ask entities [
 
     set science-knowledge new-science-knowledge
@@ -201,8 +190,10 @@ to go
 
   ]
 
+  ;; mutates the market if the countdown meets the number set in the interface
   market-mutation
 
+  ;; ticks the iteration clock
   tick
 
 end
@@ -300,7 +291,7 @@ to populate-ecosystem
 
     ]
   ;; sets the total number of entities as the sum of the types created. It will allow the model to replace the numbers with randomly created startups
-  ;; if startups? is set on
+  ;; if startups? is set on at the interface
   set number_of_entities (number_of_generators + number_of_consumers + number_of_integrators + number_of_diffusers + number_of_cons_gen + number_of_gen_dif)
 
   ]
@@ -1345,7 +1336,12 @@ to create-market
     ;; set niche-demand n-values knowledge [random 2]
 
     ;; sets the niche demand as a full specification of what would be desirable, or all ones
-    set niche-demand n-values knowledge [1]
+    ;;set niche-demand n-values knowledge [1]
+    ifelse market_fully_discovered? [
+      set niche-demand n-values knowledge [1]
+    ][
+      set niche-demand n-values knowledge [[ i ] -> ifelse-value ( i < ( knowledge / 2 )) [ 0 ][ 1 ] ]
+    ]g
 
     hide-turtle
     show niche-demand
@@ -1801,7 +1797,7 @@ knowledge
 knowledge
 2
 200
-50.0
+200.0
 2
 1
 NIL
@@ -1900,7 +1896,7 @@ niche_resources
 niche_resources
 0
 20000
-3000.0
+2000.0
 1000
 1
 NIL
@@ -2038,7 +2034,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-0
+2
 
 MONITOR
 812
@@ -2959,7 +2955,7 @@ SWITCH
 625
 startups?
 startups?
-0
+1
 1
 -1000
 
@@ -2987,7 +2983,7 @@ initial_fitness_probability
 initial_fitness_probability
 0
 1
-0.4
+0.1
 0.1
 1
 NIL
@@ -3000,7 +2996,7 @@ SWITCH
 583
 evaluate_for_fitness?
 evaluate_for_fitness?
-1
+0
 1
 -1000
 
@@ -3137,6 +3133,17 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot count entities with [generator? and crossover?]"
+
+SWITCH
+371
+10
+567
+43
+market_fully_discovered?
+market_fully_discovered?
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
