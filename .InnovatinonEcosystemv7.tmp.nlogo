@@ -957,14 +957,14 @@ to calculate-resource
 
   ;; gives CONSUMER entities a share of the niche's resources proportional to its market share (relative tech-fitness)
   ;; the relative fitness is calculated of the tech-fitness of entities who compete for market share (CONSUMERS of knowledge)
-  ;;if consumer? [
-  ;;  set resources resources + (niche_resources * (tech-fitness / (sum [tech-fitness] of entities with [consumer?])))
-  ;;]
+  if consumer? [
+    set resources resources + (niche_resources * (tech-fitness / (sum [tech-fitness] of entities with [consumer?])))
+  ]
 
   ;;*** equation that allows consumers to compete against a standard, and not against each other. Meet the minimum and you are alive.
-  ;if consumer? [
-    set resources resources + (niche_resources * tech-fitness / knowledge)
-  ]
+  ;;if consumer? [
+  ;;  set resources resources + (niche_resources * tech-fitness / knowledge)
+  ;;]
 
   ;; pays emitters for their knowledge
   if emitted? [
@@ -990,6 +990,8 @@ to calculate-resource
   ;; takes resources from the entity proportionally to its total amount of resources, respecting the minimum amount to stay alive
   ;; the amount necessary grows with the amount of resources the entity amasses (which is the growth of the entity)
   ;; the rate of the expense growth is given by the expense to live growth slider
+  ;; caveat - this keeps the non_economical at a minimum resource status, which may hamper their chances to be selected as partners unless
+  ;; unless they are really fit.
 
   ifelse not non_economical_entities? [
     set resources resources - (minimum_resources_to_live + (resources * expense_to_live_growth))
@@ -1042,11 +1044,11 @@ to-report choose-partner
   ;; creates an agentset with entities possessing knowledge similar to the knowledge of the choosing entity
   ifelse science? and technology? [
     set possible-partners other entities with [science? or technology?]
-    ]
-    [ifelse science? [
+    ][
+      ifelse science? [
       set possible-partners other entities with [science?]
-      ]
-      [if technology? [
+      ][
+        if technology? [
         set possible-partners other entities with [technology?]
         ]
       ]
@@ -1094,9 +1096,10 @@ to-report choose-partner
   ;; *** alternate code for simplicity
   ;; lottery example commands	rnd:weighted-one-of	rnd:weighted-one-of-list
   ;; The idea behind this procedure is a bit tricky to understand.
-  ;; Basically we take the sum of the sizes of the turtles, and that's how many "tickets" we have in our lottery.  Then we pick
+  ;; Basically we take the sum of the sizes of the turtles and the sum of their best fitness between science and technology,
+  ;; and that's how many "tickets" we have in our lottery.  Then we pick
   ;; a random "ticket" (a random number).  Then we step through the shorter code option - see netlogo online manual
-  ;;ask rnd:weighted-one-of entities with science? [ resources + fitness ] [set partner self]
+  ;; ask rnd:weighted-one-of entities with science? [ resources + fitness ] [set partner self]
 
 end
 
@@ -1105,8 +1108,8 @@ end
  ;; will analyze what kind of knowledge can be used for crossover and call the operation
  ;; it will then store the result in the new-knowledge variable, which will be used to update the
  ;; entity's knowledge at the end of the iteration.
- ;; it cannot update it because it would tamper with the fitness evaluation performed by other entities
- ;; before the run is done.
+ ;; it cannot update it immediatly because it would tamper with the fitness evaluation performed by other entities
+ ;; before the run is done, giving the impression of instantaneous learning.
 
 to interact
 
@@ -1180,32 +1183,9 @@ if partner != nobody and not ( [fitness] of partner < fitness) [
         ;; existem 4 possibilidades para a imagem deste link: os dois aprenderam, apenas sci aprendeu, apenas tech aprendeu, ninguém aprendeu
         ;; pode-se usar também 4 tipos de links, um sólido, um pontilhado, um tracejado e um vermelho
         ;; talvez eu tenha que pensar num update-link appearance para o caso dual, assim como o evaluate crossover.
-        update-link-appearance-dual new-tech-knowledge tech-knowledge new-science-knowledge science-knowledge yellow
+        update-link-appearance-dual tech-knowledge new-tech-knowledge science-knowledge new-science-knowledge yellow
 
-        ;;**** i can create a string with both knowledge for the update link, and it will sum the differences in both knowledges
-        ;; what are the effects on the crossover fitness - first come the bits of tech-knowledge, and then science-knowledge
-
-        ;;let new-dna new-tech-knowledge
-        ;;foreach new-science-knowledge [ [ i ] -> set new-dna lput i new-dna]
-        ;;show "new-dna"
-        ;;show new-dna
-        ;;show "new-tech-knowledge"
-        ;;show new-tech-knowledge
-        ;;show "new-science-knowledge"
-        ;;show new-science-knowledge
-        ;;does not work because niche demand is half the lenght of new-dna. A new niche demand can be constructed repeating
-        ;;it twice. But it has to be done only for the evaluation of the crossover of entities with science and technology
-        ;;show hamming-distance new-tech-knowledge [niche-demand] of one-of niches
-        ;; show hamming-distance new-dna [niche-demand] of one-of niches
-
-
-        ;;*** quais são os efeitos de avaliar duas vezes?
-        ;; evaluate-crossover tech-knowledge new-tech-knowledge
-        ;; evaluate-crossover science-knowledge new-science-knowledge
-        ;; an exit would be to create a second evaluate crossover that would be called here, avoiding lots of tests
-       ;; inside evaluate crossover.
-
-       evaluate-crossover-dual tech-knowledge new-tech-knowledge science-knowledge new-science-knowledge
+        evaluate-crossover-dual tech-knowledge new-tech-knowledge science-knowledge new-science-knowledge
 
 
       ][;; if both the entity (receiver) and the partner (emitter) possess only scientific knowledge
@@ -1241,6 +1221,8 @@ if partner != nobody and not ( [fitness] of partner < fitness) [
       ]
 
       ;; inserts a memory of this interaction in the receiver's memory
+      ;; the value is currently given by the parameter on the interface  trust_in_known_partners
+      ;; but it can also be done with the result of the evaluation of the crossover or other criteria
       table:put interaction-memory [who] of partner trust_in_known_partners
       ;; inserts a memory of this interaction in the emitter's (partner) memory
       table:put [interaction-memory] of partner who trust_in_known_partners
@@ -1265,14 +1247,15 @@ to integrate
   let partner1 one-of other entities with [science? or technology?]
   if partner1 != nobody and not crossover? [
     ask partner1 [
+      ;; Set integration? on the integrated knowledge entity, signaling it has been approached
+      ;; by an integrator
       set integration? true
       interact
     ]
 
-    ;; If the integration was sucessful, set integrated? in the integrator
-    if [integration?] of partner1 [
-      set integrated? true
-    ]
+    ;; Set integrated? in the integrator, signalling it attempted to integrate entities
+    set integrated? true
+
   ]
 
 end
@@ -1488,15 +1471,17 @@ to update-link-appearance [bits1 bits2 color-link]
 
 end
 
-to update-link-appearance-dual [newer-tech-knowledge older-tech-knowledge newer-science-knowledge older-science-knowledge color-link]
+to update-link-appearance-dual [older-tech-knowledge newer-tech-knowledge older-science-knowledge newer-science-knowledge  color-link]
   ;; Evaluates whether the crossover and the mutation actually changed bits through a hamming distance
   ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the number of bits changed.
   ;; If not, it colors the link red
 
-  let new-knowledge newer-tech-knowledge
-  let old-knowledge older-tech-knowledge
-  foreach newer-science-knowledge [ [ i ] -> set new-knowledge lput i new-knowledge]
-  foreach older-science-knowledge [ [ i ] -> set old-knowledge lput i old-knowledge]
+  let new-knowledge 0
+  let old-knowledge 0
+  ;;foreach newer-science-knowledge [ [ i ] -> set new-knowledge lput i new-knowledge]
+  ;;foreach older-science-knowledge [ [ i ] -> set old-knowledge lput i old-knowledge]
+  set new-knowledge sentence newer-science-knowledge newer-tech-knowledge
+  set old-knowledge sentence older-tech-knowledge newer-tech-knowledge
 
   let counter-change hamming-distance new-knowledge old-knowledge
   ifelse counter-change > 0 [
@@ -1900,7 +1885,7 @@ niche_resources
 niche_resources
 0
 20000
-3000.0
+20000.0
 1000
 1
 NIL
@@ -2038,7 +2023,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-0
+2
 
 MONITOR
 812
@@ -2959,7 +2944,7 @@ SWITCH
 625
 startups?
 startups?
-0
+1
 1
 -1000
 
@@ -2987,7 +2972,7 @@ initial_fitness_probability
 initial_fitness_probability
 0
 1
-0.0
+0.5
 0.05
 1
 NIL

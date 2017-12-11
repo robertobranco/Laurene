@@ -736,7 +736,7 @@ to-report hamming-distance [bits1 bits2]
 end
 
 
-;; evaluates the complement of the hamming distance between the niche's demand and the consumers tech-knowledge
+;; evaluates the complement of the hamming distance between the niche's demand, the tech-knowledge and the sci-knowledge
 to test-fitness
 
   set fitness 0
@@ -791,6 +791,8 @@ to calculate-resource
   ;; takes resources from the entity proportionally to its total amount of resources, respecting the minimum amount to stay alive
   ;; the amount necessary grows with the amount of resources the entity amasses (which is the growth of the entity)
   ;; the rate of the expense growth is given by the expense to live growth slider
+  ;; caveat - this keeps the non_economical at a minimum resource status, which may hamper their chances to be selected as partners unless
+  ;; unless they are really fit.
 
   ifelse not non_economical_entities? [
     set resources resources - (minimum_resources_to_live + (resources * expense_to_live_growth))
@@ -1532,7 +1534,7 @@ number_of_entities
 number_of_entities
 1
 600
-154.0
+102.0
 1
 1
 NIL
@@ -2239,7 +2241,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
-6.89362265E8
+-2.072613446E9
 1
 0
 Number
@@ -2565,7 +2567,7 @@ SWITCH
 580
 random_ent_creation?
 random_ent_creation?
-1
+0
 1
 -1000
 
