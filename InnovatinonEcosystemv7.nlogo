@@ -1395,33 +1395,25 @@ to select-fitness-color
       ]
     ]
   ]
-    ;; implements the color updating by survivability, the amount of iterations the entity would
-    ;; be able to survive without receiving any resources
-    ;; of course, it can live longer if it keeps gathering resources from the environment
+
+  ;; implements the color updating by survivability, the amount of iterations the entity would
+  ;; be able to survive without receiving any resources
+  ;; of course, it can live longer if it keeps gathering resources from the environment
   if color_update_rule = "survivability"[
     ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 10) [
       set color green
+    ][
+      ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 5) [
+        set color yellow
+      ][
+        set color red
+      ]
     ]
-  [ ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 5) [ set color yellow ]
-    [set color red]
-  ]
-  ]
 
-  if color_update_rule = "market survivability" [
-    ifelse consumer? [
-      ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 10) [
-        set color green
-      ]
-      [
-        ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 5) [
-          set color yellow
-        ]
-        [
-          set color red
-        ]
-      ]
-    ]
-    [
+    ;; updates the color of those entities that do not have costs charged
+    ;; meaning that their survival does not depend on their fitness or
+    ;; on their activities
+    if not consumer? and non_economical_entities? [
       set color gray
     ]
   ]
@@ -1869,8 +1861,8 @@ SLIDER
 niche_resources
 niche_resources
 0
-20000
-20000.0
+200000
+200000.0
 1000
 1
 NIL
@@ -1885,7 +1877,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1001
-101.0
+1001.0
 100
 1
 NIL
@@ -2007,8 +1999,8 @@ CHOOSER
 492
 color_update_rule
 color_update_rule
-"fitness" "survivability" "market survivability"
-0
+"fitness" "survivability"
+1
 
 MONITOR
 812
@@ -2077,7 +2069,7 @@ INPUTBOX
 364
 70
 stop_trigger
-3000.0
+6000.0
 1
 0
 Number
@@ -3026,7 +3018,7 @@ market_mutation_period
 market_mutation_period
 0
 100
-100.0
+0.0
 1
 1
 NIL
@@ -3115,7 +3107,7 @@ SWITCH
 43
 market_fully_discovered?
 market_fully_discovered?
-1
+0
 1
 -1000
 

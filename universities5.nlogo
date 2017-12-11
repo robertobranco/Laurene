@@ -1395,33 +1395,25 @@ to select-fitness-color
       ]
     ]
   ]
-    ;; implements the color updating by survivability, the amount of iterations the entity would
-    ;; be able to survive without receiving any resources
-    ;; of course, it can live longer if it keeps gathering resources from the environment
+
+  ;; implements the color updating by survivability, the amount of iterations the entity would
+  ;; be able to survive without receiving any resources
+  ;; of course, it can live longer if it keeps gathering resources from the environment
   if color_update_rule = "survivability"[
     ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 10) [
       set color green
+    ][
+      ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 5) [
+        set color yellow
+      ][
+        set color red
+      ]
     ]
-  [ ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 5) [ set color yellow ]
-    [set color red]
-  ]
-  ]
 
-  if color_update_rule = "market survivability" [
-    ifelse consumer? [
-      ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 10) [
-        set color green
-      ]
-      [
-        ifelse (resources > ((minimum_resources_to_live + resources * expense_to_live_growth)) * 5) [
-          set color yellow
-        ]
-        [
-          set color red
-        ]
-      ]
-    ]
-    [
+    ;; updates the color of those entities that do not have costs charged
+    ;; meaning that their survival does not depend on their fitness or
+    ;; on their activities
+    if not consumer? and non_economical_entities? [
       set color gray
     ]
   ]
@@ -2007,7 +1999,7 @@ CHOOSER
 492
 color_update_rule
 color_update_rule
-"fitness" "survivability" "market survivability"
+"fitness" "survivability"
 0
 
 MONITOR
