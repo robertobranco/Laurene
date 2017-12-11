@@ -404,132 +404,7 @@ to evaluate-crossover [old-knowledge new-knowledge]
 
 end
 
-to evaluate-crossover-dual [older-tech-knowledge newer-tech-knowledge older-science-knowledge newer-science-knowledge]
 
-  let evaluation 0
-  ;; the model currently has only one niche. If more than one niche is implemented, it will pick
-  ;; one of the niches for the evaluation.
-
-  ;; if there is an increase in fitness, the experience will be well evaluated (+ 0.10)
-  ;; if there is no increase in fitness (remains the same or drops), it will be poorly evaluated (- 0.05)
-
-  if evaluate_for_fitness? and not evaluate_for_learning? [
-    let niche-demand-now [niche-demand] of one-of niches
-
-  ;; compares the absolute fitness prior to the crossover, and after the crossover
-  let fitness-old 0
-  let fitness-new 0
-
-  ;;must also compare the fitness of science-knowledge!!!! If, of course, that is desirable. In academy it may not be
-  ;;the case where research has to be fit to anyone´s demand, no even the universitie´s, students, etc.
-  ;;***in this case, only the tech-knowledge is being tested.
-
-
-    ;; assesses the complement of the hamming distance between the niche-demand and the knowledges
-    ;; the higher the better
-    set fitness-old knowledge - (hamming-distance older-tech-knowledge niche-demand-now)
-    set fitness-new knowledge - (hamming-distance newer-tech-knowledge niche-demand-now)
-    ;; assessing a global fitness which includes the fitness of both knowledges
-    set fitness-old fitness-old + (knowledge - (hamming-distance older-science-knowledge niche-demand-now))
-    set fitness-new fitness-new + (knowledge - (hamming-distance newer-science-knowledge niche-demand-now))
-
-    ifelse fitness-new > fitness-old [
-      ;; the case where there is an increase in fitness
-      if motivation-to-learn < 1 [
-        ;; there is only one possible positive outcome
-        set evaluation 0.1
-      ]
-    ][
-      ;; the case where there is no increase in fitness - it either stays the same or decreases
-      ;; both outcomes are negative
-      if motivation-to-learn > 0 [
-        set evaluation -0.05
-      ]
-    ]
-  ]
-
-  if evaluate_for_learning? and not evaluate_for_fitness? [
-    ;; compares the entities' new tech and science DNA bit by bit with its previous version
-    ;; to assess if there was any learning
-    ;; both knowledges are tested
-    let new-knowledge newer-tech-knowledge
-    let old-knowledge older-tech-knowledge
-    foreach newer-science-knowledge [ [ i ] -> set new-knowledge lput i new-knowledge]
-    foreach older-science-knowledge [ [ i ] -> set old-knowledge lput i old-knowledge]
-
-    ifelse (hamming-distance old-knowledge new-knowledge) = 0 [
-      if motivation-to-learn > 0 [
-        set evaluation -0.05
-      ]
-    ][
-      if motivation-to-learn < 1 [
-        set evaluation 0.05
-      ]
-    ]
-  ]
-
-  if evaluate_for_fitness? and evaluate_for_learning? [
-
-    ;; if there is no learning, the experience will be poorly evaluated (-0.05 in motivation)
-    ;; if there is learning and there is an increase in fitness, it will be well evaluated (+ 0.05)
-    ;; if there is learning but there is no increase in fitness, it will be indifferent (no changes in motivation)
-    ;; if there is learning but there is decrease in fitness, it will be poorly evaluated (- 0.05)
-    let new-knowledge newer-tech-knowledge
-    let old-knowledge older-tech-knowledge
-    foreach newer-science-knowledge [ [ i ] -> set new-knowledge lput i new-knowledge]
-    foreach older-science-knowledge [ [ i ] -> set old-knowledge lput i old-knowledge]
-
-    ifelse (hamming-distance old-knowledge new-knowledge) = 0 [
-      ;; the case with no learning
-      if motivation-to-learn > 0 [
-        set evaluation evaluation - 0.05
-      ]
-    ][
-      ;; the case with learning
-      if motivation-to-learn < 1 [
-        let niche-demand-now [niche-demand] of one-of niches
-
-        ;; compares the absolute fitness prior to the crossover, and after the crossover
-        let fitness-old 0
-        let fitness-new 0
-
-        ;; assesses the complement of the hamming distance between the niche-demand and the knowledges
-        ;; the higher the better
-        set fitness-old knowledge - (hamming-distance older-tech-knowledge niche-demand-now)
-        set fitness-new knowledge - (hamming-distance newer-tech-knowledge niche-demand-now)
-        ;; assessing a global fitness which includes the fitness of both knowledges
-        set fitness-old fitness-old + (knowledge - (hamming-distance older-science-knowledge niche-demand-now))
-        set fitness-new fitness-new + (knowledge - (hamming-distance newer-science-knowledge niche-demand-now))
-
-        ifelse fitness-new > fitness-old [
-          ;; the case with learning and increase in fitness
-          if motivation-to-learn < 1 [
-            set evaluation evaluation + 0.1
-          ]
-        ][
-          ;; the case of learning with no change or decrease in fitness
-          if motivation-to-learn > 0 [
-            set evaluation evaluation - 0.05
-          ]
-        ]
-      ]
-    ]
-  ]
-
-  ;; incorporates the evaluation into the motivation-to-learn
-  set motivation-to-learn motivation-to-learn + evaluation
-
-  ;; limits motivation-to-learn within the bounds of 0 an 1
-  ifelse motivation-to-learn > 1 [
-    set motivation-to-learn 1
-  ][
-    if motivation-to-learn < 0 [
-      set motivation-to-learn 0
-    ]
-  ]
-
-
-end
 
 ;; creates startups (all pure consumers or generators-consumers)
 to spawn-startup [number-of-startups]
@@ -1471,17 +1346,16 @@ to update-link-appearance [bits1 bits2 color-link]
 
 end
 
-to update-link-appearance-dual [older-tech-knowledge newer-tech-knowledge older-science-knowledge newer-science-knowledge  color-link]
+to update-link-appearance-dual [ older-tech-knowledge newer-tech-knowledge  older-science-knowledge newer-science-knowledge color-link]
   ;; Evaluates whether the crossover and the mutation actually changed bits through a hamming distance
   ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the number of bits changed.
   ;; If not, it colors the link red
 
   let new-knowledge 0
   let old-knowledge 0
-  ;;foreach newer-science-knowledge [ [ i ] -> set new-knowledge lput i new-knowledge]
-  ;;foreach older-science-knowledge [ [ i ] -> set old-knowledge lput i old-knowledge]
+
   set new-knowledge sentence newer-science-knowledge newer-tech-knowledge
-  set old-knowledge sentence older-tech-knowledge newer-tech-knowledge
+  set old-knowledge sentence older-science-knowledge older-tech-knowledge
 
   let counter-change hamming-distance new-knowledge old-knowledge
   ifelse counter-change > 0 [

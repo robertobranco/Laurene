@@ -416,22 +416,24 @@ to evaluate-crossover-dual [older-tech-knowledge newer-tech-knowledge older-scie
   if evaluate_for_fitness? and not evaluate_for_learning? [
     let niche-demand-now [niche-demand] of one-of niches
 
-  ;; compares the absolute fitness prior to the crossover, and after the crossover
-  let fitness-old 0
-  let fitness-new 0
-
-  ;;must also compare the fitness of science-knowledge!!!! If, of course, that is desirable. In academy it may not be
-  ;;the case where research has to be fit to anyone´s demand, no even the universitie´s, students, etc.
-  ;;***in this case, only the tech-knowledge is being tested.
-
+    ;; compares the absolute fitness prior to the crossover, and after the crossover
+    let fitness-old 0
+    let fitness-new 0
 
     ;; assesses the complement of the hamming distance between the niche-demand and the knowledges
     ;; the higher the better
-    set fitness-old knowledge - (hamming-distance older-tech-knowledge niche-demand-now)
-    set fitness-new knowledge - (hamming-distance newer-tech-knowledge niche-demand-now)
-    ;; assessing a global fitness which includes the fitness of both knowledges
-    set fitness-old fitness-old + (knowledge - (hamming-distance older-science-knowledge niche-demand-now))
-    set fitness-new fitness-new + (knowledge - (hamming-distance newer-science-knowledge niche-demand-now))
+    ;; in order to do so a single list is created containing both tech and science DNAs, and that is
+    ;; compared to a doubled niche-demand-now
+    let new-knowledge 0
+    let old-knowledge 0
+
+    set new-knowledge sentence newer-science-knowledge newer-tech-knowledge
+    set old-knowledge sentence older-science-knowledge older-tech-knowledge
+    let double-demand sentence niche-demand-now niche-demand-now
+
+    set fitness-old knowledge - (hamming-distance old-knowledge double-demand)
+    set fitness-new knowledge - (hamming-distance new-knowledge double-demand)
+
 
     ifelse fitness-new > fitness-old [
       ;; the case where there is an increase in fitness
@@ -452,10 +454,11 @@ to evaluate-crossover-dual [older-tech-knowledge newer-tech-knowledge older-scie
     ;; compares the entities' new tech and science DNA bit by bit with its previous version
     ;; to assess if there was any learning
     ;; both knowledges are tested
-    let new-knowledge newer-tech-knowledge
-    let old-knowledge older-tech-knowledge
-    foreach newer-science-knowledge [ [ i ] -> set new-knowledge lput i new-knowledge]
-    foreach older-science-knowledge [ [ i ] -> set old-knowledge lput i old-knowledge]
+    let new-knowledge 0
+    let old-knowledge 0
+
+    set new-knowledge sentence newer-science-knowledge newer-tech-knowledge
+    set old-knowledge sentence older-science-knowledge older-tech-knowledge
 
     ifelse (hamming-distance old-knowledge new-knowledge) = 0 [
       if motivation-to-learn > 0 [
@@ -471,13 +474,14 @@ to evaluate-crossover-dual [older-tech-knowledge newer-tech-knowledge older-scie
   if evaluate_for_fitness? and evaluate_for_learning? [
 
     ;; if there is no learning, the experience will be poorly evaluated (-0.05 in motivation)
-    ;; if there is learning and there is an increase in fitness, it will be well evaluated (+ 0.05)
-    ;; if there is learning but there is no increase in fitness, it will be indifferent (no changes in motivation)
+    ;; if there is learning and there is an increase in fitness, it will be well evaluated (+ 0.1)
+    ;; if there is learning but there is no increase in fitness, it will be poorly evaluated (- 0.05)
     ;; if there is learning but there is decrease in fitness, it will be poorly evaluated (- 0.05)
-    let new-knowledge newer-tech-knowledge
-    let old-knowledge older-tech-knowledge
-    foreach newer-science-knowledge [ [ i ] -> set new-knowledge lput i new-knowledge]
-    foreach older-science-knowledge [ [ i ] -> set old-knowledge lput i old-knowledge]
+    let new-knowledge 0
+    let old-knowledge 0
+
+    set new-knowledge sentence newer-science-knowledge newer-tech-knowledge
+    set old-knowledge sentence older-science-knowledge older-tech-knowledge
 
     ifelse (hamming-distance old-knowledge new-knowledge) = 0 [
       ;; the case with no learning
@@ -486,31 +490,24 @@ to evaluate-crossover-dual [older-tech-knowledge newer-tech-knowledge older-scie
       ]
     ][
       ;; the case with learning
-      if motivation-to-learn < 1 [
-        let niche-demand-now [niche-demand] of one-of niches
+      let niche-demand-now [niche-demand] of one-of niches
+      ;; compares the absolute fitness prior to the crossover, and after the crossover
+      let fitness-old 0
+      let fitness-new 0
+      let double-demand sentence niche-demand-now niche-demand-now
 
-        ;; compares the absolute fitness prior to the crossover, and after the crossover
-        let fitness-old 0
-        let fitness-new 0
+      set fitness-old knowledge - (hamming-distance old-knowledge double-demand)
+      set fitness-new knowledge - (hamming-distance new-knowledge double-demand)
 
-        ;; assesses the complement of the hamming distance between the niche-demand and the knowledges
-        ;; the higher the better
-        set fitness-old knowledge - (hamming-distance older-tech-knowledge niche-demand-now)
-        set fitness-new knowledge - (hamming-distance newer-tech-knowledge niche-demand-now)
-        ;; assessing a global fitness which includes the fitness of both knowledges
-        set fitness-old fitness-old + (knowledge - (hamming-distance older-science-knowledge niche-demand-now))
-        set fitness-new fitness-new + (knowledge - (hamming-distance newer-science-knowledge niche-demand-now))
-
-        ifelse fitness-new > fitness-old [
-          ;; the case with learning and increase in fitness
-          if motivation-to-learn < 1 [
-            set evaluation evaluation + 0.1
-          ]
-        ][
-          ;; the case of learning with no change or decrease in fitness
-          if motivation-to-learn > 0 [
-            set evaluation evaluation - 0.05
-          ]
+      ifelse fitness-new > fitness-old [
+        ;; the case with learning and increase in fitness
+        if motivation-to-learn < 1 [
+          set evaluation evaluation + 0.1
+        ]
+      ][
+        ;; the case of learning with no change or decrease in fitness
+        if motivation-to-learn > 0 [
+          set evaluation evaluation - 0.05
         ]
       ]
     ]
@@ -1471,17 +1468,16 @@ to update-link-appearance [bits1 bits2 color-link]
 
 end
 
-to update-link-appearance-dual [older-tech-knowledge newer-tech-knowledge older-science-knowledge newer-science-knowledge  color-link]
+to update-link-appearance-dual [ older-tech-knowledge newer-tech-knowledge  older-science-knowledge newer-science-knowledge color-link]
   ;; Evaluates whether the crossover and the mutation actually changed bits through a hamming distance
   ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the number of bits changed.
   ;; If not, it colors the link red
 
   let new-knowledge 0
   let old-knowledge 0
-  ;;foreach newer-science-knowledge [ [ i ] -> set new-knowledge lput i new-knowledge]
-  ;;foreach older-science-knowledge [ [ i ] -> set old-knowledge lput i old-knowledge]
+
   set new-knowledge sentence newer-science-knowledge newer-tech-knowledge
-  set old-knowledge sentence older-tech-knowledge newer-tech-knowledge
+  set old-knowledge sentence older-science-knowledge older-tech-knowledge
 
   let counter-change hamming-distance new-knowledge old-knowledge
   ifelse counter-change > 0 [
