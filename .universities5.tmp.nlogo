@@ -551,8 +551,6 @@ to spawn-startup [number-of-startups]
 
       ;; chooses the second parent with replacement
       let parent2 choose-partner
-      show parent1
-      show parent2
 
       ;; the knowledge code will work only if there are two suitable parents available
       if parent1 != nobody and parent2 != nobody [
@@ -932,15 +930,14 @@ to-report hamming-distance [bits1 bits2]
 end
 
 
-;; evaluates the complement of the hamming distance between the niche's demand and the consumers tech-knowledge
+;; evaluates the complement of the hamming distance between the niche's demand and the consumers tech-knowledg
 to test-fitness
 
   set fitness 0
   set sci-fitness 0
   set tech-fitness 0
   let niche-demand-now [niche-demand] of one-of niches
-  let fitness1 0
-  let fitness2 0
+
   set tech-fitness knowledge - (hamming-distance tech-knowledge niche-demand-now)
   set sci-fitness knowledge - (hamming-distance science-knowledge niche-demand-now )
   set fitness max (list tech-fitness sci-fitness)
@@ -1337,11 +1334,18 @@ to create-market
 
     ;; sets the niche demand as a full specification of what would be desirable, or all ones
     ;;set niche-demand n-values knowledge [1]
+
+    ;; this code creates a market demand DNA string. Two options can be choosen. the first one, market fully discovered
+    ;; creates an all ones market DNA. It is good to assess how well the entities will discover what a stable market wants.
+    ;; It may not be suitable for those experiments where the market is supposed to change, since all knowledge is already discovered
+    ;; in terms of market demand.
+    ;; The second option leaves half the DNA string blank, for those simulations where the market may come to desire new discoveries through
+    ;; mutations on the niche demand, where it will desire some new knowlwdgw and cease to desire some old knowledge
     ifelse market_fully_discovered? [
       set niche-demand n-values knowledge [1]
     ][
       set niche-demand n-values knowledge [[ i ] -> ifelse-value ( i < ( knowledge / 2 )) [ 0 ][ 1 ] ]
-    ]g
+    ]
 
     hide-turtle
     show niche-demand
@@ -1797,7 +1801,7 @@ knowledge
 knowledge
 2
 200
-200.0
+20.0
 2
 1
 NIL
@@ -1896,7 +1900,7 @@ niche_resources
 niche_resources
 0
 20000
-2000.0
+3000.0
 1000
 1
 NIL
@@ -2034,7 +2038,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-2
+0
 
 MONITOR
 812
@@ -2103,7 +2107,7 @@ INPUTBOX
 364
 70
 stop_trigger
-200.0
+3000.0
 1
 0
 Number
@@ -2442,7 +2446,7 @@ SWITCH
 691
 non_economical_entities?
 non_economical_entities?
-1
+0
 1
 -1000
 
@@ -2707,7 +2711,7 @@ number_of_generators
 number_of_generators
 0
 100
-0.0
+50.0
 1
 1
 NIL
@@ -2767,7 +2771,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-100.0
+50.0
 1
 1
 NIL
@@ -2955,7 +2959,7 @@ SWITCH
 625
 startups?
 startups?
-1
+0
 1
 -1000
 
@@ -2983,8 +2987,8 @@ initial_fitness_probability
 initial_fitness_probability
 0
 1
-0.1
-0.1
+0.0
+0.05
 1
 NIL
 HORIZONTAL
@@ -2996,7 +3000,7 @@ SWITCH
 583
 evaluate_for_fitness?
 evaluate_for_fitness?
-0
+1
 1
 -1000
 
@@ -3144,6 +3148,24 @@ market_fully_discovered?
 1
 1
 -1000
+
+PLOT
+817
+596
+1017
+746
+Motivation to learn / (%) fitness
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot (mean [motivation-to-learn] of entities with [science?]) / ((mean [sci-fitness] of entities with [generator?]) / knowledge ) * 100 "
 
 @#$#@#$#@
 ## WHAT IS IT?

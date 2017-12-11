@@ -736,15 +736,14 @@ to-report hamming-distance [bits1 bits2]
 end
 
 
-;; evaluates the complement of the hamming distance between the niche's demand and the consumers tech-knowledge
+;; evaluates the complement of the hamming distance between the niche's demand, the tech-knowledge and the sci-knowledge
 to test-fitness
 
   set fitness 0
   set sci-fitness 0
   set tech-fitness 0
   let niche-demand-now [niche-demand] of one-of niches
-  let fitness1 0
-  let fitness2 0
+
   set tech-fitness (knowledge / 2) - (hamming-distance tech-knowledge niche-demand-now)
   set sci-fitness (knowledge / 2) - (hamming-distance science-knowledge niche-demand-now )
   set fitness max (list tech-fitness sci-fitness)
