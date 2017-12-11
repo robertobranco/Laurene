@@ -404,7 +404,129 @@ to evaluate-crossover [old-knowledge new-knowledge]
 
 end
 
+to evaluate-crossover-dual [older-tech-knowledge newer-tech-knowledge older-science-knowledge newer-science-knowledge]
 
+  let evaluation 0
+  ;; the model currently has only one niche. If more than one niche is implemented, it will pick
+  ;; one of the niches for the evaluation.
+
+  ;; if there is an increase in fitness, the experience will be well evaluated (+ 0.10)
+  ;; if there is no increase in fitness (remains the same or drops), it will be poorly evaluated (- 0.05)
+
+  if evaluate_for_fitness? and not evaluate_for_learning? [
+    let niche-demand-now [niche-demand] of one-of niches
+
+    ;; compares the absolute fitness prior to the crossover, and after the crossover
+    let fitness-old 0
+    let fitness-new 0
+
+    ;; assesses the complement of the hamming distance between the niche-demand and the knowledges
+    ;; the higher the better
+    ;; in order to do so a single list is created containing both tech and science DNAs, and that is
+    ;; compared to a doubled niche-demand-now
+    let new-knowledge 0
+    let old-knowledge 0
+
+    set new-knowledge sentence newer-science-knowledge newer-tech-knowledge
+    set old-knowledge sentence older-science-knowledge older-tech-knowledge
+    let double-demand sentence niche-demand-now niche-demand-now
+
+    set fitness-old knowledge - (hamming-distance old-knowledge double-demand)
+    set fitness-new knowledge - (hamming-distance new-knowledge double-demand)
+
+
+    ifelse fitness-new > fitness-old [
+      ;; the case where there is an increase in fitness
+      if motivation-to-learn < 1 [
+        ;; there is only one possible positive outcome
+        set evaluation 0.1
+      ]
+    ][
+      ;; the case where there is no increase in fitness - it either stays the same or decreases
+      ;; both outcomes are negative
+      if motivation-to-learn > 0 [
+        set evaluation -0.05
+      ]
+    ]
+  ]
+
+  if evaluate_for_learning? and not evaluate_for_fitness? [
+    ;; compares the entities' new tech and science DNA bit by bit with its previous version
+    ;; to assess if there was any learning
+    ;; both knowledges are tested
+    let new-knowledge 0
+    let old-knowledge 0
+
+    set new-knowledge sentence newer-science-knowledge newer-tech-knowledge
+    set old-knowledge sentence older-science-knowledge older-tech-knowledge
+
+    ifelse (hamming-distance old-knowledge new-knowledge) = 0 [
+      if motivation-to-learn > 0 [
+        set evaluation -0.05
+      ]
+    ][
+      if motivation-to-learn < 1 [
+        set evaluation 0.05
+      ]
+    ]
+  ]
+
+  if evaluate_for_fitness? and evaluate_for_learning? [
+
+    ;; if there is no learning, the experience will be poorly evaluated (-0.05 in motivation)
+    ;; if there is learning and there is an increase in fitness, it will be well evaluated (+ 0.1)
+    ;; if there is learning but there is no increase in fitness, it will be poorly evaluated (- 0.05)
+    ;; if there is learning but there is decrease in fitness, it will be poorly evaluated (- 0.05)
+    let new-knowledge 0
+    let old-knowledge 0
+
+    set new-knowledge sentence newer-science-knowledge newer-tech-knowledge
+    set old-knowledge sentence older-science-knowledge older-tech-knowledge
+
+    ifelse (hamming-distance old-knowledge new-knowledge) = 0 [
+      ;; the case with no learning
+      if motivation-to-learn > 0 [
+        set evaluation evaluation - 0.05
+      ]
+    ][
+      ;; the case with learning
+      let niche-demand-now [niche-demand] of one-of niches
+      ;; compares the absolute fitness prior to the crossover, and after the crossover
+      let fitness-old 0
+      let fitness-new 0
+      let double-demand sentence niche-demand-now niche-demand-now
+
+      set fitness-old knowledge - (hamming-distance old-knowledge double-demand)
+      set fitness-new knowledge - (hamming-distance new-knowledge double-demand)
+
+      ifelse fitness-new > fitness-old [
+        ;; the case with learning and increase in fitness
+        if motivation-to-learn < 1 [
+          set evaluation evaluation + 0.1
+        ]
+      ][
+        ;; the case of learning with no change or decrease in fitness
+        if motivation-to-learn > 0 [
+          set evaluation evaluation - 0.05
+        ]
+      ]
+    ]
+  ]
+
+  ;; incorporates the evaluation into the motivation-to-learn
+  set motivation-to-learn motivation-to-learn + evaluation
+
+  ;; limits motivation-to-learn within the bounds of 0 an 1
+  ifelse motivation-to-learn > 1 [
+    set motivation-to-learn 1
+  ][
+    if motivation-to-learn < 0 [
+      set motivation-to-learn 0
+    ]
+  ]
+
+
+end
 
 ;; creates startups (all pure consumers or generators-consumers)
 to spawn-startup [number-of-startups]
@@ -1166,6 +1288,7 @@ end
 ;; The cost to mutate is not charged here because mutation may be a by product of learning through crossover
 ;; or the result of efforts in research. The costs of the first are included in the crossover costs
 ;; the costs of the second are charged when the mutate procedure is called in the go function
+;; the function is also used in the creation of startups
 
 to-report mutate [bits]
 
@@ -1210,15 +1333,6 @@ to create-market
   ]
 end
 
-to-report dna-proportion [ i string-size]
- ifelse i < string-size [
-  report 0
- ][
-  report 1
- ]
-end
-
-
 to mutate-market
   ask niches [
     set niche-demand n-values knowledge [random 2]
@@ -1238,8 +1352,6 @@ to market-mutation
 end
 
 
-;; mutation
-;; makes the niche call the mutation procedure
 
 ;; niche swap
 ;; not necessary anymore since the simulation only covers the mainstream at this iteration
@@ -1774,7 +1886,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1001
-1001.0
+101.0
 100
 1
 NIL
@@ -1897,7 +2009,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-2
+0
 
 MONITOR
 812
@@ -2818,7 +2930,7 @@ SWITCH
 625
 startups?
 startups?
-1
+0
 1
 -1000
 
@@ -2846,7 +2958,7 @@ initial_fitness_probability
 initial_fitness_probability
 0
 1
-0.5
+0.1
 0.05
 1
 NIL
@@ -2859,7 +2971,7 @@ SWITCH
 583
 evaluate_for_fitness?
 evaluate_for_fitness?
-1
+0
 1
 -1000
 
@@ -2915,7 +3027,7 @@ market_mutation_period
 market_mutation_period
 0
 100
-0.0
+100.0
 1
 1
 NIL

@@ -474,8 +474,8 @@ to evaluate-crossover-dual [older-tech-knowledge newer-tech-knowledge older-scie
   if evaluate_for_fitness? and evaluate_for_learning? [
 
     ;; if there is no learning, the experience will be poorly evaluated (-0.05 in motivation)
-    ;; if there is learning and there is an increase in fitness, it will be well evaluated (+ 0.)
-    ;; if there is learning but there is no increase in fitness, it will be indifferent (no changes in motivation)
+    ;; if there is learning and there is an increase in fitness, it will be well evaluated (+ 0.1)
+    ;; if there is learning but there is no increase in fitness, it will be poorly evaluated (- 0.05)
     ;; if there is learning but there is decrease in fitness, it will be poorly evaluated (- 0.05)
     let new-knowledge 0
     let old-knowledge 0
@@ -1287,6 +1287,7 @@ end
 ;; The cost to mutate is not charged here because mutation may be a by product of learning through crossover
 ;; or the result of efforts in research. The costs of the first are included in the crossover costs
 ;; the costs of the second are charged when the mutate procedure is called in the go function
+;; the function is also used in the creation of startups
 
 to-report mutate [bits]
 
@@ -1314,7 +1315,7 @@ to create-market
     ;; sets the niche demand as a full specification of what would be desirable, or all ones
     ;;set niche-demand n-values knowledge [1]
 
-    ;; this code creates a market demand DNA string. Two options can be choosen. the first one, market fully discovered
+    ;; This code creates a list representing the market demand DNA string. Two options can be choosen. The first one, market fully discovered
     ;; creates an all ones market DNA. It is good to assess how well the entities will discover what a stable market wants.
     ;; It may not be suitable for those experiments where the market is supposed to change, since all knowledge is already discovered
     ;; in terms of market demand.
@@ -1330,15 +1331,6 @@ to create-market
     show niche-demand
   ]
 end
-
-to-report dna-proportion [ i string-size]
- ifelse i < string-size [
-  report 0
- ][
-  report 1
- ]
-end
-
 
 to mutate-market
   ask niches [
@@ -1359,8 +1351,7 @@ to market-mutation
 end
 
 
-;; mutation
-;; makes the niche call the mutation procedure
+
 
 ;; niche swap
 ;; not necessary anymore since the simulation only covers the mainstream at this iteration
@@ -2980,7 +2971,7 @@ SWITCH
 583
 evaluate_for_fitness?
 evaluate_for_fitness?
-1
+0
 1
 -1000
 

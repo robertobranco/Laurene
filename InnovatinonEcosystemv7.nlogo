@@ -1288,6 +1288,7 @@ end
 ;; The cost to mutate is not charged here because mutation may be a by product of learning through crossover
 ;; or the result of efforts in research. The costs of the first are included in the crossover costs
 ;; the costs of the second are charged when the mutate procedure is called in the go function
+;; the function is also used in the creation of startups
 
 to-report mutate [bits]
 
@@ -1332,15 +1333,6 @@ to create-market
   ]
 end
 
-to-report dna-proportion [ i string-size]
- ifelse i < string-size [
-  report 0
- ][
-  report 1
- ]
-end
-
-
 to mutate-market
   ask niches [
     set niche-demand n-values knowledge [random 2]
@@ -1359,10 +1351,7 @@ to market-mutation
 
 end
 
-
-;; mutation
-;; makes the niche call the mutation procedure
-
+;;*** other functions to implement
 ;; niche swap
 ;; not necessary anymore since the simulation only covers the mainstream at this iteration
 
@@ -1896,7 +1885,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1001
-1001.0
+101.0
 100
 1
 NIL
@@ -2019,7 +2008,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability" "market survivability"
-2
+0
 
 MONITOR
 812
@@ -2940,7 +2929,7 @@ SWITCH
 625
 startups?
 startups?
-1
+0
 1
 -1000
 
@@ -2968,7 +2957,7 @@ initial_fitness_probability
 initial_fitness_probability
 0
 1
-0.5
+0.1
 0.05
 1
 NIL
@@ -2981,7 +2970,7 @@ SWITCH
 583
 evaluate_for_fitness?
 evaluate_for_fitness?
-1
+0
 1
 -1000
 
@@ -3037,7 +3026,7 @@ market_mutation_period
 market_mutation_period
 0
 100
-0.0
+100.0
 1
 1
 NIL
