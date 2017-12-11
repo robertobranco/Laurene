@@ -1435,11 +1435,11 @@ to update-link-appearance [bits1 bits2 color-link]
   ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the number of bits changed.
   ;; If not, it colors the link red
 
-  let counter-change hamming-distance bits1 bits2
-  ifelse counter-change > 0 [
+  let knowledge-change hamming-distance bits1 bits2
+  ifelse knowledge-change > 0 [
     ask my-links [
       set color color-link
-      set thickness counter-change / knowledge
+      set thickness knowledge-change / knowledge
     ]
   ][
     ask my-links [
@@ -1460,12 +1460,27 @@ to update-link-appearance-dual [ older-tech-knowledge newer-tech-knowledge  olde
   set new-knowledge sentence newer-science-knowledge newer-tech-knowledge
   set old-knowledge sentence older-science-knowledge older-tech-knowledge
 
-  let counter-change hamming-distance new-knowledge old-knowledge
-  ifelse counter-change > 0 [
+  let knowledge-change hamming-distance new-knowledge old-knowledge
+  ifelse knowledge-change > 0 [
     ask my-links [
       set color color-link
       ;; knowledge is multiplied by two to compensate the longer string, which includes both science and tech DNAs
-      set thickness counter-change / ( 2 * knowledge )
+      set thickness knowledge-change / ( 2 * knowledge )
+
+      let science-change hamming-distance older-science-knowledge newer-science-knowledge
+      let tech-change hamming-distance older-tech-knowledge newer-tech-knowledge
+
+      ifelse science-change > 0 and tech-change > 0 [
+        ;; the link shape will be the default
+      ][
+        ifelse science-change > 0 [
+          set shape "traced"
+          set color green
+        ][
+          set shape "traced"
+          set color blue
+        ]
+      ]
     ]
   ][
     ;; if there is no learning, the link is colored red
@@ -2000,7 +2015,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability"
-0
+1
 
 MONITOR
 812
@@ -2380,7 +2395,7 @@ SWITCH
 593
 super_share?
 super_share?
-1
+0
 1
 -1000
 
@@ -2408,7 +2423,7 @@ SWITCH
 691
 non_economical_entities?
 non_economical_entities?
-1
+0
 1
 -1000
 
@@ -3018,7 +3033,7 @@ market_mutation_period
 market_mutation_period
 0
 100
-100.0
+0.0
 1
 1
 NIL
@@ -3107,7 +3122,7 @@ SWITCH
 43
 market_fully_discovered?
 market_fully_discovered?
-1
+0
 1
 -1000
 
@@ -3517,6 +3532,28 @@ default
 0.0
 -0.2 0 0.0 1.0
 0.0 1 1.0 0.0
+0.2 0 0.0 1.0
+link direction
+true
+0
+Line -7500403 true 150 150 90 180
+Line -7500403 true 150 150 210 180
+
+doted
+0.0
+-0.2 0 0.0 1.0
+0.0 1 2.0 2.0
+0.2 0 0.0 1.0
+link direction
+true
+0
+Line -7500403 true 150 150 90 180
+Line -7500403 true 150 150 210 180
+
+traced
+0.0
+-0.2 0 0.0 1.0
+0.0 1 4.0 4.0
 0.2 0 0.0 1.0
 link direction
 true

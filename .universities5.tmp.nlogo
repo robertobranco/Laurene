@@ -1424,6 +1424,7 @@ end
 to set-size-entity
 
   set size resources / (minimum_resources_to_live + (resources * expense_to_live_growth))
+  ;; implements a minimum size, so entities can be seen
   if size < 0.5 [
     set size 0.5
   ]
@@ -1435,11 +1436,11 @@ to update-link-appearance [bits1 bits2 color-link]
   ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the number of bits changed.
   ;; If not, it colors the link red
 
-  let counter-change hamming-distance bits1 bits2
-  ifelse counter-change > 0 [
+  let knowledge-change hamming-distance bits1 bits2
+  ifelse knowledge-change > 0 [
     ask my-links [
       set color color-link
-      set thickness counter-change / knowledge
+      set thickness knowledge-change / knowledge
     ]
   ][
     ask my-links [
@@ -1449,32 +1450,7 @@ to update-link-appearance [bits1 bits2 color-link]
 
 end
 
-to update-link-appearance-dual [ older-tech-knowledge newer-tech-knowledge  older-science-knowledge newer-science-knowledge color-link]
-  ;; Evaluates whether the crossover and the mutation actually changed bits through a hamming distance
-  ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the number of bits changed.
-  ;; If not, it colors the link red
 
-  let new-knowledge 0
-  let old-knowledge 0
-
-  set new-knowledge sentence newer-science-knowledge newer-tech-knowledge
-  set old-knowledge sentence older-science-knowledge older-tech-knowledge
-
-  let counter-change hamming-distance new-knowledge old-knowledge
-  ifelse counter-change > 0 [
-    ask my-links [
-      set color color-link
-      ;; knowledge is multiplied by two to compensate the longer string, which includes both science and tech DNAs
-      set thickness counter-change / ( 2 * knowledge )
-    ]
-  ][
-    ;; if there is no learning, the link is colored red
-    ask my-links [
-      set color red
-    ]
-  ]
-
-end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; other procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3517,6 +3493,28 @@ default
 0.0
 -0.2 0 0.0 1.0
 0.0 1 1.0 0.0
+0.2 0 0.0 1.0
+link direction
+true
+0
+Line -7500403 true 150 150 90 180
+Line -7500403 true 150 150 210 180
+
+doted
+0.0
+-0.2 0 0.0 1.0
+0.0 1 2.0 2.0
+0.2 0 0.0 1.0
+link direction
+true
+0
+Line -7500403 true 150 150 90 180
+Line -7500403 true 150 150 210 180
+
+traced
+0.0
+-0.2 0 0.0 1.0
+0.0 1 4.0 4.0
 0.2 0 0.0 1.0
 link direction
 true
