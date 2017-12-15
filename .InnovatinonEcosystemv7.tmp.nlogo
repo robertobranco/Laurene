@@ -1471,19 +1471,25 @@ to update-link-appearance-dual [ older-tech-knowledge newer-tech-knowledge  olde
       let tech-change hamming-distance older-tech-knowledge newer-tech-knowledge
 
       ifelse science-change > 0 and tech-change > 0 [
+        ;; if there are both kinds of knowledge change
         ;; the link shape will be the default
+        ;; the color will be the one commanded by the calling procedure
       ][
         ifelse science-change > 0 [
+          ;; if there is only change in the science DNA
+          ;; the color will be green and the link will be traced
           set shape "traced"
           set color green
         ][
+          ;; if there is only change in the tech DNA
+          ;; the color will be blue and the link will be traced
           set shape "traced"
           set color blue
         ]
       ]
     ]
   ][
-    ;; if there is no learning, the link is colored red
+    ;; if there is no learning whatsoever, the link is colored red
     ask my-links [
       set color red
     ]
@@ -1575,49 +1581,7 @@ end
 to-report instructions
   report [
     [
-     "You will be simulating an innovation"
-     "ecosystem based on knowledge flows."
-     "The shapes of the entities denote"
-     "their role in the ecosystem:"
-     "  - Generators - stars / hollow stars"
-     "  - Consumers - squares / hollow squares"
-     "  - Integrators - pentagons"
-     "  - Diffusers - triangles / hollow triangles"
-     "  - Hybrids - circles"
-     "The hollow shapes are used when a super"
-     "entity is created, to differentiate it from"
-     "the regular randomly create ones."
-    ]
-    [
-     "Their color denotes several information:"
-     " - Blue    - randomly assigned entities"
-     " - Orange  - manually assigned entities"
-     " - Cyan    - startups"
-     " - Magenta - super entities"
-     " - Red     - Equal or less than 33% fitness"
-     "           - Less than 5 iterations in resources"
-     " - Yellow  - More than 33% fitness"
-     "           - More than 5 iterations in resources"
-     " - Green   - More than 67% fitness"
-     "           - More than 10 iterations in resources"
-     " - Gray    - Entities do not receive resouces from"
-     "the market."
-    ]
-    [
-     "The colors during run time depend on the chooser"
-     "color_update_rule. You can choose:"
-     " - fitness:              colors by fitness"
-     " - survivability:        color by amount of resources"
-     " - market survivability: colors by amount of "
-     "resources and market dependency."
-     "The chooser repeat_simulation? uses the last seed"
-     "used for the random number generator or not."
-     " If you choose not to repeat, the chooser "
-     "set_input_seed? will prompt the user for a seed or"
-     "allow the model to randomly select the seed used."
-     "In any case, the seed used will be displayed in "
-     "the my-seed-repeat monitor."
-    ]
+
     [
      "When you press SETUP, if you chose to "
      "input a known seed for random numbers,"

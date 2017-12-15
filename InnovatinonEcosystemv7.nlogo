@@ -1471,19 +1471,25 @@ to update-link-appearance-dual [ older-tech-knowledge newer-tech-knowledge  olde
       let tech-change hamming-distance older-tech-knowledge newer-tech-knowledge
 
       ifelse science-change > 0 and tech-change > 0 [
+        ;; if there are both kinds of knowledge change
         ;; the link shape will be the default
+        ;; the color will be the one commanded by the calling procedure
       ][
         ifelse science-change > 0 [
+          ;; if there is only change in the science DNA
+          ;; the color will be green and the link will be traced
           set shape "traced"
           set color green
         ][
+          ;; if there is only change in the tech DNA
+          ;; the color will be blue and the link will be traced
           set shape "traced"
           set color blue
         ]
       ]
     ]
   ][
-    ;; if there is no learning, the link is colored red
+    ;; if there is no learning whatsoever, the link is colored red
     ask my-links [
       set color red
     ]
@@ -1600,16 +1606,26 @@ to-report instructions
      "           - More than 5 iterations in resources"
      " - Green   - More than 67% fitness"
      "           - More than 10 iterations in resources"
-     " - Gray    - Entities do not receive resouces from"
-     "the market."
+     " - Gray    - Entities do not receive resources from"
+     "the market and are not charged at each iteration either."
     ]
     [
-     "The colors during run time depend on the chooser"
-     "color_update_rule. You can choose:"
-     " - fitness:              colors by fitness"
-     " - survivability:        color by amount of resources"
-     " - market survivability: colors by amount of "
-     "resources and market dependency."
+     "The colors of entities during run time depend on the"
+     "chooser color_update_rule. You can choose:"
+     " - fitness:        colors by fitness"
+     " - survivability:  color by amount of resources"
+     " and market survivability."
+     "The color of the links represents what kind of"
+     "knowledge is being shared between entities."
+     "- Green - scientific knowledge has been shared"
+     "- Blue - tecnologic knowledge has been shared"
+     "- Yellow - both scientific and tecnologic knowledges"
+     "have been shared."
+     "If the link is dotted (blue or green) it means that"
+     "entities with both knowledges interacted, but only"
+     "scientific (green traced) or tecnologic (blue traced)"
+     "knowledges have been shared."
+
      "The chooser repeat_simulation? uses the last seed"
      "used for the random number generator or not."
      " If you choose not to repeat, the chooser "

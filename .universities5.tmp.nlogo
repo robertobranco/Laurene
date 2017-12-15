@@ -85,6 +85,8 @@ globals [
   my-seed
   ;; used to count the period of market stability between market mutations
   market-mutation-countdown
+  ;; bits exchanged at each iteration during crossover interactions
+  bits-exchanged
 
 ]
 
@@ -99,6 +101,7 @@ to setup
   define-seed
   ask patches [set pcolor black];
   set-default-shape entities "circle";
+  set bits-exchanged 0
 
   ;; creates the niches where entities will compete and assigns them a demand DNA
   ;; has to be created before the entities, so they can assess their fitness from the start
@@ -123,6 +126,9 @@ to go
 
   ;; clears the links from previous iteration to keep a clean interface
   ask links [die]
+
+  ;; resets the bits exchanged counter
+  set bits-exchanged 0
 
   ;; asks entities to assess their Hamming distance for fitness test (check algoritm for Hamming)
   ask entities [test-fitness]
@@ -1441,6 +1447,8 @@ to update-link-appearance [bits1 bits2 color-link]
     ask my-links [
       set color color-link
       set thickness knowledge-change / knowledge
+      ;; updates the counter of how many bits have been exchanged in crossover interactions
+      set bits-exchanged bits-exchanged + knowledge-change
     ]
   ][
     ask my-links [
@@ -1450,6 +1458,58 @@ to update-link-appearance [bits1 bits2 color-link]
 
 end
 
+to update-link-appearance-dual [ older-tech-knowledge newer-tech-knowledge  older-science-knowledge newer-science-knowledge color-link]
+  ;; Evaluates whether the crossover and the mutation actually changed bits through a hamming distance
+  ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the number of bits changed.
+  ;; If not, it colors the link red
+
+  let new-knowledge 0
+  let old-knowledge 0
+
+  set new-knowledge sentence newer-science-knowledge newer-tech-knowledge
+  set old-knowledge sentence older-science-knowledge older-tech-knowledge
+
+  let knowledge-change hamming-distance new-knowledge old-knowledge
+
+  ifelse knowledge-change > 0 [
+
+    ;; updates the counter of how many bits have been exchanged in crossover interactions
+    set bits-exchanged bits-exchanged + knowledge-change
+
+    ask my-links [
+      set color color-link
+      ;; knowledge is multiplied by two to compensate the longer string, which includes both science and tech DNAs
+      set thickness knowledge-change / ( 2 * knowledge )
+
+      let science-change hamming-distance older-science-knowledge newer-science-knowledge
+      let tech-change hamming-distance older-tech-knowledge newer-tech-knowledge
+
+      ifelse science-change > 0 and tech-change > 0 [
+        ;; if there are both kinds of knowledge change
+        ;; the link shape will be the default
+        ;; the color will be the one commanded by the calling procedure
+      ][
+        ifelse science-change > 0 [
+          ;; if there is only change in the science DNA
+          ;; the color will be green and the link will be traced
+          set shape "traced"
+          set color green
+        ][
+          ;; if there is only change in the tech DNA
+          ;; the color will be blue and the link will be traced
+          set shape "traced"
+          set color blue
+        ]
+      ]
+    ]
+  ][
+    ;; if there is no learning whatsoever, the link is colored red
+    ask my-links [
+      set color red
+    ]
+  ]
+
+end
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1561,16 +1621,26 @@ to-report instructions
      "           - More than 5 iterations in resources"
      " - Green   - More than 67% fitness"
      "           - More than 10 iterations in resources"
-     " - Gray    - Entities do not receive resouces from"
-     "the market."
+     " - Gray    - Entities do not receive resources from"
+     "the market and are not charged at each iteration either."
     ]
     [
-     "The colors during run time depend on the chooser"
-     "color_update_rule. You can choose:"
-     " - fitness:              colors by fitness"
-     " - survivability:        color by amount of resources"
-     " - market survivability: colors by amount of "
-     "resources and market dependency."
+     "The colors of entities during run time depend on the"
+     "chooser color_update_rule. You can choose:"
+     " - fitness:        colors by fitness"
+     " - survivability:  color by amount of resources"
+     " and market survivability."
+     "The color of the links represents what kind of"
+     "knowledge is being shared between entities."
+     "- Green - scientific knowledge has been shared"
+     "- Blue - tecnologic knowledge has been shared"
+     "- Yellow - both scientific and tecnologic knowledges"
+     "have been shared."
+     "If the link is dotted (blue or green) it means that"
+     "entities with both knowledges interacted, but only"
+     "scientific (green traced) or tecnologic (blue traced)"
+     "knowledges have been shared."
+
      "The chooser repeat_simulation? uses the last seed"
      "used for the random number generator or not."
      " If you choose not to repeat, the chooser "
@@ -1739,7 +1809,7 @@ knowledge
 knowledge
 2
 200
-20.0
+100.0
 2
 1
 NIL
@@ -2126,10 +2196,10 @@ NIL
 HORIZONTAL
 
 PLOT
-1235
-625
-1435
-775
+1234
+468
+1490
+618
 Average motivation to learn
 NIL
 NIL
@@ -2144,10 +2214,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [motivation-to-learn] of entities"
 
 PLOT
-1435
-625
-1635
-775
+1496
+468
+1752
+618
 Average willingness to share
 NIL
 NIL
@@ -2459,7 +2529,7 @@ PLOT
 13
 1751
 163
-Entities that attempted to learn
+Entities that attempted crossover
 NIL
 NIL
 0.0
@@ -2509,10 +2579,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count entities with [integrated?]"
 
 PLOT
-1235
-320
-1491
-470
+1234
+621
+1490
+771
 Consumers that attempted crossover
 NIL
 NIL
@@ -2527,10 +2597,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count entities with [consumer? and crossover?]"
 
 PLOT
-1498
-471
-1754
-621
+1496
+316
+1752
+466
 Generators that attempted mutation
 NIL
 NIL
@@ -2545,10 +2615,10 @@ PENS
 "default" 1.0 0 -10899396 true "" "plot count entities with [generator? and mutation?]"
 
 PLOT
-1235
-470
-1491
-620
+1234
+316
+1490
+466
 Entities that attempted development
 NIL
 NIL
@@ -3059,10 +3129,10 @@ ordered_DNA?
 -1000
 
 PLOT
-1498
-319
-1753
-469
+1497
+620
+1752
+770
 Generators that attempted crossover
 NIL
 NIL
@@ -3104,6 +3174,24 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot (mean [motivation-to-learn] of entities with [science?]) / ((mean [sci-fitness] of entities with [generator?]) / knowledge ) * 100 "
+
+PLOT
+1016
+596
+1216
+746
+Bits exchanged / number of crossover interactions
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot bits-exchanged / (count entities with [crossover?])"
 
 @#$#@#$#@
 ## WHAT IS IT?
