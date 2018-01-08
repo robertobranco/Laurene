@@ -1845,7 +1845,7 @@ NIL
 NIL
 NIL
 NIL
-1
+0
 
 OUTPUT
 17
@@ -1999,10 +1999,10 @@ PENS
 "Average fitness" 1.0 0 -2674135 true "" "plot ((mean [sci-fitness] of entities with [generator?]) / knowledge ) * 100 "
 
 PLOT
-1755
-15
-1955
-165
+1753
+13
+2008
+163
 Average resources
 Ticks
 Average resources
@@ -2028,10 +2028,10 @@ max [fitness] of entities
 11
 
 MONITOR
-1760
-210
-1959
-255
+1753
+213
+2008
+258
 Maximum resources accumulated
 max [resources] of entities
 2
@@ -2060,9 +2060,9 @@ standard-deviation [fitness] of entities
 11
 
 MONITOR
-1758
+1753
 165
-1958
+2008
 210
 Std deviation of resources
 standard-deviation [resources] of entities
@@ -2099,10 +2099,10 @@ min [fitness] of entities
 11
 
 MONITOR
-1760
-255
-1958
-300
+1753
+260
+2008
+305
 NIL
 min [resources] of entities
 2
@@ -2159,7 +2159,7 @@ mutation_rate
 mutation_rate
 0
 0.1
-0.05
+0.02
 0.01
 1
 NIL
@@ -2196,9 +2196,9 @@ NIL
 HORIZONTAL
 
 PLOT
-1234
+1227
 468
-1490
+1483
 618
 Average motivation to learn
 NIL
@@ -2214,9 +2214,9 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [motivation-to-learn] of entities"
 
 PLOT
-1496
+1487
 468
-1752
+1743
 618
 Average willingness to share
 NIL
@@ -2232,9 +2232,9 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [willingness-to-share] of entities"
 
 MONITOR
-1238
+1227
 775
-1437
+1483
 820
 Maximum motivation to learn
 max [motivation-to-learn] of entities
@@ -2243,10 +2243,10 @@ max [motivation-to-learn] of entities
 11
 
 MONITOR
-1438
-778
-1638
-823
+1487
+774
+1742
+819
 Maximum willingness to share
 max [willingness-to-share] of entities
 2
@@ -2254,10 +2254,10 @@ max [willingness-to-share] of entities
 11
 
 MONITOR
-1238
-820
-1437
-865
+1227
+822
+1483
+867
 Minimum motivation to learn
 min [motivation-to-learn] of entities
 2
@@ -2265,10 +2265,10 @@ min [motivation-to-learn] of entities
 11
 
 MONITOR
-1438
-820
-1638
-865
+1487
+821
+1742
+866
 Minimum willingness to share
 min [willingness-to-share] of entities
 2
@@ -2276,10 +2276,10 @@ min [willingness-to-share] of entities
 11
 
 MONITOR
-1240
-865
-1438
-910
+1227
+868
+1483
+913
 Std deviation motivation to learn
 standard-deviation [motivation-to-learn] of entities
 2
@@ -2287,10 +2287,10 @@ standard-deviation [motivation-to-learn] of entities
 11
 
 MONITOR
-1440
-865
-1636
-910
+1487
+868
+1742
+913
 Std deviation willingness to share
 standard-deviation [willingness-to-share] of entities
 2
@@ -2507,9 +2507,9 @@ my-seed-repeat
 Number
 
 PLOT
-1235
+1227
 13
-1489
+1484
 163
 Entities that shared knowledge
 NIL
@@ -2525,9 +2525,9 @@ PENS
 "default" 1.0 0 -13840069 true "" "plot count entities with [emitted?]"
 
 PLOT
-1495
+1487
 13
-1751
+1743
 163
 Entities that attempted crossover
 NIL
@@ -2543,10 +2543,10 @@ PENS
 "default" 1.0 0 -5825686 true "" "plot count entities with [crossover?]"
 
 PLOT
-1235
-165
-1490
-315
+1227
+164
+1484
+314
 Entities that attempted mutation
 NIL
 NIL
@@ -2561,10 +2561,10 @@ PENS
 "default" 1.0 0 -13345367 true "" "plot count entities with [mutation?]"
 
 PLOT
-1495
-165
-1751
-315
+1487
+164
+1743
+314
 Entities that integrated partners
 NIL
 NIL
@@ -2579,10 +2579,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count entities with [integrated?]"
 
 PLOT
-1234
-621
-1490
-771
+1227
+622
+1483
+772
 Consumers that attempted crossover
 NIL
 NIL
@@ -2597,10 +2597,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count entities with [consumer? and crossover?]"
 
 PLOT
-1496
-316
-1752
-466
+1487
+317
+1743
+467
 Generators that attempted mutation
 NIL
 NIL
@@ -2615,10 +2615,10 @@ PENS
 "default" 1.0 0 -10899396 true "" "plot count entities with [generator? and mutation?]"
 
 PLOT
-1234
-316
-1490
-466
+1227
+315
+1483
+465
 Entities that attempted development
 NIL
 NIL
@@ -2633,10 +2633,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count entities with [development?]"
 
 PLOT
-1766
-310
-2022
-460
+1753
+308
+2008
+458
 Entities alive
 NIL
 NIL
@@ -2987,10 +2987,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-619
-462
-805
-495
+625
+449
+811
+482
 initial_fitness_probability
 initial_fitness_probability
 0
@@ -3129,10 +3129,10 @@ ordered_DNA?
 -1000
 
 PLOT
-1497
-620
-1752
-770
+1487
+621
+1742
+771
 Generators that attempted crossover
 NIL
 NIL
@@ -3571,7 +3571,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0
+NetLogo 6.0.2
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
