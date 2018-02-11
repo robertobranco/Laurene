@@ -534,7 +534,10 @@ to spawn-startup [number-of-startups]
   repeat number-of-startups[
     create-entities 1 [
 
-      set generator? one-of [true false]
+      set generator? false
+      if consumer_generator_startups? [
+        set generator? one-of [true false]
+      ]
       ;; set generator? one-of [true false] ;; if a chance of creating a generator consumer is desired
       set consumer? true
       set diffuser? false
@@ -1833,17 +1836,17 @@ NIL
 0
 
 OUTPUT
-19
-799
-362
-982
+18
+852
+361
+1035
 12
 
 BUTTON
-18
-766
-196
-799
+17
+819
+195
+852
 Previous Instruction
 previous-instruction
 NIL
@@ -1857,10 +1860,10 @@ NIL
 1
 
 BUTTON
-198
-766
-362
-799
+197
+819
+361
+852
 Next Instruction
 next-instruction
 NIL
@@ -1874,10 +1877,10 @@ NIL
 1
 
 MONITOR
-255
-718
-341
-763
+254
+771
+340
+816
 Instruction #
 current-instruction-label
 17
@@ -2416,10 +2419,10 @@ super_share?
 -1000
 
 BUTTON
-17
-662
-188
-695
+15
+715
+186
+748
 mutate-market-demand
 mutate-market
 NIL
@@ -2433,10 +2436,10 @@ NIL
 0
 
 SWITCH
-17
-695
-190
-728
+15
+748
+188
+781
 non_economical_entities?
 non_economical_entities?
 0
@@ -2618,10 +2621,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count entities with [development?]"
 
 PLOT
-1766
-310
-2022
-460
+1760
+303
+1959
+453
 Entities alive
 NIL
 NIL
@@ -2677,9 +2680,9 @@ Generation and development
 
 TEXTBOX
 23
-646
+656
 173
-664
+674
 Instructions and seed origin
 11
 0.0
@@ -2947,12 +2950,12 @@ PENS
 
 SWITCH
 16
-628
+638
 190
-661
+671
 startups?
 startups?
-0
+1
 1
 -1000
 
@@ -3041,10 +3044,10 @@ mean [tech-fitness] of entities with [consumer?]
 11
 
 SLIDER
-17
-728
-191
-761
+15
+781
+189
+814
 market_mutation_period
 market_mutation_period
 0
@@ -3159,6 +3162,17 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot (mean [motivation-to-learn] of entities with [science?]) / ((mean [sci-fitness] of entities with [generator?]) / knowledge ) * 100 "
+
+SWITCH
+17
+672
+190
+705
+consumer_generator_startups?
+consumer_generator_startups?
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
