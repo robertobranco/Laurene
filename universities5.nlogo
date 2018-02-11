@@ -3063,8 +3063,8 @@ SLIDER
 market_mutation_period
 market_mutation_period
 0
-100
-0.0
+1000
+500.0
 1
 1
 NIL

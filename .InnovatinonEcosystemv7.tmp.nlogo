@@ -1581,7 +1581,59 @@ end
 to-report instructions
   report [
     [
+     "You will be simulating an innovation"
+     "ecosystem based on knowledge flows."
+     "The shapes of the entities denote"
+     "their role in the ecosystem:"
+     "  - Generators - stars / hollow stars"
+     "  - Consumers - squares / hollow squares"
+     "  - Integrators - pentagons"
+     "  - Diffusers - triangles / hollow triangles"
+     "  - Hybrids - circles"
+     "The hollow shapes are used when a super"
+     "entity is created, to differentiate it from"
+     "the regular randomly create ones."
+    ]
+    [
+     "Their color denotes several information:"
+     " - Blue    - randomly assigned entities"
+     " - Orange  - manually assigned entities"
+     " - Cyan    - startups"
+     " - Magenta - super entities"
+     " - Red     - Equal or less than 33% fitness"
+     "           - Less than 5 iterations in resources"
+     " - Yellow  - More than 33% fitness"
+     "           - More than 5 iterations in resources"
+     " - Green   - More than 67% fitness"
+     "           - More than 10 iterations in resources"
+     " - Gray    - Entities do not receive resources from"
+     "the market and are not charged at each iteration either."
+    ]
+    [
+     "The colors of entities during run time depend on the"
+     "chooser color_update_rule. You can choose:"
+     " - fitness:        colors by fitness"
+     " - survivability:  color by amount of resources"
+     " and market survivability."
+     "The color of the links represents what kind of"
+     "knowledge is being shared between entities."
+     "- Green - scientific knowledge has been shared"
+     "- Blue - tecnologic knowledge has been shared"
+     "- Yellow - both scientific and tecnologic knowledges"
+     "have been shared."
+     "If the link is dotted (blue or green) it means that"
+     "entities with both knowledges interacted, but only"
+     "scientific (green traced) or tecnologic (blue traced)"
+     "knowledges have been shared."
 
+     "The chooser repeat_simulation? uses the last seed"
+     "used for the random number generator or not."
+     " If you choose not to repeat, the chooser "
+     "set_input_seed? will prompt the user for a seed or"
+     "allow the model to randomly select the seed used."
+     "In any case, the seed used will be displayed in "
+     "the my-seed-repeat monitor."
+    ]
     [
      "When you press SETUP, if you chose to "
      "input a known seed for random numbers,"
@@ -1675,10 +1727,10 @@ end
 ; See info tab for full copyright and license.
 @#$#@#$#@
 GRAPHICS-WINDOW
-372
-10
-809
-448
+373
+12
+810
+450
 -1
 -1
 13.0
@@ -1727,7 +1779,7 @@ number_of_entities
 number_of_entities
 1
 600
-200.0
+100.0
 1
 1
 NIL
@@ -1735,14 +1787,14 @@ HORIZONTAL
 
 SLIDER
 17
-176
+212
 192
-209
+245
 knowledge
 knowledge
 2
 200
-20.0
+100.0
 2
 1
 NIL
@@ -1750,9 +1802,9 @@ HORIZONTAL
 
 SLIDER
 17
-208
+244
 192
-241
+277
 initial_resources
 initial_resources
 1
@@ -1778,20 +1830,20 @@ NIL
 NIL
 NIL
 NIL
-1
+0
 
 OUTPUT
-17
-763
-360
-946
+19
+799
+362
+982
 12
 
 BUTTON
-16
-729
-194
-762
+18
+766
+196
+799
 Previous Instruction
 previous-instruction
 NIL
@@ -1805,10 +1857,10 @@ NIL
 1
 
 BUTTON
-196
-729
-360
-762
+198
+766
+362
+799
 Next Instruction
 next-instruction
 NIL
@@ -1822,10 +1874,10 @@ NIL
 1
 
 MONITOR
-272
-652
-358
-697
+255
+718
+341
+763
 Instruction #
 current-instruction-label
 17
@@ -1834,14 +1886,14 @@ current-instruction-label
 
 SLIDER
 17
-241
+276
 192
-274
+309
 niche_resources
 niche_resources
 0
 200000
-200000.0
+30000.0
 1000
 1
 NIL
@@ -1849,9 +1901,9 @@ HORIZONTAL
 
 SLIDER
 17
-274
+309
 192
-307
+342
 minimum_resources_to_live
 minimum_resources_to_live
 1
@@ -1864,9 +1916,9 @@ HORIZONTAL
 
 SLIDER
 17
-307
+343
 192
-340
+376
 expense_to_live_growth
 expense_to_live_growth
 0
@@ -1979,7 +2031,7 @@ CHOOSER
 color_update_rule
 color_update_rule
 "fitness" "survivability"
-1
+0
 
 MONITOR
 812
@@ -2018,7 +2070,7 @@ NIL
 NIL
 NIL
 NIL
-1
+0
 
 MONITOR
 814
@@ -2048,7 +2100,7 @@ INPUTBOX
 364
 70
 stop_trigger
-6000.0
+12000.0
 1
 0
 Number
@@ -2232,9 +2284,9 @@ standard-deviation [willingness-to-share] of entities
 
 SLIDER
 17
-341
+376
 191
-374
+409
 cost_of_crossover
 cost_of_crossover
 0
@@ -2247,9 +2299,9 @@ HORIZONTAL
 
 SLIDER
 17
-406
+442
 190
-439
+475
 cost_of_mutation
 cost_of_mutation
 0
@@ -2262,9 +2314,9 @@ HORIZONTAL
 
 SLIDER
 17
-373
+408
 190
-406
+441
 cost_of_development
 cost_of_development
 0
@@ -2292,9 +2344,9 @@ HORIZONTAL
 
 SLIDER
 195
-462
+463
 368
-495
+496
 creation_performance
 creation_performance
 0
@@ -2307,9 +2359,9 @@ HORIZONTAL
 
 SLIDER
 195
-495
+497
 368
-528
+530
 std_dev_creation_performance
 std_dev_creation_performance
 0
@@ -2321,11 +2373,11 @@ NIL
 HORIZONTAL
 
 BUTTON
-13
-461
-188
-494
-create-super-professor
+15
+497
+190
+530
+create-super-consumer
 create-super-competitor
 NIL
 1
@@ -2335,13 +2387,13 @@ NIL
 NIL
 NIL
 NIL
-1
+0
 
 SLIDER
 195
-418
+420
 368
-451
+453
 std_dev_development_performance
 std_dev_development_performance
 0
@@ -2353,21 +2405,21 @@ NIL
 HORIZONTAL
 
 SWITCH
-14
-560
-188
-593
+16
+596
+190
+629
 super_share?
 super_share?
-0
+1
 1
 -1000
 
 BUTTON
-15
-625
-186
-658
+17
+662
+188
+695
 mutate-university-demand
 mutate-market
 NIL
@@ -2378,13 +2430,13 @@ NIL
 NIL
 NIL
 NIL
-1
+0
 
 SWITCH
-15
-658
-188
-691
+17
+695
+190
+728
 non_economical_entities?
 non_economical_entities?
 0
@@ -2585,9 +2637,9 @@ PENS
 
 TEXTBOX
 59
-127
+124
 209
-145
+142
 World parameters
 11
 0.0
@@ -2624,20 +2676,20 @@ Generation and development
 1
 
 TEXTBOX
-21
-609
-171
-627
+23
+646
+173
+664
 Instructions and seed origin
 11
 0.0
 1
 
 TEXTBOX
-56
-445
-206
-463
+58
+482
+208
+500
 Special functions
 11
 0.0
@@ -2652,7 +2704,7 @@ number_of_generators
 number_of_generators
 0
 100
-50.0
+0.0
 1
 1
 NIL
@@ -2712,7 +2764,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-50.0
+0.0
 1
 1
 NIL
@@ -2842,11 +2894,11 @@ count entities with [generator? and not consumer? and diffuser? and not integrat
 11
 
 BUTTON
-13
-494
-188
-527
-create-super-researcher
+15
+530
+190
+563
+create-super-generator
 create-super-generator
 NIL
 1
@@ -2856,13 +2908,13 @@ NIL
 NIL
 NIL
 NIL
-1
+0
 
 BUTTON
-13
-527
-188
-560
+15
+564
+190
+597
 NIL
 create-super-diffuser
 NIL
@@ -2873,7 +2925,7 @@ NIL
 NIL
 NIL
 NIL
-1
+0
 
 PLOT
 1013
@@ -2894,10 +2946,10 @@ PENS
 "default" 1.0 0 -13345367 true "" "plot ((mean [tech-fitness] of entities with [consumer?]) / knowledge ) * 100"
 
 SWITCH
-14
-592
-188
-625
+16
+628
+190
+661
 startups?
 startups?
 0
@@ -2928,7 +2980,7 @@ initial_fitness_probability
 initial_fitness_probability
 0
 1
-0.1
+0.3
 0.05
 1
 NIL
@@ -2936,9 +2988,9 @@ HORIZONTAL
 
 SWITCH
 195
-550
+551
 368
-583
+584
 evaluate_for_fitness?
 evaluate_for_fitness?
 0
@@ -2947,9 +2999,9 @@ evaluate_for_fitness?
 
 SWITCH
 195
-588
+590
 368
-621
+623
 evaluate_for_learning?
 evaluate_for_learning?
 0
@@ -2957,10 +3009,10 @@ evaluate_for_learning?
 -1000
 
 TEXTBOX
-238
-534
-388
-552
+240
+570
+390
+588
 Motivation to learn
 11
 0.0
@@ -2989,10 +3041,10 @@ mean [tech-fitness] of entities with [consumer?]
 11
 
 SLIDER
-15
-692
-189
-725
+17
+728
+191
+761
 market_mutation_period
 market_mutation_period
 0
@@ -3052,9 +3104,9 @@ mean [sci-fitness] of entities with [generator?]
 
 SWITCH
 17
-145
+180
 192
-178
+213
 ordered_DNA?
 ordered_DNA?
 0
@@ -3080,10 +3132,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count entities with [generator? and crossover?]"
 
 SWITCH
-371
-10
-567
-43
+17
+147
+192
+181
 market_fully_discovered?
 market_fully_discovered?
 0
@@ -3486,7 +3538,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0
+NetLogo 6.0.2
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
