@@ -2690,7 +2690,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
-1.618325842E9
+1.398864954E9
 1
 0
 Number
@@ -3339,7 +3339,7 @@ SWITCH
 17
 147
 192
-181
+180
 market_fully_discovered?
 market_fully_discovered?
 0
