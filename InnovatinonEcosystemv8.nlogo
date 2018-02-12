@@ -873,9 +873,8 @@ to develop
         ;; using new-tech-knowledge instead of tech-knowledge allows several knowledge activities to be performed without loosing the notion of paralelism
         ;; although some of the learning of the previous activity may be altered
 
-        if evaluate_for_fitness? and evaluate_for_learning? [
-          set new-tech-knowledge crossover new-tech-knowledge new-science-knowledge
-        ]
+        set new-tech-knowledge crossover new-tech-knowledge new-science-knowledge
+
 
         ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
         set development? true
@@ -1984,7 +1983,7 @@ number_of_entities
 number_of_entities
 1
 600
-500.0
+140.0
 1
 1
 NIL
@@ -2541,7 +2540,7 @@ development_performance
 development_performance
 0
 1
-1.0
+0.5
 0.05
 1
 NIL
@@ -2670,7 +2669,7 @@ SWITCH
 121
 set_input_seed?
 set_input_seed?
-0
+1
 1
 -1000
 
@@ -2681,7 +2680,7 @@ SWITCH
 82
 repeat_simulation?
 repeat_simulation?
-0
+1
 1
 -1000
 
@@ -2691,7 +2690,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
-1250.0
+1.549806143E9
 1
 0
 Number
@@ -2909,7 +2908,7 @@ number_of_generators
 number_of_generators
 0
 100
-100.0
+10.0
 1
 1
 NIL
@@ -2954,7 +2953,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-100.0
+10.0
 1
 1
 NIL
@@ -2969,7 +2968,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-100.0
+20.0
 1
 1
 NIL
@@ -3004,7 +3003,7 @@ number_of_gen_dif
 number_of_gen_dif
 0
 100
-100.0
+0.0
 1
 1
 NIL
