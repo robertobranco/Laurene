@@ -2543,7 +2543,7 @@ development_performance
 development_performance
 0
 1
-0.0
+0.5
 0.05
 1
 NIL
@@ -2605,7 +2605,7 @@ std_dev_development_performance
 std_dev_development_performance
 0
 0.5
-0.0
+0.1
 0.05
 1
 NIL
@@ -2693,7 +2693,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
--1.353249957E9
+-1.054889142E9
 1
 0
 Number
@@ -2956,7 +2956,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-20.0
+0.0
 1
 1
 NIL
@@ -2971,7 +2971,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-0.0
+20.0
 1
 1
 NIL
@@ -8185,6 +8185,1321 @@ NetLogo 6.0.2
     </enumeratedValueSet>
     <enumeratedValueSet variable="number_of_consumers">
       <value value="100"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Exp 2 B" repetitions="200" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>count turtles</metric>
+    <metric>count entities with [consumer?]</metric>
+    <metric>count entities with [consumer? and generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and generator?]</metric>
+    <metric>mean [sci-fitness] of entities with [science?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and generator?]</metric>
+    <enumeratedValueSet variable="willingness_to_share">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_mutation">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="integration_boost">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_mutation_period">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_fully_discovered?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_willingness">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="non_economical_entities?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness_cons?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_gen_dif">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="color_update_rule">
+      <value value="&quot;fitness&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="minimum_resources_to_live">
+      <value value="1001"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_creation_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation_rate">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="creation_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="motivation_to_learn">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_development">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_fitness_probability">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="random_ent_creation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="development_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="consumer_generator_startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_crossover">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="set_input_seed?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_development_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="super_share?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_entities">
+      <value value="120"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="my-seed-repeat">
+      <value value="1566201924"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_diffusers">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="niche_resources">
+      <value value="30000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_generators">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="repeat_simulation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="expense_to_live_growth">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="trust_in_known_partners">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ordered_DNA?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_cons_gen">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="knowledge">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_resources">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_motivation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning_cons?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stop_trigger">
+      <value value="3000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_consumers">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_integrators">
+      <value value="0"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Exp 2 int B" repetitions="200" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>count turtles</metric>
+    <metric>count entities with [consumer?]</metric>
+    <metric>count entities with [consumer? and generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and generator?]</metric>
+    <metric>mean [sci-fitness] of entities with [science?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and generator?]</metric>
+    <enumeratedValueSet variable="willingness_to_share">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_mutation">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="integration_boost">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_mutation_period">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_fully_discovered?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_willingness">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="non_economical_entities?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness_cons?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_gen_dif">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="color_update_rule">
+      <value value="&quot;fitness&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="minimum_resources_to_live">
+      <value value="1001"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_creation_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation_rate">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="creation_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="motivation_to_learn">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_development">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_fitness_probability">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="random_ent_creation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="development_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="consumer_generator_startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_crossover">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="set_input_seed?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_development_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="super_share?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_entities">
+      <value value="125"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="my-seed-repeat">
+      <value value="1454296243"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_diffusers">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="niche_resources">
+      <value value="30000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_generators">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="repeat_simulation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="expense_to_live_growth">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="trust_in_known_partners">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ordered_DNA?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_cons_gen">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="knowledge">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_resources">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_motivation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning_cons?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stop_trigger">
+      <value value="3000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_consumers">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_integrators">
+      <value value="5"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="EXP 2 change int B" repetitions="200" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>count turtles</metric>
+    <metric>count entities with [consumer?]</metric>
+    <metric>count entities with [consumer? and generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and generator?]</metric>
+    <metric>mean [sci-fitness] of entities with [science?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and generator?]</metric>
+    <enumeratedValueSet variable="willingness_to_share">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_mutation">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="integration_boost">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_mutation_period">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_fully_discovered?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_willingness">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="non_economical_entities?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness_cons?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_gen_dif">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="color_update_rule">
+      <value value="&quot;fitness&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="minimum_resources_to_live">
+      <value value="1001"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_creation_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation_rate">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="creation_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="motivation_to_learn">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_development">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_fitness_probability">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="random_ent_creation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="development_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="consumer_generator_startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_crossover">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="set_input_seed?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_development_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="super_share?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_entities">
+      <value value="125"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="my-seed-repeat">
+      <value value="-1718226166"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_diffusers">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="niche_resources">
+      <value value="30000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_generators">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="repeat_simulation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="expense_to_live_growth">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="trust_in_known_partners">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ordered_DNA?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_cons_gen">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="knowledge">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_resources">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_motivation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning_cons?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stop_trigger">
+      <value value="3000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_consumers">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_integrators">
+      <value value="5"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="EXP 2 change B" repetitions="200" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>count turtles</metric>
+    <metric>count entities with [consumer?]</metric>
+    <metric>count entities with [consumer? and generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and generator?]</metric>
+    <metric>mean [sci-fitness] of entities with [science?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and generator?]</metric>
+    <enumeratedValueSet variable="willingness_to_share">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_mutation">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="integration_boost">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_mutation_period">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_fully_discovered?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_willingness">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="non_economical_entities?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness_cons?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_gen_dif">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="color_update_rule">
+      <value value="&quot;fitness&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="minimum_resources_to_live">
+      <value value="1001"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_creation_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation_rate">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="creation_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="motivation_to_learn">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_development">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_fitness_probability">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="random_ent_creation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="development_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="consumer_generator_startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_crossover">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="set_input_seed?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_development_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="super_share?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_entities">
+      <value value="120"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="my-seed-repeat">
+      <value value="-1718226166"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_diffusers">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="niche_resources">
+      <value value="30000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_generators">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="repeat_simulation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="expense_to_live_growth">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="trust_in_known_partners">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ordered_DNA?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_cons_gen">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="knowledge">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_resources">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_motivation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning_cons?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stop_trigger">
+      <value value="3000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_consumers">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_integrators">
+      <value value="0"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Exp 5 B" repetitions="200" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>count turtles</metric>
+    <metric>count entities with [consumer? and not generator?]</metric>
+    <metric>count entities with [consumer? and generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and generator?]</metric>
+    <metric>mean [sci-fitness] of entities with [science? and not consumer?]</metric>
+    <metric>mean [sci-fitness] of entities with [science? and consumer?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [not consumer? and not integrator?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and generator?]</metric>
+    <enumeratedValueSet variable="willingness_to_share">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_mutation">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="integration_boost">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_mutation_period">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_fully_discovered?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_willingness">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="non_economical_entities?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness_cons?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_gen_dif">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="color_update_rule">
+      <value value="&quot;fitness&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="minimum_resources_to_live">
+      <value value="1001"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_creation_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation_rate">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="creation_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="motivation_to_learn">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_development">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_fitness_probability">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="random_ent_creation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="development_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="consumer_generator_startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_crossover">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="set_input_seed?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_development_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="super_share?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_entities">
+      <value value="140"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="my-seed-repeat">
+      <value value="-1526107324"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_diffusers">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="niche_resources">
+      <value value="30000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_generators">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="repeat_simulation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="expense_to_live_growth">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="trust_in_known_partners">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ordered_DNA?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_cons_gen">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="knowledge">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_resources">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_motivation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning_cons?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stop_trigger">
+      <value value="3000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_consumers">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_integrators">
+      <value value="0"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Exp 5 int B" repetitions="200" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>count turtles</metric>
+    <metric>count entities with [consumer? and not generator?]</metric>
+    <metric>count entities with [consumer? and generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and generator?]</metric>
+    <metric>mean [sci-fitness] of entities with [science? and not consumer?]</metric>
+    <metric>mean [sci-fitness] of entities with [science? and consumer?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [not consumer? and not integrator?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and generator?]</metric>
+    <enumeratedValueSet variable="cost_of_mutation">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="willingness_to_share">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="integration_boost">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_mutation_period">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_willingness">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_fully_discovered?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="non_economical_entities?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness_cons?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_gen_dif">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="color_update_rule">
+      <value value="&quot;fitness&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="minimum_resources_to_live">
+      <value value="1001"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_creation_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation_rate">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="creation_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="motivation_to_learn">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_development">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_fitness_probability">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="random_ent_creation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="development_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="consumer_generator_startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_crossover">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="set_input_seed?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_development_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="super_share?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_entities">
+      <value value="145"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="my-seed-repeat">
+      <value value="-738492665"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_diffusers">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="niche_resources">
+      <value value="30000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_generators">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="repeat_simulation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="expense_to_live_growth">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="trust_in_known_partners">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ordered_DNA?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_cons_gen">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="knowledge">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_resources">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_motivation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning_cons?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stop_trigger">
+      <value value="3000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_consumers">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_integrators">
+      <value value="5"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Exp 5 change B" repetitions="200" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>count turtles</metric>
+    <metric>count entities with [consumer? and not generator?]</metric>
+    <metric>count entities with [consumer? and generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and generator?]</metric>
+    <metric>mean [sci-fitness] of entities with [science? and not consumer?]</metric>
+    <metric>mean [sci-fitness] of entities with [science? and consumer?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [not consumer? and not integrator?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and generator?]</metric>
+    <enumeratedValueSet variable="cost_of_mutation">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="willingness_to_share">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="integration_boost">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_mutation_period">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_willingness">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_fully_discovered?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="non_economical_entities?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness_cons?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_gen_dif">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="color_update_rule">
+      <value value="&quot;fitness&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="minimum_resources_to_live">
+      <value value="1001"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_creation_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation_rate">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="creation_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="motivation_to_learn">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_development">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_fitness_probability">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="random_ent_creation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="development_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="consumer_generator_startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_crossover">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="set_input_seed?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_development_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="super_share?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_entities">
+      <value value="145"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="my-seed-repeat">
+      <value value="-376496306"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_diffusers">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="niche_resources">
+      <value value="30000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_generators">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="repeat_simulation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="expense_to_live_growth">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="trust_in_known_partners">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ordered_DNA?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_cons_gen">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="knowledge">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_resources">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_motivation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning_cons?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stop_trigger">
+      <value value="3000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_consumers">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_integrators">
+      <value value="0"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Exp 5 change int B" repetitions="200" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>count turtles</metric>
+    <metric>count entities with [consumer? and not generator?]</metric>
+    <metric>count entities with [consumer? and generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and generator?]</metric>
+    <metric>mean [sci-fitness] of entities with [science? and not consumer?]</metric>
+    <metric>mean [sci-fitness] of entities with [science? and consumer?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [not consumer? and not integrator?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and generator?]</metric>
+    <enumeratedValueSet variable="cost_of_mutation">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="willingness_to_share">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="integration_boost">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_mutation_period">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_willingness">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_fully_discovered?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="non_economical_entities?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness_cons?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_gen_dif">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="color_update_rule">
+      <value value="&quot;fitness&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="minimum_resources_to_live">
+      <value value="1001"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_creation_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation_rate">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="creation_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="motivation_to_learn">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_development">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_fitness_probability">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="random_ent_creation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="development_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="consumer_generator_startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_crossover">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="set_input_seed?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_development_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="super_share?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_entities">
+      <value value="140"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="my-seed-repeat">
+      <value value="416074316"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_diffusers">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="niche_resources">
+      <value value="30000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_generators">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="repeat_simulation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="expense_to_live_growth">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="trust_in_known_partners">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ordered_DNA?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_cons_gen">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="knowledge">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_resources">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_motivation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning_cons?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stop_trigger">
+      <value value="3000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_consumers">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_integrators">
+      <value value="5"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Exp 5 change int no dev B" repetitions="200" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>count turtles</metric>
+    <metric>count entities with [consumer? and not generator?]</metric>
+    <metric>count entities with [consumer? and generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [tech-fitness] of entities with [consumer? and generator?]</metric>
+    <metric>mean [sci-fitness] of entities with [science? and not consumer?]</metric>
+    <metric>mean [sci-fitness] of entities with [science? and consumer?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and not generator?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [not consumer? and not integrator?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer? and generator?]</metric>
+    <enumeratedValueSet variable="willingness_to_share">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_mutation">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="integration_boost">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_mutation_period">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_fully_discovered?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_willingness">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="non_economical_entities?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness_cons?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_gen_dif">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="color_update_rule">
+      <value value="&quot;fitness&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="minimum_resources_to_live">
+      <value value="1001"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_creation_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation_rate">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="creation_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="motivation_to_learn">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_development">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_fitness_probability">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="random_ent_creation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="development_performance">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="consumer_generator_startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_crossover">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="set_input_seed?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_development_performance">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="super_share?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_entities">
+      <value value="145"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="my-seed-repeat">
+      <value value="1726044205"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_diffusers">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="niche_resources">
+      <value value="30000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_generators">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="repeat_simulation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="expense_to_live_growth">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="trust_in_known_partners">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ordered_DNA?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_cons_gen">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="knowledge">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_resources">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_motivation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning_cons?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stop_trigger">
+      <value value="3000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_consumers">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_integrators">
+      <value value="5"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
