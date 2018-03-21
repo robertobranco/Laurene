@@ -22,14 +22,12 @@ entities-own [
   new-tech-knowledge
   ;; lets the  model know which entities have active technological knowledge
   technology?
-  ;; stores the Hamming distance of the entity (currently just from one niche)
+  ;; stores the complement of the Hamming distance between the entity and the market
   sci-fitness
   tech-fitness
   fitness
   ;; stores the amount of resources kept by the entity
   resources
-  ;; Stores the entity's reputation, given its resources and fitness in its niche
-  reputation
   ;; does the entity assume a generator role in the ecosystem?
   generator?
   ;; does the entity assume a generator role in the ecosystem?
@@ -50,7 +48,7 @@ entities-own [
   crossover?
   ;; lets the model know if the agent performed mutation
   mutation?
-  ;; lets the model know if the agent performed development of science knowledge into technological knowledge
+  ;; lets the model know if the agent performed development of scientific knowledge into technological knowledge
   development?
   ;; lets the model know if the agent shared knowledge as the emitter
   emitted?
@@ -67,9 +65,9 @@ entities-own [
 
 niches-own [
 
-  ;; total-resources of a niche (put this on a slider in the future)
+  ;; total-resources of a market niche
   niche-resources
-  ;; stores the demand DNA of the niche
+  ;; stores the demand DNA of the market niche
   niche-demand
 
 ]
@@ -100,12 +98,12 @@ to setup
   ask patches [set pcolor black];
   set-default-shape entities "circle";
 
-  ;; creates the niches where entities will compete and assigns them a demand DNA
-  ;; has to be created before the entities, so they can assess their fitness from the start
+  ;; creates the market where entities will compete and assigns the demand DNA
+  ;; has to be called before the populate-ecosystem, so entities can assess their fitness from the start
   create-market
   ;; creates the entities according to the inputs in the User Interface
   populate-ecosystem
-  ;; resets the tick clock
+  ;; resets the simulation clock
   reset-ticks
 
 end
@@ -121,18 +119,19 @@ to go
     stop
   ]
 
-  ;; clears the links from previous iteration to keep a clean interface
+  ;; clears the knowledge flow links from the previous iteration to keep a clean interface
   ask links [die]
 
-  ;; asks entities to assess their Hamming distance for fitness test (check algoritm for Hamming)
+  ;; asks entities to assess their fitness against the market demand DNA
   ask entities [test-fitness]
 
-  ;; gives the entities resources proportional to their fitness, and collects resources
+  ;; gives the entities resources proportional to their fitness
+  ;; and collects the resources necessary to live
+  ;; kills entities with insuficient resources to live
   ask entities [calculate-resource]
 
-  ;; replaces dead entities with new startups, keeping the competition high
-  ;; has to be called after calculate-resources, to avoid choosing parents that would die during the iteration
-  if (count entities) !=  number_of_entities and startups? [
+  ;; replaces dead entities with new startups
+  if ((count entities) !=  number_of_entities) and startups? [
     spawn-startup (number_of_entities - (count entities))
   ]
 
@@ -142,9 +141,9 @@ to go
     stop
   ]
 
-  ;; KNOWLEDGE ACTIVITIES
+  ;; KNOWLEDGE INTERNAL ACTIVITIES
 
-  ;; asks generators to perform research, in other words, mutate knowledge
+  ;; asks generators to perform research, in other words, mutate their scientific knowledge
   ;; must be called before the interact procedure to avoid loss of new knowledge
   ask entities with [generator?] [
 
@@ -153,24 +152,22 @@ to go
   ]
 
   ;; asks entities with scientific and technological knowledge to develop science into technology
-  ;; must be called before the interact procedure to avoid loss of new knowledge
   ask entities with [science? and technology?] [
 
     develop
 
   ]
 
-  ;; KNOWLEDGE INTERACTION ACTIVITIES
+  ;; KNOWLEDGE EXTERNAL ACTIVITIES
 
   ;; asks integrators to facilitate the interaction and crossover between two entities
-  ;; must be called before the interact procedure to avoid loss of new knowledge
   ask entities with [integrator?] [
 
     integrate
 
   ]
 
-  ;; ask entities with some kind of knowledge  to look for similar partners and possibly, to crossover
+  ;; ask entities with some kind of knowledge  to look for similar partners and try to perform crossover
   ;; it prevents entities who performed mutation, crossover or development to receive knowledge to protect
   ;; the results of these operations
   ask entities with [science? or technology?] [
@@ -193,17 +190,10 @@ to go
   ;; mutates the market if the countdown meets the number set in the interface
   market-mutation
 
-  ;; ticks the iteration clock
+  ;; ticks the simulation clock
   tick
 
 end
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;; external sources procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; it has to be on the same directory as the .nlogo model
-;; _includes [ .nls]
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; entities' procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -215,7 +205,7 @@ to populate-ecosystem
     ;; creates random amounts of each kind of entity and assigns them resources, a knowledge DNA and others
     create-entities number_of_entities [
 
-      ;; asks turtles to select their roles
+      ;; asks entities to select their roles and create their parameters accordingly
       select-role
       set-entity-parameters
       set color blue
@@ -290,7 +280,9 @@ to populate-ecosystem
       set color orange
 
     ]
-  ;; sets the total number of entities as the sum of the types created. It will allow the model to replace the numbers with randomly created startups
+
+  ;; sets the total number of entities as the sum of the types created.
+  ;; it allows the model to replace the dead entities with randomly created startups
   ;; if startups? is set on at the interface
   set number_of_entities (number_of_generators + number_of_consumers + number_of_integrators + number_of_diffusers + number_of_cons_gen + number_of_gen_dif)
 
@@ -303,7 +295,7 @@ end
 to evaluate-crossover [old-knowledge new-knowledge]
 
   let evaluation 0
-  ;; the model currently has only one niche. If more than one niche is implemented, it will pick
+  ;; the model currently runs with only one market niche. If more than one market niche is implemented, it will pick
   ;; one of the niches for the evaluation.
 
   ;; if there is an increase in fitness, the experience will be well evaluated (+ 0.10)
@@ -479,7 +471,6 @@ to evaluate-crossover [old-knowledge new-knowledge]
     ]
   ]
 
-
   ;; incorporates the evaluation into the motivation-to-learn
   set motivation-to-learn motivation-to-learn + evaluation
 
@@ -491,7 +482,6 @@ to evaluate-crossover [old-knowledge new-knowledge]
       set motivation-to-learn 0
     ]
   ]
-
 
 end
 
@@ -505,6 +495,7 @@ to evaluate-crossover-dual [older-tech-knowledge newer-tech-knowledge older-scie
   ;; if there is no increase in fitness (remains the same or drops), it will be poorly evaluated (- 0.05)
 
   ;;;;;;;;;;;;;;; if the entities only evaluate for fitness;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
   ;; implements the function for all entities that are not consumers
   if evaluate_for_fitness? and not evaluate_for_learning? and not consumer? [
     let niche-demand-now [niche-demand] of one-of niches
@@ -581,9 +572,8 @@ to evaluate-crossover-dual [older-tech-knowledge newer-tech-knowledge older-scie
     ]
   ]
 
-
-
   ;;;;;;;;;;;;;;; if the entities only evaluate for learning ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
   ;; implements the function for all entities that are not consumers
   if evaluate_for_learning? and not evaluate_for_fitness? and not consumer? [
     ;; compares the entities' new tech and science DNA bit by bit with its previous version
@@ -629,6 +619,7 @@ to evaluate-crossover-dual [older-tech-knowledge newer-tech-knowledge older-scie
   ]
 
   ;;;;;;;;;;;;;;; if the entities evaluate for fitness and learning  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
   ;; implements the function for all entities that are not consumers
   if evaluate_for_fitness? and evaluate_for_learning? and not consumer? [
 
@@ -727,7 +718,6 @@ to evaluate-crossover-dual [older-tech-knowledge newer-tech-knowledge older-scie
     ]
   ]
 
-
 end
 
 ;; creates startups (all pure consumers or generators-consumers)
@@ -737,10 +727,10 @@ to spawn-startup [number-of-startups]
     create-entities 1 [
 
       set generator? false
+      ;; if the user wants a chance of startups to be consumers-generators. Default is pure consumers
       if consumer_generator_startups? [
         set generator? one-of [true false]
       ]
-      ;; set generator? one-of [true false] ;; if a chance of creating a generator consumer is desired
       set consumer? true
       set diffuser? false
       set integrator? false
@@ -875,7 +865,6 @@ to develop
 
         set new-tech-knowledge crossover new-tech-knowledge new-science-knowledge
 
-
         ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
         set development? true
       ]
@@ -931,14 +920,14 @@ to set-entity-parameters
   set creation-performance random-normal creation_performance std_dev_creation_performance
   set development-performance random-normal development_performance std_dev_development_performance
 
-  ;; tells the model they the entities have not performed any of these actions yet
-  ;; Flags that impact on the payment of resources and measurement of activities
+  ;; tells the model that the entities have not performed any of these actions yet
+  ;; flags activities performed for payment and measurement
   set crossover? false
   set mutation? false
   set integration? false
   set development? false
 
-  ;; Flags that impact on the receiving of resources and measurement of activities
+  ;; flags activities performed for payment and measurement
   set emitted? false
   set mutated? false
   set integrated? false
@@ -955,7 +944,6 @@ end
 
 ;; creates a superfit entity, perhaps an entity that comes from another market
 to create-super-generator
-
 
   create-entities 1 [
 
@@ -976,7 +964,7 @@ to create-super-generator
     set science-knowledge [niche-demand] of one-of niches
     set new-science-knowledge science-knowledge
 
-    ;; assigns the supercompetitor the best fitness score possible from the start
+    ;; assigns the supercompetitor the best fitness score possible upon creation
     test-fitness
     set color magenta
     set shape "star 2"
@@ -986,7 +974,6 @@ to create-super-generator
 end
 
 to create-super-competitor
-
 
   create-entities 1 [
 
@@ -1015,10 +1002,8 @@ to create-super-competitor
 
 end
 
-
 ;; creates a superfit diffuser. Different from the other super entities, this one assumes
 to create-super-diffuser
-
 
   create-entities 1 [
 
@@ -1029,7 +1014,7 @@ to create-super-diffuser
 
     set-entity-parameters
 
-    ;; a super diffuser gets maximum efficiency when sharing knowledge
+    ;; a super diffuser gets maximum efficiency when sharing its knowledge
     if not super_share? [
       set willingness-to-share 1
       set motivation-to-learn 0
@@ -1049,12 +1034,9 @@ to create-super-diffuser
 
 end
 
-
 to select-role
 
   ;; randomly sets the role (s) an entity assumes in the ecosystem.
-  ;; sets the type of knowledge the entity has according to its role
-  ;; later it has to be more controllable, assigning a known proportion of each
 
   ;; does the entity assume a GENERATOR role in the ecosystem?
   set generator? one-of [true false]
@@ -1063,7 +1045,6 @@ to select-role
   set consumer? one-of [true false]
 
   ;; does the entity assume a DIFFUSER role in the ecosystem?
-  ;; if the entity accumulates other role, it will retain the knowledge the other role confers, and maybe add another
   set diffuser? one-of [true false]
 
   ;; does the entity assume an INTEGRATOR role in the ecosystem? Integrators don't need to have scientific or technological knowledge
@@ -1090,7 +1071,6 @@ to create-knowledge-DNA
   ;; it also initializes the new-science-knowledge
   ;; if the ordered_DNA? option is selected, it sorts the entities DNA, leaving a blank area in the DNA for
   ;; knowledge not yet learned/existing in the ecossistem
-  ;; although very similar, the entities will still have slight differences between each other
 
   ifelse science? [
     ;; set science-knowledge n-values knowledge [random 2]
@@ -1144,6 +1124,8 @@ to test-fitness
 
   set tech-fitness knowledge - (hamming-distance tech-knowledge niche-demand-now)
   set sci-fitness knowledge - (hamming-distance science-knowledge niche-demand-now )
+
+  ;; if the entity has both kinds of knowledge, its global knowledge will reflect the highest score
   set fitness max (list tech-fitness sci-fitness)
 
   ;; sets the color of the entities based on its absolute fitness
@@ -1153,11 +1135,10 @@ end
 
 ;; procedure to calculate how much must the entity receive from the market, and how much must it pay to live
 ;; also adjusts the size of the entity given the amount of its resources
-;; *** create options to award resources to each role
 
 to calculate-resource
 
-  ;; Awards the entities resources based on their actions / fitness
+  ;; awards the entities resources based on their actions / fitness
 
   ;; gives CONSUMER entities a share of the niche's resources proportional to its market share (relative tech-fitness)
   ;; the relative fitness is calculated of the tech-fitness of entities who compete for market share (CONSUMERS of knowledge)
@@ -1165,26 +1146,27 @@ to calculate-resource
     set resources resources + (niche_resources * (tech-fitness / (sum [tech-fitness] of entities with [consumer?])))
   ]
 
-  ;;*** equation that allows consumers to compete against a standard, and not against each other. Meet the minimum and you are alive.
+  ;;*** equation that allows consumers to compete against a standard (the market demand), and not against each other
+  ;; used in the university as an innovation ecosystem piece
   ;;if consumer? [
   ;;  set resources resources + (niche_resources * tech-fitness / knowledge)
   ;;]
 
   ;; pays emitters for their knowledge
   if emitted? [
-      set resources resources + (cost_of_crossover / 2)
+      set resources resources + (cost_of_crossover)
       set emitted? false
   ]
 
-  ;;******************* new function for resources of non market entities
+  ;;******************* new function for resources of non market entities*********************************
 
-  ;; Gives non market entities the minimum resources to live, to keep them always alive
-  ;; The entities will receive extra resources if they suceed in sharing resources, generating new knowledge
+  ;; gives non market entities the minimum resources to live, to keep them always alive
+  ;; the entities will receive extra resources if they succeed in sharing resources, generating new knowledge
   if not consumer? [
 
-   ;; if the mutation is well suceeded, the generator has the budget renewed.
+   ;; if the mutation is well suceeded, the generator has the budget renewed, by the government or other
    ;; admits that a research facility receives, besides the cost of research, operational and capital funds.
-   ;; consumers mutate to increase their own competitivity
+   ;; consumers mutate to increase their own competitivity and do not get paid for mutation (they pay for it)
     if mutated? [
       set resources resources + (10 * cost_of_mutation)
       set mutated? false
@@ -2693,7 +2675,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
-7.13303426E8
+-1.089591736E9
 1
 0
 Number
@@ -3159,7 +3141,7 @@ SWITCH
 671
 startups?
 startups?
-1
+0
 1
 -1000
 
@@ -3256,7 +3238,7 @@ market_mutation_period
 market_mutation_period
 0
 100
-100.0
+0.0
 1
 1
 NIL
