@@ -54,8 +54,6 @@ entities-own [
   emitted?
   ;; lets the model know if the mutation attempt by a generator was successful
   mutated?
-  ;; lets the model know if the development attempt by an entity was sucessful
-  developed?
   ;; lets the model know if the integrator attempted to integrate
   integrated?
   ;; lets the model know if the interaction of an agent is ocurring through an integrator
@@ -864,14 +862,10 @@ to develop
 
         ;; using new-tech-knowledge instead of tech-knowledge allows several knowledge activities to be performed without loosing the notion of paralelism
         ;; although some of the learning of the previous activity may be altered
-        let new-tech-knowledge-dev new-tech-knowledge
-        set new-tech-knowledge crossover new-tech-knowledge new-science-knowledge
-        if length ( remove true ( map [ [a b] -> a = b ] new-tech-knowledge-dev new-tech-knowledge )  ) > 0 [
-          ;; flags the model that the development attempt was well succeded
-          set developed? true
-        ]
 
-        ;; flags the model that internal crossover between scientific and technological knowledge (development) was attempted
+        set new-tech-knowledge crossover new-tech-knowledge new-science-knowledge
+
+        ;; flags the model that internal crossover between scientific and technologica knowledge (development) was attempted
         set development? true
       ]
     ]
@@ -937,7 +931,6 @@ to set-entity-parameters
   set emitted? false
   set mutated? false
   set integrated? false
-  set developed? false
 
   ;; creates a table to implement the interaction memory
   set interaction-memory table:make
@@ -1153,7 +1146,7 @@ to calculate-resource
     set resources resources + (niche_resources * (tech-fitness / (sum [tech-fitness] of entities with [consumer?])))
   ]
 
-  ;;*** function that allows consumers to compete against a standard (the market demand), and not against each other
+  ;;*** equation that allows consumers to compete against a standard (the market demand), and not against each other
   ;; used in the university as an innovation ecosystem piece
   ;;if consumer? [
   ;;  set resources resources + (niche_resources * tech-fitness / knowledge)
@@ -1165,34 +1158,20 @@ to calculate-resource
       set emitted? false
   ]
 
-  ;;*******************  non market entities *********************************
+  ;;******************* new function for resources of non market entities*********************************
 
   ;; gives non market entities the minimum resources to live, to keep them always alive
-  ;; the entities will receive extra resources if they succeed in sharing resources, developing or generating new knowledge
-
-  ;; resources for generating and developing knowledge
-  ;; the equilibrium between the cost of developing and the cost of living has to be carefully adjusted
-  ;; if the cost of mutation and development is too small compared to the cost of living, non consumer generators and diffusers
-  ;; may have a hard time surving if non_economical_entities? is off, because that is their source of income
+  ;; the entities will receive extra resources if they succeed in sharing resources, generating new knowledge
   if not consumer? [
 
-    ;; if the mutation is well suceeded, the generator has the budget renewed, by the government or other
-    ;; admits that a research facility receives, besides the cost of research, operational and capital funds.
-    ;; consumers mutate to increase their own competitivity and do not get paid for mutation (they pay for it)
+   ;; if the mutation is well suceeded, the generator has the budget renewed, by the government or other
+   ;; admits that a research facility receives, besides the cost of research, operational and capital funds.
+   ;; consumers mutate to increase their own competitivity and do not get paid for mutation (they pay for it)
     if mutated? [
-      set resources resources + (5 * cost_of_mutation)
-    ]
-
-    ;; if the development is well suceeded, the entity has the budget renewed, by the government or other
-    ;; admits that a development facility receives, besides the cost of development, operational and capital funds.
-    ;; consumers develop to increase their own competitivity and do not get paid for development (they pay for it)
-    if developed? [
-      set resources resources + (5 * cost_of_development)
+      set resources resources + (10 * cost_of_mutation)
+      set mutated? false
     ]
   ]
-  ;; resets the mutated? and developed? flag for all entities, including consumers.
-  set mutated? false
-  set developed? false
 
   ;; takes resources from the entity proportionally to its total amount of resources, respecting the minimum amount to stay alive
   ;; the amount necessary grows with the amount of resources the entity amasses (which is the growth of the entity)
@@ -1200,10 +1179,6 @@ to calculate-resource
   ;; caveat - this keeps the non_economical at a minimum resource status, which may hamper their chances to be selected as partners unless
   ;; unless they are really fit.
 
-  ;; charges all entities if non_economical_entities? is not set
-  ;; otherwise charges consumers only
-  ;; if this option is used the cost of knowledge transactions must be zero!!! Otherwise non market entities will accumulate too much
-  ;; resources
   ifelse not non_economical_entities? [
     set resources resources - (minimum_resources_to_live + (resources * expense_to_live_growth))
   ][
@@ -1329,7 +1304,7 @@ to interact
 
     ;; if a emitter partner is found and the interaction is happening through an integrator, boost its willingness to share
     ;; it also checks if the partner is fit enough to be accepted
-  if partner != nobody and not ( [fitness] of partner < fitness) [
+    if partner != nobody and not ( [fitness] of partner < fitness) [
       ifelse integration? [
         set willingness-to-share-actual ([willingness-to-share] of partner + integration_boost)
       ][
@@ -1598,7 +1573,7 @@ to set-size-entity
 end
 
 to update-link-appearance [bits1 bits2 color-link]
-  ;; evaluates whether the crossover and the mutation actually changed bits through a hamming distance
+  ;; Evaluates whether the crossover and the mutation actually changed bits through a hamming distance
   ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the number of bits changed.
   ;; If not, it colors the link red
 
@@ -1617,7 +1592,7 @@ to update-link-appearance [bits1 bits2 color-link]
 end
 
 to update-link-appearance-dual [ older-tech-knowledge newer-tech-knowledge  older-science-knowledge newer-science-knowledge color-link]
-  ;; Evaluates whether the crossover and the mutation actually changed bits through a hamming distance
+  ;; evaluates whether the crossover and the mutation actually changed bits through a hamming distance
   ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the number of bits changed.
   ;; If not, it colors the link red
 
@@ -1890,7 +1865,7 @@ to-report instructions
   ]
 end
 
-; Copyright 2018 José Roberto Branco Ramos Filho, Celson Pantoja Lima
+; Copyright 2018 José Roberto Branco Ramos Filho
 ; See info tab for full copyright and license.
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -2075,7 +2050,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1001
-501.0
+1001.0
 100
 1
 NIL
@@ -2653,7 +2628,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
-1.550793418E9
+-1.089591736E9
 1
 0
 Number
@@ -3119,7 +3094,7 @@ SWITCH
 671
 startups?
 startups?
-1
+0
 1
 -1000
 
@@ -3276,7 +3251,7 @@ SWITCH
 213
 ordered_DNA?
 ordered_DNA?
-1
+0
 1
 -1000
 
@@ -3365,7 +3340,7 @@ Evaluation for non consumers
 @#$#@#$#@
 ## WHAT IS IT?
 
-Innovation Ecosystem Model based on Knowledge Flows
+Innovation Ecosystem Based on Knowledge Flows Model
 
 It observes the diffusion of knowledge in a community of entitities, given the fact that each of them has a knowledge "DNA", a role towards knowledge, and individual characteristics towards learning and sharing that evolve given the entities past failures and successes.
 
@@ -3376,7 +3351,8 @@ The mentioned roles are:
 • Generators: those who generate new scientific/ technological knowledge. Create inventions, or further the state of the art;
 • Diffusers: those who absorb, store, process knowledge created by other entities and transmit it to other organizations or people, without significantly furthering the state of the art or providing the society products that embed the knowledge. They may recode, translate and perform other transformations to ease its transfer and make it accessible to entities that lack the absorption capacity to receive it directly from generators;
 • Integrators: these entities connect other entities. They create relationships, introduce and establish trust between partners, disseminate cultural values, and create views of how the other entities could interact, although not handling knowledge itself;
-• Consumers: those who apply new knowledge into the products, services, processes, methods that are related to their main activities. Through these entities the effects of the new knowledge reach customers and society. They are the innovators in the sense [12] meant.
+• Consumers: those who apply new knowledge into the products, services, processes, methods that are related to their main activities. Through these entities the effects of the new knowledge reach customers and society. They are the true innovators,.
+• Developer: it is an implicit role performed by entities with both scientific and technological knowledges. It develops scientific knowledge into technological knowledge.  Although this activity may be included in the decription of the diffusion role (if the diffuser has both knowledges), there may be entities with certain combinations of roles performing this role as a result, such as consumer-generators.
 
 
 ## HOW IT WORKS

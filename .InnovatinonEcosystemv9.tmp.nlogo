@@ -937,7 +937,7 @@ to set-entity-parameters
   set emitted? false
   set mutated? false
   set integrated? false
-
+  set developed? false
 
   ;; creates a table to implement the interaction memory
   set interaction-memory table:make
@@ -1231,7 +1231,7 @@ to calculate-resource
     set development? false
   ]
 
-  ;; Resets the integration attempt counter
+  ;; resets the integration attempt counter
   set integrated? false
   set integration? false
 
@@ -1247,8 +1247,6 @@ end
 
 
 ;; creates agentsets of possible partners who possess the same kind of knowledge possessed by the choosing entity
-;; *** issue - something has to be done with the agentsets before it is closed. The lottery for an instance
-
 to-report choose-partner
 
   let possible-partners nobody
@@ -1304,35 +1302,19 @@ to-report choose-partner
 
   report partner
 
-  ;; *** alternate code for simplicity
-  ;; lottery example commands	rnd:weighted-one-of	rnd:weighted-one-of-list
-  ;; The idea behind this procedure is a bit tricky to understand.
-  ;; Basically we take the sum of the sizes of the turtles and the sum of their best fitness between science and technology,
-  ;; and that's how many "tickets" we have in our lottery.  Then we pick
-  ;; a random "ticket" (a random number).  Then we step through the shorter code option - see netlogo online manual
-  ;; ask rnd:weighted-one-of entities with science? [ resources + fitness ] [set partner self]
-
 end
 
- ;; This procedure implements the attempt to interact with other entities
- ;; it will call procedures so select suitable partners, and from this pool, to select one
- ;; will analyze what kind of knowledge can be used for crossover and call the operation
- ;; it will then store the result in the new-knowledge variable, which will be used to update the
- ;; entity's knowledge at the end of the iteration.
- ;; it cannot update it immediatly because it would tamper with the fitness evaluation performed by other entities
- ;; before the run is done, giving the impression of instantaneous learning.
-
+;; this procedure implements the attempt to interact with other entities
 to interact
 
   ;; given the receiver's motivation to learn
   ;; chooses a suitable partner to be the emitter
-  ;; If the interaction is intermediated by an integrator, there is a receiver's motivation-to-learn boost, increasing the chance of interaction
 
   let motivation-to-learn-actual 0
   let willingness-to-share-actual 0
   let receiver self
 
-  ;; if this interaction is happening through an integrator, boos the motivation to learn
+  ;; if this interaction is happening through an integrator, boosts the motivation to learn
   ifelse integration? [
     ;; uses the integration_boost from the slider in the interface
     set motivation-to-learn-actual (motivation-to-learn + integration_boost)
@@ -1341,13 +1323,13 @@ to interact
     set motivation-to-learn-actual motivation-to-learn
   ]
 
-  ;; if the receiver decides, given its motivation (boosted or not) to interact and it has resources, look for partner
+  ;; if the receiver decides to interact and it has resources, look for partner
   ifelse (random-float 1 < motivation-to-learn-actual) and (resources > cost_of_crossover) [
     let partner choose-partner
 
     ;; if a emitter partner is found and the interaction is happening through an integrator, boost its willingness to share
     ;; it also checks if the partner is fit enough to be accepted
-if partner != nobody and not ( [fitness] of partner < fitness) [
+  if partner != nobody and not ( [fitness] of partner < fitness) [
       ifelse integration? [
         set willingness-to-share-actual ([willingness-to-share] of partner + integration_boost)
       ][
@@ -1370,8 +1352,6 @@ if partner != nobody and not ( [fitness] of partner < fitness) [
 
       set crossover? true
 
-      ;; *** decide whether an interaction between entities with both kinds of knowledge results in changes in both
-      ;; kinds of knowledge
       ;; if both the entity (receiver) and the partner (emitter) possess scientific and technological knowledge
       ifelse science? and technology? and [science? and technology?] of partner [
 
@@ -1390,10 +1370,6 @@ if partner != nobody and not ( [fitness] of partner < fitness) [
         set bits2 [tech-knowledge] of partner
         set new-tech-knowledge crossover bits1 bits2
 
-        ;;*** repensar os efeitos deste trecho do código. E se não houver transf de tech, mas sim de sci?
-        ;; existem 4 possibilidades para a imagem deste link: os dois aprenderam, apenas sci aprendeu, apenas tech aprendeu, ninguém aprendeu
-        ;; pode-se usar também 4 tipos de links, um sólido, um pontilhado, um tracejado e um vermelho
-        ;; talvez eu tenha que pensar num update-link appearance para o caso dual, assim como o evaluate crossover.
         update-link-appearance-dual tech-knowledge new-tech-knowledge science-knowledge new-science-knowledge yellow
 
         evaluate-crossover-dual tech-knowledge new-tech-knowledge science-knowledge new-science-knowledge
@@ -1408,15 +1384,14 @@ if partner != nobody and not ( [fitness] of partner < fitness) [
           let bits2 [science-knowledge] of partner
           set new-science-knowledge crossover bits1 bits2
 
-          ;; after learning has been done, also performs a mutation in science knowledge, following traditional genetic algorithms
+          ;; after learning has been done, also performs a mutation in science knowledge
           set new-science-knowledge mutate new-science-knowledge
           update-link-appearance new-science-knowledge science-knowledge green
 
           evaluate-crossover science-knowledge new-science-knowledge
 
-        ][;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
-          ;; the code ignores those who don't have any knowledge, but these have been ignored already by the choose-partner procedure
-
+        ][
+          ;; if both the entity (receiver) and the partner (emitter) possess only technological knowledge
           if technology? and [technology?] of partner [
             ;; bits1 is the tech-knowledge of the receiver
             let bits1 tech-knowledge
@@ -1433,56 +1408,54 @@ if partner != nobody and not ( [fitness] of partner < fitness) [
 
       ;; inserts a memory of this interaction in the receiver's memory
       ;; the value is currently given by the parameter on the interface  trust_in_known_partners
-      ;; but it can also be done with the result of the evaluation of the crossover or other criteria
       table:put interaction-memory [who] of partner trust_in_known_partners
       ;; inserts a memory of this interaction in the emitter's (partner) memory
       table:put [interaction-memory] of partner who trust_in_known_partners
 
 
-    ][;; the crossover failed the test of the willingness-to-share-actual or the search for a partner
+    ][
+      ;; the crossover failed the test of the willingness-to-share-actual or the search for a partner
       ;; in either case the integration, if occurred, failed
       set integration? false
     ]
-  ][;; the crossover failed the test of the motivation-to-learn-actual or there are not enough resources
+  ][
+    ;; the crossover failed the test of the motivation-to-learn-actual or there are not enough resources
     ;; in either case the integration, if occurred, failed
     set integration? false
   ]
 
 end
 
-;; The integrator facilitates interaction
-;; The integrator finds an entity asks it to find a partner.
-;; It then boosts the willingness to share an motivation to learn of both of them, facilitating the transaction
+;; the integrator facilitates interaction
+;; the function finds an entity asks it to find a partner.
+;; it then boosts the willingness to share an motivation to learn, facilitating the transaction
 to integrate
 
   let partner1 one-of other entities with [science? or technology?]
   if partner1 != nobody and not crossover? [
     ask partner1 [
-      ;; Set integration? on the integrated knowledge entity, signaling it has been approached
-      ;; by an integrator
+      ;; set integration? on the integrated entity, signaling it has been approached by an integrator
       set integration? true
       interact
     ]
 
-    ;; Set integrated? in the integrator, signalling it attempted to integrate entities
+    ;; set integrated? in the integrator, signalling it attempted to integrate entities
     set integrated? true
 
   ]
 
 end
 
-;; Crossover procedure from simple genetic algorithm model
-;; This reporter performs one-point crossover on two lists of bits.
-;; That is, it chooses a random location for a splitting point.
-;; Then it reports two new lists, using that splitting point,
+;; crossover procedure from simple genetic algorithm model
+;; this reporter performs one-point crossover on two lists of bits.
+;; that is, it chooses a random location for a splitting point.
+;; then it reports two new lists, using that splitting point,
 ;; by combining the first part of bits1 with the second part of bits2
 ;; and the first part of bits2 with the second part of bits1;
 ;; it puts together the first part of one list with the second part of
 ;; the other.
-;; In this model, if we consider unidirectional exchanges of knowledge, only
-;; one of the answers has to be chosen to represent the new knowledge DNA of
+;; then only one of the answers is chosen and reported to represent the new knowledge DNA of
 ;; the receiver entity
-;; reports one of two strings of bits resulting from single point crossover
 
 to-report crossover [bits1 bits2]
 
@@ -1496,14 +1469,8 @@ to-report crossover [bits1 bits2]
 end
 
 ;; mutation procedure from simple genetic algorithm model
-;; This procedure causes random mutations to occur in a solution's bits.
-;; The probability that each bit will be flipped is controlled by the
-;; MUTATION_RATE slider.
-;; The cost to mutate is not charged here because mutation may be a by product of learning through crossover
-;; or the result of efforts in research. The costs of the first are included in the crossover costs
-;; the costs of the second are charged when the mutate procedure is called in the go function
-;; the function is also used in the creation of startups
-
+;; this procedure causes random mutations to occur in a knowledge string bits.
+;; the probability that each bit will be flipped is controlled by the MUTATION_RATE slider.
 to-report mutate [bits]
 
    report map [ [b] -> ifelse-value (random-float 100.0 < mutation_rate) [
@@ -1524,18 +1491,12 @@ to create-market
 
   create-niches 1 [
 
-    ;; set the niche demand randomly
-    ;; set niche-demand n-values knowledge [random 2]
-
-    ;; sets the niche demand as a full specification of what would be desirable, or all ones
-    ;;set niche-demand n-values knowledge [1]
-
-    ;; this code creates a market demand DNA string. Two options can be choosen. the first one, market fully discovered
-    ;; creates an all ones market DNA. It is good to assess how well the entities will discover what a stable market wants.
-    ;; It may not be suitable for those experiments where the market is supposed to change, since all knowledge is already discovered
+    ;; this code creates a market demand DNA string. when market_fully_discovered? is on, it creates an all ones market DNA.
+    ;; it is good to assess how well the entities will discover what a stable market wants.
+    ;; it may not be suitable for those experiments where the market is supposed to change, since all knowledge is already discovered
     ;; in terms of market demand.
-    ;; The second option leaves half the DNA string blank, for those simulations where the market may come to desire new discoveries through
-    ;; mutations on the niche demand, where it will desire some new knowlwdgw and cease to desire some old knowledge
+    ;; the second option leaves half the DNA string blank, for those simulations where the market may come to desire new discoveries through
+    ;; mutations on the niche demand, where it will desire some new knowledge and cease to desire some old knowledge
     ifelse market_fully_discovered? [
       set niche-demand n-values knowledge [1]
     ][
@@ -1564,14 +1525,6 @@ to market-mutation
   ]
 
 end
-
-;;*** other functions to implement
-;; niche swap
-;; not necessary anymore since the simulation only covers the mainstream at this iteration
-
-;; niche learning from introduced products (crossover with consumers)
-;; makes the niche call a crossover to one of the consumers. Not necessarily the fittest
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; GUI procedures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1645,7 +1598,7 @@ to set-size-entity
 end
 
 to update-link-appearance [bits1 bits2 color-link]
-  ;; Evaluates whether the crossover and the mutation actually changed bits through a hamming distance
+  ;; evaluates whether the crossover and the mutation actually changed bits through a hamming distance
   ;; if it did, it changes the color of the link to blue and its thickness to be proportional to the number of bits changed.
   ;; If not, it colors the link red
 
@@ -1717,28 +1670,28 @@ end
 
 to define-seed
 
-  ;; Makes the seed that will create the random numbers in the model known, making it repeatable
-  ;; The seed may be choosen by the user, or randomly chosen by the model
-  ;; The seed being used will be displayed in the interface in the my-seed-repeat input.
+  ;; makes the seed that will create the random numbers in the model known, making it repeatable
+  ;; the seed may be choosen by the user, or randomly chosen by the model
+  ;; the seed being used will be displayed in the interface in the my-seed-repeat input.
   ifelse repeat_simulation? [
 
-    ;; Takes the seed stored in the my-seed-repeat from the last simulation / user intervention during simulation
+    ;; takes the seed stored in the my-seed-repeat from the last simulation / user intervention during simulation
     random-seed my-seed-repeat
 
   ][
     ifelse set_input_seed? [
 
-      ;; Use a seed entered by the user
+      ;; use a seed entered by the user
       let suitable-seed? false
       while [not suitable-seed?] [
 
         set my-seed user-input "Enter a random seed (an integer):"
 
-        ;; Tries to set my-seed from the input. If it is not possible, does nothing
+        ;; tries to set my-seed from the input. If it is not possible, does nothing
         carefully [ set my-seed read-from-string my-seed ] [ ]
 
-        ;; Tests the value from my-seed. If it is suitable (number and integer), sets the random-seed
-        ;; If not, asks for a new one
+        ;; tests the value from my-seed. If it is suitable (number and integer), sets the random-seed
+        ;; if not, asks for a new one
         ifelse is-number? my-seed and round my-seed = my-seed [
           random-seed my-seed ;; use the new seed
           output-print word "User-entered seed: " my-seed  ;; print it out
@@ -1750,18 +1703,18 @@ to define-seed
       ]
 
     ][
-      ;; Use a seed created by the NEW-SEED reporter
+      ;; use a seed created by the NEW-SEED reporter
       set my-seed new-seed            ;; generate a new seed
       output-print word "Generated seed: " my-seed  ;; print it out
       random-seed my-seed             ;; use the new seed
-      ;; Displays the new seed in the my-seed-repeat input
+      ;; displays the new seed in the my-seed-repeat input
       set my-seed-repeat my-seed
     ]
   ]
 
 end
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; (modelo DNA Protein Synthesis)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;; instructions for players ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1937,7 +1890,7 @@ to-report instructions
   ]
 end
 
-; Copyright 2017 José Roberto Branco Ramos Filho
+; Copyright 2018 José Roberto Branco Ramos Filho,
 ; See info tab for full copyright and license.
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -2122,7 +2075,7 @@ minimum_resources_to_live
 minimum_resources_to_live
 1
 1001
-1001.0
+501.0
 100
 1
 NIL
@@ -2700,7 +2653,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
--1.817131021E9
+1.550793418E9
 1
 0
 Number
@@ -3166,7 +3119,7 @@ SWITCH
 671
 startups?
 startups?
-0
+1
 1
 -1000
 
@@ -3323,7 +3276,7 @@ SWITCH
 213
 ordered_DNA?
 ordered_DNA?
-0
+1
 1
 -1000
 
