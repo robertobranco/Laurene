@@ -1921,7 +1921,7 @@ number_of_entities
 number_of_entities
 1
 600
-165.0
+105.0
 1
 1
 NIL
@@ -2628,7 +2628,7 @@ INPUTBOX
 277
 70
 my-seed-repeat
--1.089591736E9
+-9.06597015E8
 1
 0
 Number
@@ -2846,7 +2846,7 @@ number_of_generators
 number_of_generators
 0
 100
-20.0
+0.0
 1
 1
 NIL
@@ -2891,7 +2891,7 @@ number_of_diffusers
 number_of_diffusers
 0
 100
-20.0
+0.0
 1
 1
 NIL
@@ -2906,7 +2906,7 @@ number_of_cons_gen
 number_of_cons_gen
 0
 100
-20.0
+0.0
 1
 1
 NIL
@@ -3094,7 +3094,7 @@ SWITCH
 671
 startups?
 startups?
-0
+1
 1
 -1000
 
@@ -3191,7 +3191,7 @@ market_mutation_period
 market_mutation_period
 0
 100
-0.0
+100.0
 1
 1
 NIL
@@ -3342,9 +3342,11 @@ Evaluation for non consumers
 
 Innovation Ecosystem Based on Knowledge Flows Model
 
-It observes the diffusion of knowledge in a community of entitities, given the fact that each of them has a knowledge "DNA", a role towards knowledge, and individual characteristics towards learning and sharing that evolve given the entities past failures and successes.
+This model simulates candidates to be an innovation ecosystem. Here innovation is the adoption of a bit of knowledge by an entity who is exposed to the environments demands, presenting this knowledge in the form of products, processes or services to society.
 
-These entitities are located in an environment that may spur or hinder the efforts, affecting the agents willingness to share knowledge, motivation to learn, and trust in each other.
+It observes the diffusion of knowledge in a community of entitities, given the fact that each of them has a knowledge "DNA" a mix of knowledge that constitutes the entity itself and its response to the environment's demand, a role towards knowledge, and individual characteristics towards learning and sharing that evolve given the entities past failures and successes.
+
+These entitities are located in an environment that may spur or hinder the efforts, affecting the agents willingness to share knowledge, motivation to learn, and trust in each other, which is assessed by their perception of the relative fitness to the environment and amount of resources accumulated.
 
 The mentioned roles are:
 
@@ -3354,13 +3356,82 @@ The mentioned roles are:
 • Consumers: those who apply new knowledge into the products, services, processes, methods that are related to their main activities. Through these entities the effects of the new knowledge reach customers and society. They are the true innovators, use the knwoledge in products, processes and services available to the society.
 • Developer: it is an implicit role performed by entities with both scientific and technological knowledges. It develops scientific knowledge into technological knowledge.  Although this activity may be included in the decription of the diffusion role (if the diffuser has both knowledges), there may be entities with certain combinations of roles performing this role as a result, such as consumer-generators.
 
+Knowledge exists in an ecosystem in scientific form and technological form. Only those who possess either scientific or technological knowledge (or both) may be considered a part of the ecosystem from the knowledge flow perspective. The only exception are the integrators, which must connect entities with knowledge, and not necessarily possess knowledge.
+
+Those who generate will do it in the scientific form. Those who consume will consume it in the technological form, which is knowledge applied to real problems and products. Several activities must be performed so that new scientific knowledge may be diffused, turned into technological knowledge, which is also diffused and adopted by consumers of knowledge. 
+
 
 ## HOW IT WORKS
+
+The model will simulate the interactions and actions of knowledge entities in an environment. If there is constant knowledge flows and innovation (the adoption of knowledge by entities in the consumer role), yielding increases in the alignment between the entities and the environment (increase in fitness), this environment can be called an innovation ecosystem.
+
+At each iteration, the environment will collect resources from the entities, as the necessary cost to stay alive. It will also award resources to those entities who are provinding the environments needs (of products and services). Entities who are not providind will receive their resources from the knowledge activities performed. The user may also choose not to collect resources from entities who are not exposed to the environments demands.
+
+The entities will try to generate new knowledge, to develop scientific knowledge into technological knowledge, to interact with others to learn from them, and to integrate two other entities so they can interact with each other.
+
+Given the population of entities performing each role, their willingness to share, motivation to learn, performance in generating new scientific knowledge, performance in developing new technological knowledge, performance in integrating entities, the characteristics of the market (size, stability, costs of living and performing actions) one will be able to observe whether they connect, and whether the entities are able to adapt to the environment's demand. If they are constantly evolving, the set of entities may be called an innovation ecosystem. If knowledge flows stop and the knowledge fail to reach the entities responsible by introducing new products, processes and services, then the set does not form an innovation ecosystem.
 
 
 ## HOW TO USE IT
 
-Set the number of entities.
+The repeat_simulation? uses the last random number generator seed (on), or makes the model use a new one (off).
+
+The set_input_seed? chooser makes the model ask the user for a new seed (on) or allows the model to choose automatically (off).
+
+The market_fully_discovered? chooser gives the environment a fully discovered knowledge demand DNA (all ones) or a half discovered one (half zeros and half ones).
+
+Each entity will have two knowledge DNAs: one scientific and one technological. These will be created according to the initial_fitness probability slider, which will give the chance of each bit being a one or a zero, giving the entity roughfuly that fitness when the market DNA is fully discovered. 
+
+The ordered_DNA?  chooser orders the entities DNA (zeros and ones grouped) or allows them to be randomly distributed in the DNA string. With this one can emulate heterogeneity of homogeneity in the knowledge available in the ecosystem.
+
+Knowledge slider defines the number of bits on a knolwedge string.
+
+Initial_resources defines the amount of resources an entity has when it is created.
+These resources are necessary to live and to pay for knowledge activities.
+
+Niche_resources defines the size of the market, or how many resources will be split between the entities provide products and services to the market.
+
+Minimum_resources_to_live is the minimum amount of resources an entity has to spend to remain alive at each iteration.
+
+Expense_to_live_growth defines the percentual growth of the expenses to live in proportion to the amount of resources (or the size) of the entity.
+
+cost_of_crossover is the collected cost to crossover knowledge, paid by the receiver and received by the emitter.
+
+cost_of_develoment is the collected cost to develop techonology, paid by the developer.
+
+cost_of_mutation is the collected cost to create science, paid by the generator.
+
+my_seed_repeat shows the seed currently being used.
+
+stop_trigger defines the number of iterations the model will run before it stops.
+It may also stop if there are no entities alive, or less than two entities with any kind of knowledge (scientific or technological).
+
+The parameters of the agents are created so that a normal distribution of values is created with the informed mean and standard deviation.
+
+motivation_to_learn is the mean initial inclination of entities (the receiver of knowledge) to ask another entity to interact (the emitter of knowledge).
+std_dev_motivation is the standard deviation of the normal distribution the values of this parameter in the population forms
+
+willingness_to_share is the mean initial inclination of entities (as emitters of knowledge) to accept the invitation of a receiver
+std_dev_willingness is the standard deviation of the normal distribution the values of this parameter in the population forms
+
+trust_in_known_partners is the amount of extra chances an entity (emitter) has to be picked by a receiver. It is also the extra amount of willingness_to_share the emitter will have to accept the receiver's invitation.
+
+mutation_rate gives the chance a bit has to mutate in a knowledge DNA string during crossver between entities with science knowledge, during the generation of new knowledge, during the creation of a startup inspired in entities from the ecosystem.
+
+integration_boost is the increase in willingness_to_share and motivation_to_learn caused by an integrator when an interaction between two entities is initiated by an integrator.
+
+development_performance is the initial inclination of an entity to engage in an technology development activity
+std_dev_development_performance is the standard deviation of the normal distribution the values of this parameter in the population forms
+
+
+
+
+
+
+
+
+Set the number of entities that will populate the environment.
+
 Set the number of niches where they will compete.
 Set the amount of resources the niches have to distribute.
 Set the initial amount of resources each entity has to get by.
@@ -3721,432 +3792,6 @@ NetLogo 6.0.2
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="Experimento 1" repetitions="200" runMetricsEveryStep="true">
-    <setup>setup</setup>
-    <go>go</go>
-    <timeLimit steps="3000"/>
-    <metric>count turtles</metric>
-    <metric>mean [tech-fitness] of entities with [consumer?]</metric>
-    <metric>mean [tech-fitness] of entities with [consumer? and generator?]</metric>
-    <metric>mean [sci-fitness] of entities with [science?]</metric>
-    <metric>mean [motivation-to-learn] of entities with [consumer?]</metric>
-    <metric>mean [motivation-to-learn] of entities with [not consumer?]</metric>
-    <enumeratedValueSet variable="willingness_to_share">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cost_of_mutation">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="integration_boost">
-      <value value="0.2"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="evaluate_for_learning?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="market_mutation_period">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="std_dev_willingness">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="market_fully_discovered?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="non_economical_entities?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="evaluate_for_fitness_cons?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_gen_dif">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="color_update_rule">
-      <value value="&quot;fitness&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="minimum_resources_to_live">
-      <value value="1001"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="std_dev_creation_performance">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="mutation_rate">
-      <value value="0.05"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="creation_performance">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="motivation_to_learn">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cost_of_development">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="initial_fitness_probability">
-      <value value="0.2"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="evaluate_for_fitness?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="random_ent_creation?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="development_performance">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="consumer_generator_startups?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cost_of_crossover">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="startups?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="set_input_seed?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="std_dev_development_performance">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="super_share?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_entities">
-      <value value="140"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="my-seed-repeat">
-      <value value="1549806143"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_diffusers">
-      <value value="10"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="niche_resources">
-      <value value="30000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_generators">
-      <value value="10"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="repeat_simulation?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="expense_to_live_growth">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="trust_in_known_partners">
-      <value value="0.05"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="ordered_DNA?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_cons_gen">
-      <value value="20"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="knowledge">
-      <value value="100"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="initial_resources">
-      <value value="1000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="std_dev_motivation">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="stop_trigger">
-      <value value="3000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="evaluate_for_learning_cons?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_consumers">
-      <value value="100"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_integrators">
-      <value value="0"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="experiment 2" repetitions="200" sequentialRunOrder="false" runMetricsEveryStep="true">
-    <setup>setup</setup>
-    <go>go</go>
-    <timeLimit steps="3000"/>
-    <metric>count turtles</metric>
-    <metric>mean [tech-fitness] of entities with [consumer?]</metric>
-    <metric>mean [tech-fitness] of entities with [consumer? and generator?]</metric>
-    <metric>mean [sci-fitness] of entities with [science?]</metric>
-    <metric>mean [motivation-to-learn] of entities with [consumer?]</metric>
-    <metric>mean [motivation-to-learn] of entities with [not consumer? and not integrator?]</metric>
-    <enumeratedValueSet variable="cost_of_mutation">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="willingness_to_share">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="integration_boost">
-      <value value="0.2"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="evaluate_for_learning?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="market_mutation_period">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="market_fully_discovered?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="std_dev_willingness">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="non_economical_entities?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="evaluate_for_fitness_cons?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_gen_dif">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="color_update_rule">
-      <value value="&quot;fitness&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="minimum_resources_to_live">
-      <value value="1001"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="std_dev_creation_performance">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="mutation_rate">
-      <value value="0.05"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="creation_performance">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="motivation_to_learn">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cost_of_development">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="initial_fitness_probability">
-      <value value="0.2"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="evaluate_for_fitness?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="random_ent_creation?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="development_performance">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="consumer_generator_startups?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cost_of_crossover">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="startups?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="set_input_seed?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="std_dev_development_performance">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="super_share?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_entities">
-      <value value="145"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="my-seed-repeat">
-      <value value="-532149301"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_diffusers">
-      <value value="10"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="niche_resources">
-      <value value="30000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_generators">
-      <value value="10"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="repeat_simulation?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="expense_to_live_growth">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="trust_in_known_partners">
-      <value value="0.05"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="ordered_DNA?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_cons_gen">
-      <value value="20"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="knowledge">
-      <value value="100"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="initial_resources">
-      <value value="1000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="std_dev_motivation">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="stop_trigger">
-      <value value="3000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="evaluate_for_learning_cons?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_consumers">
-      <value value="100"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_integrators">
-      <value value="5"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="Experimento 3" repetitions="200" runMetricsEveryStep="true">
-    <setup>setup</setup>
-    <go>go</go>
-    <timeLimit steps="3000"/>
-    <metric>count turtles</metric>
-    <metric>mean [tech-fitness] of entities with [consumer?]</metric>
-    <metric>mean [motivation-to-learn] of entities with [consumer?]</metric>
-    <enumeratedValueSet variable="cost_of_mutation">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="willingness_to_share">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="integration_boost">
-      <value value="0.2"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="evaluate_for_learning?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="market_mutation_period">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="market_fully_discovered?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="std_dev_willingness">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="non_economical_entities?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="evaluate_for_fitness_cons?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_gen_dif">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="color_update_rule">
-      <value value="&quot;fitness&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="minimum_resources_to_live">
-      <value value="1001"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="std_dev_creation_performance">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="mutation_rate">
-      <value value="0.05"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="creation_performance">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="motivation_to_learn">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cost_of_development">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="initial_fitness_probability">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="evaluate_for_fitness?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="random_ent_creation?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="development_performance">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="consumer_generator_startups?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cost_of_crossover">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="startups?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="set_input_seed?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="std_dev_development_performance">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="super_share?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_entities">
-      <value value="100"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="my-seed-repeat">
-      <value value="-1753853580"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_diffusers">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="niche_resources">
-      <value value="30000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_generators">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="repeat_simulation?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="expense_to_live_growth">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="trust_in_known_partners">
-      <value value="0.05"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="ordered_DNA?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_cons_gen">
-      <value value="0"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="knowledge">
-      <value value="100"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="initial_resources">
-      <value value="1000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="std_dev_motivation">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="stop_trigger">
-      <value value="3000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="evaluate_for_learning_cons?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_consumers">
-      <value value="100"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="number_of_integrators">
-      <value value="0"/>
-    </enumeratedValueSet>
-  </experiment>
   <experiment name="Exp 1" repetitions="200" runMetricsEveryStep="true">
     <setup>setup</setup>
     <go>go</go>
@@ -9577,6 +9222,146 @@ NetLogo 6.0.2
     </enumeratedValueSet>
     <enumeratedValueSet variable="evaluate_for_learning_cons?">
       <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_consumers">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_integrators">
+      <value value="5"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Exp 1 change int" repetitions="200" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>count turtles</metric>
+    <metric>mean [tech-fitness] of entities with [consumer?]</metric>
+    <metric>mean [motivation-to-learn] of entities with [consumer?]</metric>
+    <enumeratedValueSet variable="willingness_to_share">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_mutation">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="integration_boost">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_mutation_period">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="market_fully_discovered?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_willingness">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="non_economical_entities?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness_cons?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_gen_dif">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="color_update_rule">
+      <value value="&quot;fitness&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="minimum_resources_to_live">
+      <value value="1001"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_creation_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation_rate">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="creation_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="motivation_to_learn">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_development">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_fitness_probability">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_fitness?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="random_ent_creation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="development_performance">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="consumer_generator_startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cost_of_crossover">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="startups?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="set_input_seed?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_development_performance">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="super_share?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_entities">
+      <value value="105"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="my-seed-repeat">
+      <value value="625003153"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_diffusers">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="niche_resources">
+      <value value="30000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_generators">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="repeat_simulation?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="expense_to_live_growth">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="trust_in_known_partners">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ordered_DNA?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_cons_gen">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="knowledge">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_resources">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="std_dev_motivation">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="evaluate_for_learning_cons?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stop_trigger">
+      <value value="3000"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="number_of_consumers">
       <value value="100"/>
